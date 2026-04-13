@@ -1,0 +1,44 @@
+git clone --depth 1 https://github.com/z3214965/cvat.git
+
+# 让 Git 忽略文件的「可执行权限」变化，只关心文件内容。
+git config core.fileMode false
+
+git remote -v
+
+git remote set-url origin git@github.com:z3214965/cvat.git
+
+git remote add upstream https://github.com/cvat-ai/cvat.git
+
+git checkout -b dev
+git add .
+git commit -m "首次提交"
+git push origin dev
+
+git checkout -b main
+git push origin main
+
+拉取上游最新提交（不会自动合并）
+git gc
+git prune
+git fetch upstream develop
+
+# 切换到本地 develop 分支
+git checkout develop
+# 把 upstream/develop 合并到本地 develop（真正更新）
+git merge upstream/develop
+# 推送到你自己的远程仓库（可选，建议执行）
+git push origin develop
+
+# 切换到你的开发分支 dev
+git checkout dev
+# 把刚更新好的 upstream/develop 合并到 dev
+git merge upstream/develop
+# 推送到你自己的远程 dev
+git push origin dev
+
+# 切换到主分支 main
+git checkout main
+# 把最新的 dev 合并到 main
+git merge dev
+# 推送到你自己的远程 main（完成全部同步）
+git push origin main
