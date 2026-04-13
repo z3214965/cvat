@@ -8,13 +8,17 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
-    "baseUrl": "src"
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["src/*"]
+    }
   },
   "include": ["./index.d.ts", "src/index.tsx", "src/assets/index.d.ts", "plugins/**/*", "src"]
 }
