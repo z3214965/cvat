@@ -18,24 +18,29 @@ module.exports = (env) => {
     const sourceMapsToken = process.env.SOURCE_MAPS_TOKEN || '';
 
     const defaultPlugins = ['plugins/sam'];
-    const plugins = process.env.CLIENT_PLUGINS ? [...defaultPlugins, ...process.env.CLIENT_PLUGINS.split(':')]
-        .map((plugin) => plugin.trim()).filter((plugin) => !!plugin) : defaultPlugins;
+    const plugins = process.env.CLIENT_PLUGINS
+        ? [...defaultPlugins, ...process.env.CLIENT_PLUGINS.split(':')]
+              .map((plugin) => plugin.trim())
+              .filter((plugin) => !!plugin)
+        : defaultPlugins;
 
-    const pluginPaths = plugins.map((pluginPath) => {
-        const abs = path.isAbsolute(pluginPath) ? pluginPath : path.join(__dirname, pluginPath);
-        const prepareScript = path.join(abs, 'prepare.cjs');
-        return {
-            cwd: abs,
-            entrypoint: path.join(abs, 'src', 'ts', 'index.tsx'),
-            script: fs.existsSync(prepareScript) ? prepareScript : null,
-        };
-    }).filter(({ entrypoint }) => {
-        if (!fs.existsSync(entrypoint)) {
-            console.warn(`Not found entrypoint ${entrypoint}. The plugin skipped.`);
-            return false;
-        }
-        return true;
-    });
+    const pluginPaths = plugins
+        .map((pluginPath) => {
+            const abs = path.isAbsolute(pluginPath) ? pluginPath : path.join(__dirname, pluginPath);
+            const prepareScript = path.join(abs, 'prepare.cjs');
+            return {
+                cwd: abs,
+                entrypoint: path.join(abs, 'src', 'ts', 'index.tsx'),
+                script: fs.existsSync(prepareScript) ? prepareScript : null,
+            };
+        })
+        .filter(({ entrypoint }) => {
+            if (!fs.existsSync(entrypoint)) {
+                console.warn(`Not found entrypoint ${entrypoint}. The plugin skipped.`);
+                return false;
+            }
+            return true;
+        });
 
     console.log('Source maps: ', sourceMapsDisabled ? 'disabled' : 'enabled');
     console.log('Plugins:');
@@ -51,15 +56,18 @@ module.exports = (env) => {
         devtool: sourceMapsDisabled ? false : 'source-map',
         entry: {
             'cvat-ui': './src/index.tsx',
-            ...pluginPaths.reduce((acc, { entrypoint }, index) => ({
-                ...acc,
-                [`plugin_${index}`]: {
-                    dependOn: 'cvat-ui',
-                    // path can be absolute, in this case it is accepted as is
-                    // also the path can be relative to cvat-ui root directory
-                    import: entrypoint,
-                },
-            }), {})
+            ...pluginPaths.reduce(
+                (acc, { entrypoint }, index) => ({
+                    ...acc,
+                    [`plugin_${index}`]: {
+                        dependOn: 'cvat-ui',
+                        // path can be absolute, in this case it is accepted as is
+                        // also the path can be relative to cvat-ui root directory
+                        import: entrypoint,
+                    },
+                }),
+                {},
+            ),
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
@@ -85,18 +93,25 @@ module.exports = (env) => {
                 'Cross-Origin-Embedder-Policy': 'credentialless',
                 'Service-Worker-Allowed': '/',
             },
-            proxy: [{
-                context: (param) =>
-                    param.match(
-                        /\/api\/.*|analytics\/.*|static\/.*|admin(?:\/(.*))?.*|profiler(?:\/(.*))?.*|documentation\/.*|django-rq(?:\/(.*))?/gm,
-                    ),
-                target: env && env.API_URL,
-                secure: false,
-                changeOrigin: true,
-                onProxyReq: (proxyReq) => {
-                    proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
+            proxy: [
+                {
+                    context: (param) =>
+                        param.match(
+                            /\/api\/.*|analytics\/.*|static\/.*|admin(?:\/(.*))?.*|profiler(?:\/(.*))?.*|documentation\/.*|django-rq(?:\/(.*))?/gm,
+                        ),
+                    target: env && env.API_URL,
+                    secure: false,
+                    changeOrigin: true,
+                    onProxyReq: (proxyReq) => {
+                        // proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
+                        // 👇 关键：把 Origin 伪装成远程服务器地址，解决跨域问题
+                        const targetUrl = new URL(env.API_URL);
+                        proxyReq.setHeader('Origin', targetUrl.origin);
+                        proxyReq.setHeader('Referer', targetUrl.origin);
+                        proxyReq.setHeader('X-FORWARDED-HOST', targetUrl.host);
+                    },
                 },
-            }],
+            ],
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
@@ -154,11 +169,7 @@ module.exports = (env) => {
                             loader: 'postcss-loader',
                             options: {
                                 postcssOptions: {
-                                    plugins: [
-                                        [
-                                            'postcss-preset-env', {},
-                                        ],
-                                    ],
+                                    plugins: [['postcss-preset-env', {}]],
                                 },
                             },
                         },
@@ -208,7 +219,7 @@ module.exports = (env) => {
                     },
                     {
                         from: '../node_modules/onnxruntime-web/dist/*.wasm',
-                        to  : 'assets/[name][ext]',
+                        to: 'assets/[name][ext]',
                     },
                     {
                         from: '../node_modules/onnxruntime-web/dist/*.mjs',
@@ -216,22 +227,26 @@ module.exports = (env) => {
                     },
                     {
                         from: 'src/assets/opencv_4.8.0.js',
-                        to  : 'assets/opencv_4.8.0.js',
+                        to: 'assets/opencv_4.8.0.js',
                     },
                     {
                         from: 'src/assets/*.png',
-                        to  : 'assets/[name][ext]',
+                        to: 'assets/[name][ext]',
                     },
                     {
                         from: 'plugins/**/assets/*.(onnx|js)',
-                        to  : 'assets/[name][ext]',
+                        to: 'assets/[name][ext]',
                     },
                 ],
             }),
-            ...(!sourceMapsDisabled && sourceMapsToken ? [new webpack.SourceMapDevToolPlugin({
-                append: '\n',
-                filename: `${sourceMapsToken}/[file].map`,
-            })] : []),
+            ...(!sourceMapsDisabled && sourceMapsToken
+                ? [
+                      new webpack.SourceMapDevToolPlugin({
+                          append: '\n',
+                          filename: `${sourceMapsToken}/[file].map`,
+                      }),
+                  ]
+                : []),
         ],
-    }
+    };
 };
