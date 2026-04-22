@@ -42,3 +42,75 @@ git checkout main
 git merge dev
 # 推送到你自己的远程 main（完成全部同步）
 git push origin main
+
+-------------------------------------------------------
+
+docker save almalinux:10.1 > almalinux_10.1.tar
+docker load --input almalinux_10.1.tar
+docker run -d --privileged --name cvat \
+  -p 4414:8080 \
+  -v /dlService/project/cvat:/cvat \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  almalinux:10.1 tail -f /dev/null
+
+docker build -f Dockerfile.ui -t cvat/ui:v20260422 .
+docker save cvat/ui:v20260422 > cvat_ui_v20260422.tar
+docker load --input cvat_ui_v20260422.tar
+
+
+-------------------------------------------------------
+
+dnf install zip unzip -y
+
+unzip cvat.zip -d cvat
+
+export CVAT_HOST=39.105.209.194
+export CVAT_HOST=192.168.1.17
+export CVAT_HOST=47.96.137.124
+export CVAT_POSTGRES_PASSWORD=diorszhang1987.
+
+CVAT_VERSION=v2.62.0 docker-compose up -d  /  docker-compose down -v
+
+CVAT_VERSION=v2.62.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml up -d /  docker-compose -f docker-compose.yml -f docker-compose.external_db.yml down -v
+
+docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+admin/superuser123456789
+
+
+http://192.168.1.17:8080  /  http://39.105.209.194:4414
+
+
+
+----------------------------------------------------------------
+docker pull alpine:3.20
+docker tag alpine:3.20 gcr.io/iguazio/alpine:3.20
+
+CVAT_VERSION=v2.62.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down -v
+# 查看 CVAT + Nuclio 容器状态
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml ps
+
+wget https://github.com/nuclio/nuclio/releases/download/1.15.9/nuctl-1.15.9-linux-amd64
+chmod +x nuctl-1.15.9-linux-amd64
+ln -sf $(pwd)/nuctl-1.15.9-linux-amd64 /usr/local/bin/nuctl
+
+# 安装buildx-v0.33.0.linux-amd64
+# 1. 创建插件目录（必须是这个路径）
+mkdir /docker/program/cli-plugins
+# 2. 把 docker-buildx 复制到正确目录
+cp buildx-v0.33.0.linux-amd64 /docker/program/cli-plugins/
+# 修改名称
+buildx-v0.33.0.linux-amd64 -> docker-buildx
+# 3. 加执行权限
+chmod +x /docker/program/cli-plugins/docker-buildx
+# 4. 配置插件路径
+daemon.json
+# 验证
+docker buildx version
+
+./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam/nuclio
+./serverless/deploy_cpu.sh serverless/onnx/WongKinYiu/yolov7/nuclio
+
+
+

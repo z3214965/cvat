@@ -6,10 +6,10 @@
 
 x-backend-settings: &backend-settings
   environment:
-    CVAT_POSTGRES_HOST:
-    CVAT_POSTGRES_PORT:
-    CVAT_POSTGRES_DBNAME:
-    CVAT_POSTGRES_USER:
+    CVAT_POSTGRES_HOST: 117.72.127.218
+    CVAT_POSTGRES_PORT: 8083
+    CVAT_POSTGRES_DBNAME: cvat
+    CVAT_POSTGRES_USER: diorszhang
     CVAT_POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
   secrets:
     - postgres_password

@@ -8,6 +8,8 @@ import { PlusOutlined } from '@ant-design/icons';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
 
+import { useTranslation } from 'react-i18next';
+
 import {
     SortingComponent,
     ResourceFilterHOC,
@@ -36,6 +38,8 @@ interface VisibleTopBarProps {
 }
 
 export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JSX.Element {
+    const { t } = useTranslation();
+
     const {
         query, onApplyFilter, onApplySorting, onApplySearch, onCreateWebhook, goBackContent, selectedCount, onSelectAll,
     } = props;
@@ -59,7 +63,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                                 }}
                                 defaultValue={query.search ?? ''}
                                 className='cvat-webhooks-page-search-bar'
-                                placeholder='Search ...'
+                                placeholder={`${t('common.search')} ...`}
                             />
                             <ResourceSelectionInfo selectedCount={selectedCount} onSelectAll={onSelectAll} />
                         </div>

@@ -184,7 +184,7 @@ export default class LabelForm extends React.Component<Props> {
         const locked = attr.id as number >= 0;
 
         return (
-            <CVATTooltip title='An HTML element representing the attribute'>
+            <CVATTooltip title='表示该属性的 HTML 元素'>
                 <Form.Item name={[key, 'type']}>
                     <Select
                         className='cvat-attribute-type-input'
@@ -204,19 +204,19 @@ export default class LabelForm extends React.Component<Props> {
                         }}
                     >
                         <Select.Option value={AttributeType.SELECT} className='cvat-attribute-type-input-select'>
-                            Select
+                            选择
                         </Select.Option>
                         <Select.Option value={AttributeType.RADIO} className='cvat-attribute-type-input-radio'>
-                            Radio
+                            单选框
                         </Select.Option>
                         <Select.Option value={AttributeType.CHECKBOX} className='cvat-attribute-type-input-checkbox'>
-                            Checkbox
+                            复选框
                         </Select.Option>
                         <Select.Option value={AttributeType.TEXT} className='cvat-attribute-type-input-text'>
-                            Text
+                            文本
                         </Select.Option>
                         <Select.Option value={AttributeType.NUMBER} className='cvat-attribute-type-input-number'>
-                            Number
+                            数字
                         </Select.Option>
                     </Select>
                 </Form.Item>
@@ -246,13 +246,13 @@ export default class LabelForm extends React.Component<Props> {
         };
 
         return (
-            <CVATTooltip title='Press enter to add a new value'>
+            <CVATTooltip title='按Enter键添加新值'>
                 <Form.Item
                     name={[key, 'values']}
                     rules={[
                         {
                             required: true,
-                            message: 'Please specify values',
+                            message: '请指定数值',
                         },
                         {
                             validator,
@@ -262,7 +262,7 @@ export default class LabelForm extends React.Component<Props> {
                     <Select
                         className='cvat-attribute-values-input'
                         mode='tags'
-                        placeholder='Attribute values'
+                        placeholder='属性值'
                         dropdownStyle={{ display: 'none' }}
                         tagRender={(props) => {
                             const attrs = this.formRef.current?.getFieldValue('attributes');
@@ -270,7 +270,7 @@ export default class LabelForm extends React.Component<Props> {
                             return (
                                 <CVATTooltip
                                     placement='bottom'
-                                    title={isDefault ? 'This value is default' : 'Click to set default value'}
+                                    title={isDefault ? '此值为默认值' : '点击设置默认值'}
                                 >
                                     <Tag
                                         visible
@@ -310,18 +310,18 @@ export default class LabelForm extends React.Component<Props> {
         const { key } = fieldInstance;
 
         return (
-            <CVATTooltip title='Specify a default value'>
+            <CVATTooltip title='指定一个默认值'>
                 <Form.Item
                     rules={[
                         {
                             required: true,
-                            message: 'Please, specify a default value',
+                            message: '请指定一个默认值',
                         }]}
                     name={[key, 'values']}
                 >
                     <Select className='cvat-attribute-values-input'>
-                        <Select.Option value='false'>False</Select.Option>
-                        <Select.Option value='true'>True</Select.Option>
+                        <Select.Option value='false'>否</Select.Option>
+                        <Select.Option value='true'>是</Select.Option>
                     </Select>
                 </Form.Item>
             </CVATTooltip>
@@ -337,27 +337,27 @@ export default class LabelForm extends React.Component<Props> {
 
             const numbers = strNumbers.split(';').map((number): number => Number.parseFloat(number));
             if (numbers.length !== 3) {
-                return Promise.reject(new Error('Three numbers are expected'));
+                return Promise.reject(new Error('预期有三个数字'));
             }
 
             for (const number of numbers) {
                 if (Number.isNaN(number)) {
-                    return Promise.reject(new Error(`"${number}" is not a number`));
+                    return Promise.reject(new Error(`"${number}" 不是一个数字`));
                 }
             }
 
             const [min, max, step] = numbers;
 
             if (min >= max) {
-                return Promise.reject(new Error('Minimum must be less than maximum'));
+                return Promise.reject(new Error('最小值必须小于最大值'));
             }
 
             if (max - min < step) {
-                return Promise.reject(new Error('Step must be less than minmax difference'));
+                return Promise.reject(new Error('步长必须小于最大最小差值'));
             }
 
             if (step <= 0) {
-                return Promise.reject(new Error('Step must be a positive number'));
+                return Promise.reject(new Error('步长必须是正数'));
             }
 
             return Promise.resolve();
@@ -369,14 +369,14 @@ export default class LabelForm extends React.Component<Props> {
                 rules={[
                     {
                         required: true,
-                        message: 'Please set a range',
+                        message: '请设置一个范围',
                     },
                     {
                         validator,
                     },
                 ]}
             >
-                <Input className='cvat-attribute-values-input' disabled={locked} placeholder='min;max;step' />
+                <Input className='cvat-attribute-values-input' disabled={locked} placeholder='最小;最大;步长' />
             </Form.Item>
         );
     }
@@ -386,7 +386,7 @@ export default class LabelForm extends React.Component<Props> {
 
         return (
             <Form.Item name={[key, 'values']}>
-                <Input.TextArea className='cvat-attribute-values-input' placeholder='Default value' />
+                <Input.TextArea className='cvat-attribute-values-input' placeholder='默认值' />
             </Form.Item>
         );
     }
@@ -396,13 +396,13 @@ export default class LabelForm extends React.Component<Props> {
         const locked = attr.id as number >= 0;
 
         return (
-            <CVATTooltip title='Can this attribute be changed frame to frame?'>
+            <CVATTooltip title='这个属性可以逐帧更改吗？'>
                 <Form.Item
                     name={[key, 'mutable']}
                     valuePropName='checked'
                 >
                     <Checkbox className='cvat-attribute-mutable-checkbox' disabled={locked}>
-                        Mutable
+                        可变
                     </Checkbox>
                 </Form.Item>
             </CVATTooltip>
@@ -413,7 +413,7 @@ export default class LabelForm extends React.Component<Props> {
         const { key } = fieldInstance;
 
         return (
-            <CVATTooltip title='Delete the attribute'>
+            <CVATTooltip title='删除属性'>
                 <Form.Item>
                     <Button
                         disabled={attr.id >= 0} // temporary disabled, does not work on the server
@@ -424,8 +424,8 @@ export default class LabelForm extends React.Component<Props> {
                                 Modal.confirm({
                                     className: 'cvat-modal-delete-label-attribute',
                                     icon: <ExclamationCircleOutlined />,
-                                    title: `Do you want to remove the "${attr.name}" attribute?`,
-                                    content: 'This action cannot be undone. All annotations associated to the attribute will be removed',
+                                    title: `是否想要删除 "${attr.name}" 属性?`,
+                                    content: '此操作无法撤销。所有与该属性相关的标注都将被移除',
                                     type: 'warning',
                                     okButtonProps: { type: 'primary', danger: true },
                                     onOk: () => {
@@ -498,7 +498,7 @@ export default class LabelForm extends React.Component<Props> {
                 rules={[
                     {
                         required: true,
-                        message: 'Please specify a name',
+                        message: '请指定一个名称',
                     },
                     {
                         pattern: patterns.validateAttributeName.pattern,
@@ -507,7 +507,7 @@ export default class LabelForm extends React.Component<Props> {
                     {
                         validator: (_rule: any, labelName: string) => {
                             if (labelNames.includes(labelName) && label?.name !== labelName) {
-                                return Promise.reject(new Error('Label name must be unique'));
+                                return Promise.reject(new Error('标签名称必须唯一'));
                             }
                             return Promise.resolve();
                         },
@@ -516,7 +516,7 @@ export default class LabelForm extends React.Component<Props> {
             >
                 <Input
                     ref={this.inputNameRef}
-                    placeholder='Label name'
+                    placeholder='标签名'
                     className='cvat-label-name-input'
                     onKeyUp={(event): void => {
                         if (event.key === 'Escape' || event.key === 'Esc' || event.keyCode === 27) {
@@ -545,7 +545,7 @@ export default class LabelForm extends React.Component<Props> {
                             className='cvat-label-type-option-skeleton'
                             value='skeleton'
                         >
-                            Skeleton
+                            骨架
                         </Select.Option>
                     ) : types.map((type: string): JSX.Element => (
                         <Select.Option className={`cvat-label-type-option-${type}`} key={type} value={type}>
@@ -561,7 +561,7 @@ export default class LabelForm extends React.Component<Props> {
         return (
             <Form.Item>
                 <Button onClick={this.addAttribute} className='cvat-new-attribute-button'>
-                    Add an attribute
+                    添加一个属性
                     <PlusCircleOutlined />
                 </Button>
             </Form.Item>
@@ -570,8 +570,8 @@ export default class LabelForm extends React.Component<Props> {
 
     private renderSaveButton(): JSX.Element {
         const { label } = this.props;
-        const tooltipTitle = label ? 'Save the label and return' : 'Save the label and create one more';
-        const buttonText = label ? 'Done' : 'Continue';
+        const tooltipTitle = label ? '保存标签并返回' : '保存标签并再创建一个';
+        const buttonText = label ? '完成' : '继续';
 
         return (
             <CVATTooltip title={tooltipTitle}>
@@ -591,7 +591,7 @@ export default class LabelForm extends React.Component<Props> {
         const { onCancel } = this.props;
 
         return (
-            <CVATTooltip title='Do not save the label and return'>
+            <CVATTooltip title='不要保存标签并返回'>
                 <Button
                     className='cvat-cancel-new-label-button'
                     type='primary'
@@ -601,7 +601,7 @@ export default class LabelForm extends React.Component<Props> {
                         onCancel();
                     }}
                 >
-                    Cancel
+                    取消
                 </Button>
             </CVATTooltip>
         );
@@ -613,7 +613,7 @@ export default class LabelForm extends React.Component<Props> {
                 {() => (
                     <Form.Item name='color'>
                         <ColorPicker placement='bottom'>
-                            <CVATTooltip title='Change color of the label'>
+                            <CVATTooltip title='改变标签颜色'>
                                 <Button type='default' className='cvat-change-task-label-color-button'>
                                     <Badge
                                         className='cvat-change-task-label-color-badge'

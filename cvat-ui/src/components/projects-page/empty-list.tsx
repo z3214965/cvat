@@ -19,7 +19,7 @@ export default function EmptyListComponent(props: Props): JSX.Element {
     return (
         <div className='cvat-empty-projects-list'>
             <Empty description={notFound ? (
-                <Text strong>No results matched your search...</Text>
+                <Text strong>没有找到匹配的搜索结果 ...</Text>
             ) : (
                 <>
                     <Row justify='center' align='middle'>

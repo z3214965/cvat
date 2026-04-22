@@ -364,7 +364,7 @@ function RemoteBrowser(props: Props): JSX.Element {
                             </CVATTooltip>
                         )}
                         disabled={isFetching}
-                        placeholder='Search by prefix'
+                        placeholder='按前缀搜索'
                         value={curSearchString}
                         onBlur={() => resetDataSource()}
                         onPressEnter={() => resetDataSource()}

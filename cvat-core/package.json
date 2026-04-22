@@ -24,7 +24,7 @@
   "dependencies": {
     "axios": "^1.13.5",
     "axios-retry": "^4.0.0",
-    "cvat-data": "link:./../cvat-data",
+    "cvat-data": "file:./../cvat-data",
     "detect-browser": "^5.2.1",
     "dompurify": "^3.3.2",
     "error-stack-parser": "^2.0.2",

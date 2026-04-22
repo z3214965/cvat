@@ -8,6 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { connect, Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import localeData from 'dayjs/plugin/localeData';
@@ -16,6 +17,9 @@ import weekday from 'dayjs/plugin/weekday';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import weekYear from 'dayjs/plugin/weekYear';
 import duration from 'dayjs/plugin/duration';
+
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/es/locale/zh_CN';
 
 import { getAboutAsync } from 'actions/about-actions';
 import { authenticatedAsync } from 'actions/auth-actions';
@@ -37,11 +41,14 @@ import { getServerAPISchemaAsync } from 'actions/server-actions';
 import { navigationActions } from 'actions/navigation-actions';
 import { CombinedState, NotificationsState, PluginsState } from './reducers';
 import './utils/dayjs-wrapper';
+import './i18n';
 
 createCVATStore(createRootReducer);
 
 const cvatStore = getCVATStore();
 
+// 全局启用中文
+dayjs.locale('zh-cn');
 dayjs.extend(customParseFormat);
 dayjs.extend(advancedFormat);
 dayjs.extend(relativeTime);
@@ -151,13 +158,15 @@ const ReduxAppWrapper = connect(mapStateToProps, mapDispatchToProps)(CVATApplica
 
 const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render((
-    <Provider store={cvatStore}>
-        <BrowserRouter>
-            <PluginsEntrypoint />
-            <ReduxAppWrapper />
-        </BrowserRouter>
-        <LayoutGrid />
-    </Provider>
+    <ConfigProvider locale={zhCN}>
+        <Provider store={cvatStore}>
+            <BrowserRouter>
+                <PluginsEntrypoint />
+                <ReduxAppWrapper />
+            </BrowserRouter>
+            <LayoutGrid />
+        </Provider>
+    </ConfigProvider>
 ));
 
 window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {

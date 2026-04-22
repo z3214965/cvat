@@ -640,7 +640,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
         }
 
         return (
-            <Spin size='large' fullscreen className='cvat-spinner' tip='Connecting...' />
+            <Spin size='large' fullscreen className='cvat-spinner' tip='连接中...' />
         );
     }
 }

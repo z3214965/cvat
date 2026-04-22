@@ -14,6 +14,8 @@ import Badge from 'antd/lib/badge';
 import Button from 'antd/lib/button';
 import { MoreOutlined } from '@ant-design/icons';
 
+import { useTranslation } from 'react-i18next';
+
 import { CombinedState } from 'reducers';
 import { Project } from 'cvat-core-wrapper';
 import { useCardHeightHOC, usePlugins, useContextMenuClick } from 'utils/hooks';
@@ -35,6 +37,8 @@ const useCardHeight = useCardHeightHOC({
 });
 
 export default function ProjectItemComponent(props: Props): JSX.Element {
+    const { t } = useTranslation();
+
     const {
         projectInstance: instance,
         selected,
@@ -102,13 +106,13 @@ export default function ProjectItemComponent(props: Props): JSX.Element {
                             {ownerName && (
                                 <>
                                     <Text type='secondary'>
-                                        Created
-                                        {ownerName ? ` by ${ownerName}` : ''}
+                                        {t('project.created')}
+                                        {ownerName ? `${ownerName}` : ''}
                                     </Text>
                                     <br />
                                 </>
                             )}
-                            <Text type='secondary'>{`Last updated ${updated}`}</Text>
+                            <Text type='secondary'>{`${t('common.last_updated')} ${updated}`}</Text>
                         </div>
                         <div>
                             <Button

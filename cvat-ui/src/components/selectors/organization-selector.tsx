@@ -81,7 +81,7 @@ function OrganizationSelector(props: Props): JSX.Element {
     return (
         <AutoComplete
             defaultValue={searchPhrase}
-            placeholder='Select an organization'
+            placeholder='选择一个组织'
             showSearch
             onSearch={_.debounce(setSearchPhrase, 500)}
             options={[

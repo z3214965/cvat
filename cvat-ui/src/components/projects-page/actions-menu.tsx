@@ -8,6 +8,8 @@ import { useHistory } from 'react-router';
 import Dropdown from 'antd/lib/dropdown';
 import Modal from 'antd/lib/modal';
 
+import { useTranslation } from 'react-i18next';
+
 import { Organization, Project, User } from 'cvat-core-wrapper';
 import { useDropdownEditField, usePlugins } from 'utils/hooks';
 import { CombinedState } from 'reducers';
@@ -31,6 +33,8 @@ interface Props {
 }
 
 function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
+    const { t } = useTranslation();
+
     const {
         projectInstance, triggerElement, dropdownTrigger, onUpdateProject,
     } = props;
@@ -103,7 +107,7 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
                     project.assignee = assignee;
                     await dispatch(updateProjectAsync(project));
                 },
-                (project, idx, total) => `Updating assignee for project #${project.id} (${idx + 1}/${total})`,
+                (project, idx, total) => `正在更新项目 #${project.id} 的负责人 (${idx + 1}/${total})`,
             ));
         }
     }, [projectInstance, stopEditField, dispatch, collectObjectsForBulkUpdate, onUpdateProject]);
@@ -126,7 +130,7 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
                     project.organizationId = newOrganization?.id ?? null;
                     await dispatch(updateProjectAsync(project, ResourceUpdateTypes.UPDATE_ORGANIZATION));
                 },
-                (project, idx, total) => `Updating organization for project #${project.id} (${idx + 1}/${total})`,
+                (project, idx, total) => `正在更新项目 #${project.id} 所属组织 (${idx + 1}/${total})`,
             )).then((processedCount: number) => {
                 if (processedCount) {
                     // as for some projects org has changed
@@ -162,11 +166,11 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
         const projectsToDelete = currentProjects.filter((project) => selectedIds.includes(project.id));
         Modal.confirm({
             title: isBulkMode ?
-                `Delete ${projectsToDelete.length} selected projects` :
-                `The project ${projectInstance.id} will be deleted`,
+                `删除所选中的 ${projectsToDelete.length} 项目` :
+                `项目 #${projectInstance.id} 将要被删除`,
             content: isBulkMode ?
-                'All related data (images, annotations) for all selected projects will be lost. Continue?' :
-                'All related data (images, annotations) will be lost. Continue?',
+                '所有选定项目的相关数据（包括图像和标注）都将丢失。是否继续？' :
+                '所有相关数据（图像、标注）都将丢失。是否继续？',
             className: 'cvat-modal-confirm-remove-project',
             onOk: () => {
                 dispatch(makeBulkOperationAsync(
@@ -174,14 +178,14 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
                     async (project) => {
                         await dispatch(deleteProjectAsync(project));
                     },
-                    (project, idx, total) => `Deleting project #${project.id} (${idx + 1}/${total})`,
+                    (project, idx, total) => `删除项目 #${project.id} (${idx + 1}/${total})`,
                 ));
             },
             okButtonProps: {
                 type: 'primary',
                 danger: true,
             },
-            okText: isBulkMode ? 'Delete selected' : 'Delete',
+            okText: isBulkMode ? '删除选中' : '删除',
         });
     }, [projectInstance, currentProjects, selectedIds, isBulkMode]);
     let menuItems;
@@ -214,6 +218,7 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
             onBackupProject,
             onDeleteProject,
             selectedIds,
+            t,
         }, props);
     }
 

@@ -95,7 +95,7 @@ function SelectCloudStorage(props: Props): JSX.Element {
 
     return (
         <Form.Item
-            label={label || 'Select cloud storage'}
+            label={label || '选择云存储'}
             name={name || 'cloudStorageSelect'}
             rules={[{ required: true, message: 'Please, specify a cloud storage' }]}
             valuePropName='label'
@@ -104,7 +104,7 @@ function SelectCloudStorage(props: Props): JSX.Element {
             <AutoComplete
                 onBlur={onBlur}
                 value={searchPhrase}
-                placeholder='Search...'
+                placeholder='选择 ...'
                 showSearch
                 onSearch={(phrase: string) => {
                     setSearchPhrase(phrase);

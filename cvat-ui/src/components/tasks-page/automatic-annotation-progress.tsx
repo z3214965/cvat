@@ -42,7 +42,7 @@ function AutomaticAnnotationProgress(props: Props): JSX.Element | null {
                             if (activeInference.status === RQStatus.QUEUED) {
                                 return (
                                     <>
-                                        Automatic annotation request queued
+                                        自动标注请求已排队
                                         <LoadingOutlined />
                                     </>
                                 );
@@ -51,21 +51,21 @@ function AutomaticAnnotationProgress(props: Props): JSX.Element | null {
                             if (activeInference.status === RQStatus.STARTED) {
                                 return (
                                     <>
-                                        Automatic annotation is in progress
+                                        自动标注正在进行中
                                         <LoadingOutlined />
                                     </>
                                 );
                             }
 
                             if (activeInference.status === RQStatus.FAILED) {
-                                return (<>Automatic annotation failed</>);
+                                return (<>自动标注失败</>);
                             }
 
                             if (activeInference.status === RQStatus.UNKNOWN) {
-                                return (<>Unknown status received</>);
+                                return (<>收到未知状态</>);
                             }
 
-                            return <>Automatic annotation accomplished</>;
+                            return <>自动标注完成</>;
                         })()}
                     </Text>
                 </div>
@@ -81,12 +81,12 @@ function AutomaticAnnotationProgress(props: Props): JSX.Element | null {
             </Col>
             <Col span={1} className='close-auto-annotation-icon'>
                 { activeInference.status !== RQStatus.FAILED && (
-                    <CVATTooltip title='Cancel automatic annotation'>
+                    <CVATTooltip title='取消自动标注'>
                         <CloseOutlined
                             onClick={() => {
                                 Modal.confirm({
-                                    title: 'You are going to cancel automatic annotation?',
-                                    content: 'Reached progress will be lost. Continue?',
+                                    title: '您要取消自动标注吗？',
+                                    content: '已取得的进度将会丢失。是否继续？',
                                     okButtonProps: {
                                         type: 'primary',
                                         danger: true,

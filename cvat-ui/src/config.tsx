@@ -156,6 +156,20 @@ const PAID_PLACEHOLDER_CONFIG = {
     },
 };
 
+// ====================== 中文配置开始 ======================
+const supportedLanguages: string[] = (
+    process.env.REACT_APP_SUPPORTED_LANGUAGES || 'en'
+).split(',');
+
+const defaultLanguage: string =
+  process.env.REACT_APP_DEFAULT_LANGUAGE || 'en';
+
+const languageResources = {
+    en: require('./locales/en.json'),
+    'zh-CN': require('./locales/zh-CN.json'),
+};
+// ====================== 中文配置结束 ======================
+
 export default {
     UNDEFINED_ATTRIBUTE_VALUE,
     NO_BREAK_SPACE,
@@ -200,4 +214,7 @@ export default {
     BLACKLISTED_GO_BACK_PATHS,
     PAID_PLACEHOLDER_CONFIG,
     MAXIMUM_NOTIFICATION_MESSAGE_LENGTH,
+    supportedLanguages,
+    defaultLanguage,
+    languageResources,
 };

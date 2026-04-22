@@ -58,7 +58,7 @@ function validateLabels(_: RuleObject, value: string): Promise<void> {
     try {
         const parsed = JSON.parse(replaceTrailingCommas(value));
         if (!Array.isArray(parsed)) {
-            return Promise.reject(new Error('Field is expected to be a JSON array'));
+            return Promise.reject(new Error('字段应为JSON数组'));
         }
 
         for (const label of parsed) {
@@ -71,7 +71,7 @@ function validateLabels(_: RuleObject, value: string): Promise<void> {
 
         const labelNames = parsed.map((label: SerializedLabel) => label.name.trim());
         if (new Set(labelNames).size !== labelNames.length) {
-            return Promise.reject(new Error('Label name must be unique'));
+            return Promise.reject(new Error('标签名必须唯一'));
         }
     } catch (error) {
         return Promise.reject(error);
@@ -153,13 +153,13 @@ export default class RawViewer extends React.PureComponent<Props> {
 
         if (deletedLabels.length || deletedAttributes.length) {
             Modal.confirm({
-                title: 'You are going to remove existing labels/attributes',
+                title: '您将移除现有的标签/属性',
                 className: 'cvat-modal-confirm-remove-existing-labels',
                 content: (
                     <>
                         {deletedLabels.length ? (
                             <Paragraph>
-                                Following labels are going to be removed:
+                                以下标签将被移除：
                                 <div className='cvat-modal-confirm-content-remove-existing-labels'>
                                     {deletedLabels
                                         .map((_label: LabelOptColor): JSX.Element => (
@@ -171,7 +171,7 @@ export default class RawViewer extends React.PureComponent<Props> {
                         ) : null}
                         {deletedAttributes.length ? (
                             <Paragraph>
-                                Following attributes are going to be removed:
+                                以下属性将被移除：
                                 <div className='cvat-modal-confirm-content-remove-existing-attributes'>
                                     {deletedAttributes.map((_attr: SerializedAttribute) => (
                                         <Tag key={_attr.id as number}>{_attr.name}</Tag>
@@ -179,10 +179,10 @@ export default class RawViewer extends React.PureComponent<Props> {
                                 </div>
                             </Paragraph>
                         ) : null}
-                        <Paragraph type='danger'>All related annotations will be destroyed. Continue?</Paragraph>
+                        <Paragraph type='danger'>所有相关标注都将被销毁。是否继续？</Paragraph>
                     </>
                 ),
-                okText: 'Delete existing data',
+                okText: '删除现有数据',
                 okButtonProps: {
                     danger: true,
                 },
@@ -238,7 +238,7 @@ export default class RawViewer extends React.PureComponent<Props> {
                                 type='primary'
                                 htmlType='submit'
                             >
-                                Done
+                                完成
                             </Button>
                         </CVATTooltip>
                     </Col>
@@ -255,7 +255,7 @@ export default class RawViewer extends React.PureComponent<Props> {
                                     }
                                 }}
                             >
-                                Reset
+                                重置
                             </Button>
                         </CVATTooltip>
                     </Col>

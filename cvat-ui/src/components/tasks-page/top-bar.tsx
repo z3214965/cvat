@@ -12,6 +12,9 @@ import Popover from 'antd/lib/popover';
 import { LoadingOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
+
+import { useTranslation } from 'react-i18next';
+
 import { importActions } from 'actions/import-actions';
 import {
     SortingComponent,
@@ -44,6 +47,8 @@ interface VisibleTopBarProps {
 }
 
 export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JSX.Element {
+    const { t } = useTranslation();
+
     const dispatch = useDispatch();
     const {
         importing, query, onApplyFilter, onApplySorting, onApplySearch,
@@ -71,7 +76,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                             }}
                             defaultValue={query.search ?? ''}
                             className='cvat-tasks-page-search-bar'
-                            placeholder='Search ...'
+                            placeholder={`${t('common.search')} ...`}
                         />
                         <ResourceSelectionInfo selectedCount={selectedCount} onSelectAll={onSelectAll} />
                     </div>

@@ -15,6 +15,8 @@ import { DownloadOutlined, MoreOutlined } from '@ant-design/icons';
 import { Config } from '@react-awesome-query-builder/antd';
 import jsonLogic from 'json-logic-js';
 
+import { useTranslation } from 'react-i18next';
+
 import { ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
 import { generateCSV, downloadCSV as triggerCSVDownload } from 'utils/csv-writer';
 import CVATTooltip from './cvat-tooltip';
@@ -62,6 +64,8 @@ function getValueFromDataItem<T>(
     * show/hide columns
 */
 function CVATTable(props: Props): JSX.Element {
+    const { t } = useTranslation();
+
     const {
         onChangeColumnVisibility,
         onFilterDataSource,
@@ -182,7 +186,7 @@ function CVATTable(props: Props): JSX.Element {
                             >
                                 <Input.Search
                                     className='cvat-table-search-bar'
-                                    placeholder='Search ..'
+                                    placeholder={`${t('common.search')} ...`}
                                     onSearch={setSearchPhrase}
                                     enterButton
                                 />

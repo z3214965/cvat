@@ -21,6 +21,8 @@ import Empty from 'antd/lib/empty';
 import Input from 'antd/lib/input';
 import notification from 'antd/lib/notification';
 
+import { useTranslation } from 'react-i18next';
+
 import { getCore, Project, Task } from 'cvat-core-wrapper';
 import { CombinedState, TasksQuery, SelectedResourceType } from 'reducers';
 import { getProjectTasksAsync, updateProjectAsync } from 'actions/projects-actions';
@@ -57,6 +59,8 @@ interface ParamType {
 }
 
 export default function ProjectPageComponent(): JSX.Element {
+    const { t } = useTranslation();
+
     const id = +useParams<ParamType>().id;
     const dispatch = useDispatch();
     const history = useHistory();
@@ -275,7 +279,7 @@ export default function ProjectPageComponent(): JSX.Element {
                                     }}
                                     defaultValue={tasksQuery.search ?? ''}
                                     className='cvat-project-page-tasks-search-bar'
-                                    placeholder='Search ...'
+                                    placeholder={`${t('common.search')} ...`}
                                 />
                                 <ResourceSelectionInfo
                                     selectedCount={selectedCount}

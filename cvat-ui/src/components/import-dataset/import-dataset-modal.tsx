@@ -352,8 +352,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
 
     useEffect(() => {
         dispatch(reducerActions.setHelpMessage(
-            `Import from ${(defaultStorageLocation) ? defaultStorageLocation.split('_')[0] : 'local'} ` +
-            `storage ${(defaultStorageCloudId) ? `№${defaultStorageCloudId}` : ''}`,
+            `导入从 ${(defaultStorageLocation) ? defaultStorageLocation.split('_')[0] : 'local'} ` +
+            `存储 ${(defaultStorageCloudId) ? `№${defaultStorageCloudId}` : ''}`,
         ));
     }, [defaultStorageLocation, defaultStorageCloudId]);
 
@@ -374,9 +374,9 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 accept='.zip,.json,.xml'
                 beforeUpload={(_file: RcFile): boolean => {
                     if (!selectedLoader) {
-                        message.warning('Please select a format first', 3);
+                        message.warning('请先选择格式', 3);
                     } else if (isDataset() && !['application/zip', 'application/x-zip-compressed'].includes(_file.type)) {
-                        message.error('Only ZIP archive is supported for import a dataset');
+                        message.error('导入数据集仅支持ZIP存档格式');
                     } else if (isAnnotation() &&
                                 !selectedLoader.format.toLowerCase().split(', ').includes(_file.name.split('.')[_file.name.split('.').length - 1])) {
                         message.error(
@@ -395,14 +395,14 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 <p className='ant-upload-drag-icon'>
                     <InboxOutlined />
                 </p>
-                <p className='ant-upload-text'>Click or drag file to this area</p>
+                <p className='ant-upload-text'>点击或拖动文件到此区域</p>
             </Upload.Dragger>
         </Form.Item>
     );
 
     const validateFileName = (_: RuleObject, value: string): Promise<void> => {
         if (!selectedLoader) {
-            message.warning('Please select a format first', 3);
+            message.warning('请先选择格式', 3);
             return Promise.reject();
         }
         if (value) {
@@ -418,7 +418,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             }
             if (isDataset()) {
                 if (extension !== 'zip') {
-                    return Promise.reject(new Error('Only ZIP archive is supported for import a dataset'));
+                    return Promise.reject(new Error('导入数据集仅支持ZIP存档格式'));
                 }
             }
         }
@@ -428,7 +428,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
 
     const renderCustomName = (): JSX.Element => (
         <Form.Item
-            label={<Text strong>File name</Text>}
+            label={<Text strong>文件名</Text>}
             name='fileName'
             hasFeedback
             dependencies={['selectedFormat']}
@@ -436,7 +436,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             required
         >
             <Input
-                placeholder='Dataset file name'
+                placeholder='数据集文件名'
                 className='cvat-modal-import-filename-input'
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                     dispatch(reducerActions.setFileName(e.target.value || ''));
@@ -518,15 +518,15 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             title={(
                 <>
                     <Text strong>
-                        {`Import ${resource} to ${instanceType}`}
+                        {`导入 ${resource} 到 ${instanceType}`}
                     </Text>
                     {
                         instance instanceof core.classes.Project && (
                             <CVATTooltip
                                 title={
                                     instance && !instance.labels.length ?
-                                        'Labels will be imported from dataset' :
-                                        'Labels from project will be used'
+                                        '标签将从数据集中导入' :
+                                        '将使用来自项目的标签'
                                 }
                             >
                                 <QuestionCircleOutlined className='cvat-modal-import-header-question-icon' />
@@ -553,12 +553,12 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             >
                 <Form.Item
                     name='selectedFormat'
-                    label='Import format'
+                    label='导入格式'
                     rules={[{ required: true, message: 'Format must be selected' }]}
                     hasFeedback
                 >
                     <Select
-                        placeholder={`Select ${resource} format`}
+                        placeholder={`选择 ${resource} 格式`}
                         className='cvat-modal-import-select'
                         virtual={false}
                         onChange={(format: string) => {
@@ -603,8 +603,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                             }}
                         />
                     </Form.Item>
-                    <Text strong>Convert masks to polygons</Text>
-                    <CVATTooltip title='The option is relevant for formats that work with masks only'>
+                    <Text strong>将 masks 转换为多边形</Text>
+                    <CVATTooltip title='此配置项仅适用于 masks 类标注格式'>
                         <QuestionCircleOutlined />
                     </CVATTooltip>
                 </Space>
@@ -620,7 +620,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                             }}
                         />
                     </Form.Item>
-                    <Text strong>Use default settings</Text>
+                    <Text strong>用默认设置</Text>
                     <CVATTooltip title={helpMessage}>
                         <QuestionCircleOutlined />
                     </CVATTooltip>

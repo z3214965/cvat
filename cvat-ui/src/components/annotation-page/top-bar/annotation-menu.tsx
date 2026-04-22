@@ -87,10 +87,10 @@ function AnnotationMenuComponent(): JSX.Element {
 
     const changeJobState = useCallback((state: JobState) => () => {
         Modal.confirm({
-            title: 'Would you like to update current job state?',
-            content: `Job state will be switched to "${state}"`,
-            okText: 'Continue',
-            cancelText: 'Cancel',
+            title: '您想更新当前的作业状态吗？',
+            content: `作业状态将要被切换到 "${state}"`,
+            okText: '继续',
+            cancelText: '取消',
             className: 'cvat-modal-content-change-job-state',
             onOk: () => changeState(state),
         });
@@ -105,30 +105,30 @@ function AnnotationMenuComponent(): JSX.Element {
 
     menuItems.push([{
         key: Actions.LOAD_JOB_ANNO,
-        label: 'Upload annotations',
+        label: '上传标注',
         onClick: uploadAnnotations,
     }, 10]);
 
     menuItems.push([{
         key: Actions.EXPORT_JOB_DATASET,
-        label: 'Export job dataset',
+        label: '导出作业数据集',
         onClick: exportDataset,
     }, 20]);
 
     menuItems.push([{
         key: Actions.REMOVE_ANNOTATIONS,
-        label: 'Remove annotations',
+        label: '删除标注',
         onClick: () => {
             let removeFrom: number | undefined;
             let removeUpTo: number | undefined;
             let removeOnlyKeyframes = false;
             Modal.confirm({
-                title: 'Remove Annotations',
+                title: '删除标注',
                 content: (
                     <div>
-                        <Text>You are about to remove all annotations from every frame. </Text>
-                        <Text>If you want to remove them from certain frames only, select a range below.</Text>
-                        <Text>Changes take effect only when you save the job.</Text>
+                        <Text>您即将从每一帧中移除所有标注。</Text>
+                        <Text>如果您只想从某些帧中移除它们，请在下面选择一个范围。</Text>
+                        <Text>只有保存作业后，更改才会生效。</Text>
                         <br />
                         <br />
                         <br />
@@ -136,10 +136,10 @@ function AnnotationMenuComponent(): JSX.Element {
                             bordered={false}
                             items={[{
                                 key: 1,
-                                label: <Text>Select Range</Text>,
+                                label: <Text>选择范围</Text>,
                                 children: (
                                     <>
-                                        <Text>From: </Text>
+                                        <Text>从: </Text>
                                         <InputNumber
                                             min={0}
                                             max={stopFrame}
@@ -147,7 +147,7 @@ function AnnotationMenuComponent(): JSX.Element {
                                                 removeFrom = value ?? undefined;
                                             }}
                                         />
-                                        <Text>  To: </Text>
+                                        <Text>  到: </Text>
                                         <InputNumber
                                             min={0}
                                             max={stopFrame}
@@ -155,7 +155,7 @@ function AnnotationMenuComponent(): JSX.Element {
                                                 removeUpTo = value ?? undefined;
                                             }}
                                         />
-                                        <CVATTooltip title='Applicable only for annotations in range'>
+                                        <CVATTooltip title='仅适用于范围内的标注'>
                                             <br />
                                             <br />
                                             <Checkbox
@@ -163,7 +163,7 @@ function AnnotationMenuComponent(): JSX.Element {
                                                     removeOnlyKeyframes = check.target.checked;
                                                 }}
                                             >
-                                                Delete only keyframes for tracks
+                                                仅删除追踪的关键帧
                                             </Checkbox>
                                         </CVATTooltip>
                                     </>
@@ -180,14 +180,14 @@ function AnnotationMenuComponent(): JSX.Element {
                     type: 'primary',
                     danger: true,
                 },
-                okText: 'Remove',
+                okText: '删除',
             });
         },
     }, 30]);
 
     menuItems.push([{
         key: Actions.RUN_ACTIONS,
-        label: 'Run actions',
+        label: '运行操作',
         onClick: () => {
             openAnnotationsActionModal();
         },
@@ -195,14 +195,14 @@ function AnnotationMenuComponent(): JSX.Element {
 
     menuItems.push([{
         key: Actions.OPEN_TASK,
-        label: 'Open the task',
+        label: '打开任务',
         onClick: openTask,
     }, 50]);
 
     menuItems.push([{
         key: 'job-state-submenu',
         popupClassName: 'cvat-annotation-menu-job-state-submenu',
-        label: 'Change job state',
+        label: '改变作业状态',
         children: [{
             key: `state:${JobState.NEW}`,
             label: JobState.NEW,
@@ -228,13 +228,13 @@ function AnnotationMenuComponent(): JSX.Element {
 
     menuItems.push([{
         key: Actions.FINISH_JOB,
-        label: 'Finish the job',
+        label: '结束作业',
         onClick: () => {
             Modal.confirm({
-                title: 'Would you like to finish the job?',
-                content: 'It will save annotations and set the job state to "completed"',
-                okText: 'Continue',
-                cancelText: 'Cancel',
+                title: '你想完成这项作业吗？',
+                content: '它将保存标注并将作业状态设置为"已完成"',
+                okText: '继续',
+                cancelText: '取消',
                 className: 'cvat-modal-content-finish-job',
                 onOk: finishJob,
             });
@@ -263,7 +263,7 @@ function AnnotationMenuComponent(): JSX.Element {
         >
             <Button type='link' className='cvat-annotation-header-menu-button cvat-annotation-header-button'>
                 <Icon component={MainMenuIcon} />
-                Menu
+                菜单
             </Button>
         </Dropdown>
     );

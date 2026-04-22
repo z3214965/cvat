@@ -5,6 +5,9 @@
 import React, { useCallback } from 'react';
 import Button from 'antd/lib/button';
 import { useDispatch } from 'react-redux';
+
+import { useTranslation } from 'react-i18next';
+
 import { selectionActions } from 'actions/selection-actions';
 
 interface ResourceSelectionInfoProps {
@@ -15,6 +18,8 @@ interface ResourceSelectionInfoProps {
 export function ResourceSelectionInfo(
     { selectedCount, onSelectAll }: Readonly<ResourceSelectionInfoProps>,
 ): JSX.Element | null {
+    const { t } = useTranslation();
+
     const dispatch = useDispatch();
 
     const handleDeselectAll = useCallback(() => {
@@ -32,7 +37,7 @@ export function ResourceSelectionInfo(
                 size='small'
                 type='link'
             >
-                Select all
+                {t('common.select_all')}
             </Button>
         );
     } else if (selectedCount > 0) {
@@ -44,7 +49,7 @@ export function ResourceSelectionInfo(
                 size='small'
                 type='link'
             >
-                Deselect
+                {t('common.deselect')}
             </Button>
         );
     }

@@ -9,6 +9,8 @@ import { Row, Col } from 'antd/lib/grid';
 import Button from 'antd/lib/button';
 import { PlusOutlined } from '@ant-design/icons';
 
+import { useTranslation } from 'react-i18next';
+
 import { CloudStoragesQuery } from 'reducers';
 import Input from 'antd/lib/input';
 import {
@@ -39,6 +41,8 @@ interface Props {
 }
 
 export default function StoragesTopBar(props: Readonly<Props>): JSX.Element {
+    const { t } = useTranslation();
+
     const {
         query, onApplyFilter, onApplySorting, onApplySearch, selectedCount, onSelectAll,
     } = props;
@@ -57,7 +61,7 @@ export default function StoragesTopBar(props: Readonly<Props>): JSX.Element {
                             }}
                             defaultValue={query.search ?? ''}
                             className='cvat-cloudstorages-page-tasks-search-bar'
-                            placeholder='Search ...'
+                            placeholder={`${t('common.search')} ...`}
                         />
                         <ResourceSelectionInfo selectedCount={selectedCount} onSelectAll={onSelectAll} />
                     </div>

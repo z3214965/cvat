@@ -11,6 +11,9 @@ import Button from 'antd/lib/button';
 import Popover from 'antd/lib/popover';
 import Input from 'antd/lib/input';
 import { LoadingOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+
+import { useTranslation } from 'react-i18next';
+
 import { importActions } from 'actions/import-actions';
 import { usePrevious } from 'utils/hooks';
 import { ProjectsQuery } from 'reducers';
@@ -42,6 +45,8 @@ interface Props {
 }
 
 function TopBarComponent(props: Readonly<Props>): JSX.Element {
+    const { t } = useTranslation();
+
     const dispatch = useDispatch();
     const {
         importing, query, onApplyFilter, onApplySorting, onApplySearch,
@@ -69,7 +74,7 @@ function TopBarComponent(props: Readonly<Props>): JSX.Element {
                             }}
                             defaultValue={query.search ?? ''}
                             className='cvat-projects-page-search-bar'
-                            placeholder='Search ...'
+                            placeholder={`${t('common.search')} ...`}
                         />
                         <ResourceSelectionInfo selectedCount={selectedCount} onSelectAll={onSelectAll} />
                     </div>

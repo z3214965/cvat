@@ -18,12 +18,15 @@ interface MenuItemsData {
     onBackupProject: () => void;
     onDeleteProject: () => void;
     selectedIds: number[];
+    t: (key: string) => string;
 }
 
 export default function ProjectActionsItems(
     menuItemsData: MenuItemsData,
     projectMenuProps: unknown,
 ): MenuProps['items'] {
+    const { t } = menuItemsData;
+
     const {
         projectId,
         startEditField,
@@ -45,46 +48,46 @@ export default function ProjectActionsItems(
     menuItems.push([{
         key: 'export-dataset',
         onClick: onExportDataset,
-        label: withCount('Export dataset', 'export-dataset'),
+        label: withCount(t('common.export_dataset'), 'export-dataset'),
         disabled: isDisabled('export-dataset'),
     }, 0]);
 
     menuItems.push([{
         key: 'import-dataset',
         onClick: onImportDataset,
-        label: 'Import dataset',
+        label: t('common.import_dataset'),
         disabled: isDisabled('import-dataset'),
     }, 10]);
 
     menuItems.push([{
         key: 'backup-project',
         onClick: onBackupProject,
-        label: withCount('Backup Project', 'backup-project'),
+        label: withCount(t('common.backup_project'), 'backup-project'),
         disabled: isDisabled('backup-project'),
     }, 20]);
 
     menuItems.push([{
         key: 'edit_assignee',
         onClick: () => startEditField('assignee'),
-        label: <CVATMenuEditLabel>{withCount('Assignee', 'edit_assignee')}</CVATMenuEditLabel>,
+        label: <CVATMenuEditLabel>{withCount(t('common.edit_assignee'), 'edit_assignee')}</CVATMenuEditLabel>,
         disabled: isDisabled('edit_assignee'),
     }, 30]);
 
     menuItems.push([{
         key: 'view-analytics',
-        label: <Link to={`/projects/${projectId}/analytics`}>View analytics</Link>,
+        label: <Link to={`/projects/${projectId}/analytics`}>{t('common.view_analytics')}</Link>,
         disabled: isDisabled('view-analytics'),
     }, 40]);
 
     menuItems.push([{
         key: 'quality-control',
-        label: <Link to={`/projects/${projectId}/quality-control`}>Quality control</Link>,
+        label: <Link to={`/projects/${projectId}/quality-control`}>{t('common.quality_control')}</Link>,
         disabled: isDisabled('quality-control'),
     }, 50]);
 
     menuItems.push([{
         key: 'set-webhooks',
-        label: <Link to={`/projects/${projectId}/webhooks`}>Setup webhooks</Link>,
+        label: <Link to={`/projects/${projectId}/webhooks`}>{t('common.setup_webhooks')}</Link>,
         disabled: isDisabled('set-webhooks'),
     }, 60]);
 
@@ -95,13 +98,13 @@ export default function ProjectActionsItems(
     menuItems.push([{
         key: 'edit_organization',
         onClick: () => startEditField('organization'),
-        label: <CVATMenuEditLabel>Organization</CVATMenuEditLabel>,
+        label: <CVATMenuEditLabel>{t('common.edit_organization')}</CVATMenuEditLabel>,
     }, 70]);
 
     menuItems.push([{
         key: 'delete',
         onClick: onDeleteProject,
-        label: withCount('Delete', 'delete'),
+        label: withCount(t('common.delete'), 'delete'),
         disabled: isDisabled('delete'),
     }, 80]);
 

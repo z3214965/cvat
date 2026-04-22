@@ -73,11 +73,11 @@ export default function CloudStorageItemComponent(props: Readonly<Props>): JSX.E
         const cloudStoragesToDelete = currentCloudStorages.filter((storage) => selectedIds.includes(storage.id));
         Modal.confirm({
             title: isBulkMode ?
-                `Delete ${cloudStoragesToDelete.length} selected cloud storages` :
-                'Please, confirm your action',
+                `删除已选中的 ${cloudStoragesToDelete.length} 个云存储资源` :
+                '请确认您的操作',
             content: isBulkMode ?
-                'All selected cloud storages will be permanently removed. Continue?' :
-                `You are going to remove the cloudstorage "${displayName}". Continue?`,
+                '所有选定的云存储将被永久删除。是否继续？' :
+                `您将要移除云存储“${displayName}”。是否继续？`,
             className: 'cvat-modal-confirm-delete-cloud-storage',
             onOk: () => {
                 dispatch(makeBulkOperationAsync(
@@ -85,14 +85,14 @@ export default function CloudStorageItemComponent(props: Readonly<Props>): JSX.E
                     async (storage) => {
                         await dispatch(deleteCloudStorageAsync(storage));
                     },
-                    (storage, idx, total) => `Deleting cloud storage #${storage.id} (${idx + 1}/${total})`,
+                    (storage, idx, total) => `删除云存储 #${storage.id} (${idx + 1}/${total})`,
                 ));
             },
             okButtonProps: {
                 type: 'primary',
                 danger: true,
             },
-            okText: isBulkMode ? 'Delete selected' : 'Delete',
+            okText: isBulkMode ? '删除选中' : '删除',
         });
     }, [cloudStorage, currentCloudStorages, selectedIds, isBulkMode, displayName]);
 
@@ -131,17 +131,17 @@ export default function CloudStorageItemComponent(props: Readonly<Props>): JSX.E
                 description={(
                     <>
                         <Paragraph>
-                            <Text type='secondary'>Provider: </Text>
+                            <Text type='secondary'>提供商: </Text>
                             <Text>{providerType}</Text>
                         </Paragraph>
                         <Paragraph>
-                            <Text type='secondary'>Created </Text>
-                            {owner ? <Text type='secondary'>{`by ${owner.username}`}</Text> : null}
-                            <Text type='secondary'> on </Text>
+                            <Text type='secondary'>创建 </Text>
+                            {owner ? <Text type='secondary'>{`通过 ${owner.username}`}</Text> : null}
+                            <Text type='secondary'> 在 </Text>
                             <Text type='secondary'>{dayjs(createdDate).format('MMMM Do YYYY')}</Text>
                         </Paragraph>
                         <Paragraph>
-                            <Text type='secondary'>Last updated </Text>
+                            <Text type='secondary'>最后更新 </Text>
                             <Text type='secondary'>{dayjs(updatedDate).fromNow()}</Text>
                         </Paragraph>
                         <Status cloudStorage={cloudStorage} />

@@ -17,25 +17,23 @@ export function confirmTransferModal(
         return;
     }
 
-    const instanceType = first instanceof Task ? 'task' : 'project';
-    const movingItems = instances.length > 1 ?
-        `${instances.length} ${instanceType}s` : `the ${instanceType} #${first.id}`;
-    let details = `You are going to move ${movingItems} ` +
-        `to the ${dstWorkspace ? `organization ${dstWorkspace.slug}` : 'personal workspace'}. `;
+    const instanceType = first instanceof Task ? '任务' : '项目';
+    const movingItems = instances.length > 1 ? `${instances.length} ${instanceType}s` : ` ${instanceType} #${first.id}`;
+    let details = `您打算将 ${movingItems} 移至 ${dstWorkspace ? `组织 ${dstWorkspace.slug}` : '个人工作空间'}。 `;
     if (activeWorkspace) {
-        details += 'Organization members will lose access to ' +
-            `${instances.length > 1 ? 'these resources' : 'this resource'}.`;
+        details += `组织成员将失去访问权限 ${instances.length > 1 ? '这些资源' : '该资源'}.`;
     }
 
     Modal.confirm({
-        title: 'Data transfer between workspaces',
-        content: `${details} Would you like to proceed?`,
+        title: '工作区之间数据传输',
+        content: `${details} 是否要继续？`,
         className: 'cvat-modal-confirm-project-transfer-between-workspaces',
         onOk,
         okButtonProps: {
             type: 'primary',
             danger: true,
         },
-        okText: 'Continue',
+        okText: '继续',
+        cancelText: '取消',
     });
 }

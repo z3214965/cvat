@@ -4,10 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import _ from 'lodash';
-import {
-    useRef, useEffect, useState, useCallback,
-    useLayoutEffect, EffectCallback, DependencyList,
-} from 'react';
+import { useRef, useEffect, useState, useCallback, useLayoutEffect, EffectCallback, DependencyList } from 'react';
 import { useSelector } from 'react-redux';
 import { useHistory, useLocation, useParams } from 'react-router';
 import { CombinedState, PluginComponent, InstanceType } from 'reducers';
@@ -45,18 +42,23 @@ export type Plugin = {
 
 export function usePlugins(
     getState: (state: CombinedState) => PluginComponent[],
-    props: object = {}, state: object = {},
+    props: object = {},
+    state: object = {},
 ): Plugin[] {
     const components = useSelector(getState);
     const filteredComponents = components.filter((component) => component.data.shouldBeRendered(props, state));
-    const mappedComponents = filteredComponents
-        .map(({ component, data }): {
+    const mappedComponents = filteredComponents.map(
+        ({
+            component,
+            data,
+        }): {
             component: CallableFunction;
             weight: number;
         } => ({
             component,
             weight: data.weight,
-        }));
+        }),
+    );
     const ref = useRef<Plugin[]>(mappedComponents);
 
     if (!_.isEqual(ref.current, mappedComponents)) {
@@ -85,9 +87,7 @@ export interface ICardHeightHOC {
 }
 
 export function useCardHeightHOC(params: ICardHeightHOC): () => string {
-    const {
-        numberOfRows, minHeight, paddings, containerClassName, siblingClassNames,
-    } = params;
+    const { numberOfRows, minHeight, paddings, containerClassName, siblingClassNames } = params;
 
     return (): string => {
         const [height, setHeight] = useState('auto');
@@ -140,16 +140,19 @@ export function useResetShortcutsOnUnmount(componentShortcuts: Record<string, Ke
         keyMapRef.current = keyMap;
     }, [keyMap]);
 
-    useEffect(() => () => {
-        const revertedShortcuts = Object.entries(componentShortcuts).reduce((acc: KeyMap, [key, value]) => {
-            acc[key] = {
-                ...value,
-                sequences: keyMapRef.current[key]?.sequences ?? [],
-            };
-            return acc;
-        }, {});
-        registerComponentShortcuts(revertedShortcuts);
-    }, []);
+    useEffect(
+        () => () => {
+            const revertedShortcuts = Object.entries(componentShortcuts).reduce((acc: KeyMap, [key, value]) => {
+                acc[key] = {
+                    ...value,
+                    sequences: keyMapRef.current[key]?.sequences ?? [],
+                };
+                return acc;
+            }, {});
+            registerComponentShortcuts(revertedShortcuts);
+        },
+        [],
+    );
 }
 
 export function usePageSizeData(ref: any): any {
@@ -197,9 +200,9 @@ export function useInstanceType(): InstanceType {
 
 export function useInstanceId(type: InstanceType): number {
     const params = useParams<{
-        pid?: string,
-        jid?: string,
-        tid?: string,
+        pid?: string;
+        jid?: string;
+        tid?: string;
     }>();
 
     if (type === InstanceType.PROJECT) return +(params.pid as string);
@@ -225,16 +228,24 @@ export function useDropdownEditField(): DropdownEditField {
         setDropdownOpen(false);
     }, []);
 
-    const onOpenChange = useCallback((open: boolean, { source }: {
-        source: 'trigger' | 'menu';
-    }) => {
-        if (source === 'trigger') {
-            setDropdownOpen(open);
-        }
-        if (!open && editField) {
-            stopEditField();
-        }
-    }, [editField, stopEditField]);
+    const onOpenChange = useCallback(
+        (
+            open: boolean,
+            {
+                source,
+            }: {
+                source: 'trigger' | 'menu';
+            },
+        ) => {
+            if (source === 'trigger') {
+                setDropdownOpen(open);
+            }
+            if (!open && editField) {
+                stopEditField();
+            }
+        },
+        [editField, stopEditField],
+    );
 
     const onMenuClick = useCallback(({ key }: { key: string }) => {
         if (!key.startsWith('edit') && !key.endsWith('selector')) {
@@ -257,16 +268,14 @@ interface ResourceQueryDefaultParams {
     pageSize?: number;
 }
 
-export function useResourceQuery<QueryType extends {
-    page: number;
-    pageSize: number;
-    filter?: string;
-}>(query: QueryType, defaultParams: ResourceQueryDefaultParams = {}): QueryType {
-    const {
-        page = 1,
-        pageSize = 10,
-        filter = null,
-    } = defaultParams;
+export function useResourceQuery<
+    QueryType extends {
+        page: number;
+        pageSize: number;
+        filter?: string;
+    },
+>(query: QueryType, defaultParams: ResourceQueryDefaultParams = {}): QueryType {
+    const { page = 1, pageSize = 10, filter = null } = defaultParams;
 
     const history = useHistory();
 
@@ -310,16 +319,22 @@ export function useContextMenuClick<T extends HTMLElement = HTMLElement>(
         }
     }, []);
 
-    const shouldPreventContextMenu = useCallback((target: EventTarget | null): boolean => {
-        if (!target || !(target instanceof Element)) return false;
-        return preventSelectors.some((selector) => target.closest(selector) !== null);
-    }, [preventSelectors]);
+    const shouldPreventContextMenu = useCallback(
+        (target: EventTarget | null): boolean => {
+            if (!target || !(target instanceof Element)) return false;
+            return preventSelectors.some((selector) => target.closest(selector) !== null);
+        },
+        [preventSelectors],
+    );
 
-    const handleContextMenuCapture = useCallback((e: React.MouseEvent) => {
-        if (shouldPreventContextMenu(e.target)) {
-            e.stopPropagation();
-        }
-    }, [shouldPreventContextMenu]);
+    const handleContextMenuCapture = useCallback(
+        (e: React.MouseEvent) => {
+            if (shouldPreventContextMenu(e.target)) {
+                e.stopPropagation();
+            }
+        },
+        [shouldPreventContextMenu],
+    );
 
     return { itemRef, handleContextMenuClick, handleContextMenuCapture };
 }

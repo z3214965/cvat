@@ -124,10 +124,10 @@ function PlayerNavigation(props: Props): JSX.Element {
         if (!playing) {
             switchNavigationBlocked(true);
             Modal.confirm({
-                title: `Do you want to delete frame #${frameNumber}?`,
-                content: 'The frame will not be visible in navigation and exported datasets, but it still can be restored with all the annotations.',
+                title: `你想删除第 #${frameNumber} 帧吗?`,
+                content: '该帧不会在导航界面及导出的数据集中显示，但所有标注内容均可完整恢复。',
                 className: 'cvat-modal-delete-frame',
-                okText: 'Delete',
+                okText: '删除',
                 okType: 'danger',
                 onOk: () => {
                     switchNavigationBlocked(false);
@@ -181,7 +181,7 @@ function PlayerNavigation(props: Props): JSX.Element {
     }, {});
 
     const deleteFrameIcon = !frameDeleted ? (
-        <CVATTooltip title={`Delete the frame ${deleteFrameShortcut}`}>
+        <CVATTooltip title={`删除帧 ${deleteFrameShortcut}`}>
             <DeleteOutlined
                 style={deleteFrameIconStyle}
                 className='cvat-player-delete-frame'
@@ -189,7 +189,7 @@ function PlayerNavigation(props: Props): JSX.Element {
             />
         </CVATTooltip>
     ) : (
-        <CVATTooltip title='Restore the frame'>
+        <CVATTooltip title='恢复帧'>
             <Icon
                 style={deleteFrameIconStyle}
                 className='cvat-player-restore-frame'
@@ -244,10 +244,10 @@ function PlayerNavigation(props: Props): JSX.Element {
                         </CVATTooltip>
                     </Col>
                     <Col className='cvat-player-frame-actions' offset={1}>
-                        <CVATTooltip title='Copy frame filename'>
+                        <CVATTooltip title='复制帧文件名'>
                             <CopyOutlined className='cvat-player-copy-frame-name-icon' onClick={onCopyFilenameIconClick} />
                         </CVATTooltip>
-                        <CVATTooltip title='Create frame URL'>
+                        <CVATTooltip title='创建帧URL'>
                             <LinkOutlined className='cvat-player-frame-url-icon' onClick={onURLIconClick} />
                         </CVATTooltip>
                         { deleteFrameIcon }
@@ -255,7 +255,7 @@ function PlayerNavigation(props: Props): JSX.Element {
                 </Row>
             </Col>
             <Col>
-                <CVATTooltip title={`Press ${focusFrameInputShortcut} to focus here`}>
+                <CVATTooltip title={`按下 ${focusFrameInputShortcut} 即可聚焦此处`}>
                     <InputNumber
                         ref={inputFrameRef}
                         className='cvat-player-frame-selector'
@@ -283,7 +283,7 @@ function PlayerNavigation(props: Props): JSX.Element {
             <Col className='cvat-player-actions'>
                 {
                     showSearchFrameByName && (
-                        <CVATTooltip title={`Search frame by name ${searchFrameByNameShortcut}`}>
+                        <CVATTooltip title={`通过名称搜索帧 ${searchFrameByNameShortcut}`}>
                             <SearchOutlined
                                 className='cvat-player-search-frame-name-icon'
                                 onClick={onSearchIconClick}
