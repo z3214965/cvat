@@ -5,8 +5,8 @@
 
 const validationPatterns = {
     validatePasswordLength: {
-        pattern: /(?=.{8,})/,
-        message: '密码必须至少包含8个字符',
+        pattern: /^(?=.{8,256}$)/,
+        message: '密码长度必须介于8到256个字符之间',
     },
 
     passwordContainsNumericCharacters: {
