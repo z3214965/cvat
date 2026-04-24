@@ -1,6 +1,6 @@
 ---
-title: 'Docker Сompose agent guide'
-linkTitle: 'Docker Сompose agent guide'
+title: 'Docker Compose agent guide'
+linkTitle: 'Docker Compose agent guide'
 weight: 2
 aliases:
   - /docs/guides/docker-compose-agent/
