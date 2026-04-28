@@ -5,6 +5,7 @@
 
 import CVATCore from 'cvat-core/src';
 import _cvat from 'cvat-core/src/api';
+import config from 'config';
 
 import ObjectState from 'cvat-core/src/object-state';
 import Webhook from 'cvat-core/src/webhook';
@@ -60,6 +61,7 @@ import { BaseShapesAction } from 'cvat-core/src/annotations-actions/base-shapes-
 import { BaseCollectionAction } from 'cvat-core/src/annotations-actions/base-collection-action';
 import { ActionParameterType, BaseAction } from 'cvat-core/src/annotations-actions/base-action';
 import { Request, RequestOperation } from 'cvat-core/src/request';
+import { ImageProcessing, BaseImageFilter, SerializedImageFilter } from 'cvat-core/src/opencv/image-processing';
 import AboutData from 'cvat-core/src/about';
 import { MinimalShape, TrackerResults, InteractorResults } from 'cvat-core/src/lambda-manager';
 
@@ -70,6 +72,7 @@ cvat.config.origin = window.location.origin;
 // Set the TUS chunk size to 2 MB. A small value works better in case of a slow internet connection.
 // A larger value may cause a server-side timeout errors in the current implementation.
 cvat.config.uploadChunkSize = 2;
+cvat.config.opencvPath = config.OPENCV_PATH;
 (globalThis as any).cvat = cvat;
 
 function getCore(): typeof cvat {
@@ -134,6 +137,7 @@ export {
     StorageLocation,
     MembershipRole,
     AboutData,
+    BaseImageFilter,
 };
 
 export type {
@@ -156,4 +160,6 @@ export type {
     TrackerResults,
     ApiTokenModifiableFields,
     ApiTokensFilter,
+    ImageProcessing,
+    SerializedImageFilter,
 };

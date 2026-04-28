@@ -3,11 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { BaseImageFilter, ImageProcessing } from 'utils/image-processing';
-
-export interface HistogramEqualization extends ImageProcessing {
-    processImage: (src: ImageData, frameNumber: number) => ImageData;
-}
+import { BaseImageFilter } from './image-processing';
 
 export default class HistogramEqualizationImplementation extends BaseImageFilter {
     private cv: any;

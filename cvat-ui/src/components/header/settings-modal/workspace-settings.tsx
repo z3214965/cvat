@@ -287,7 +287,7 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
             </Row>
             <Row className='cvat-workspace-settings-approx-poly-threshold cvat-player-setting'>
                 <Col>
-                    <Text className='cvat-text-color'>多边形拟合默认顶点数量</Text>
+                    <Text className='cvat-text-color'>默认多边形简化阈值</Text>
                 </Col>
                 <Col span={7} offset={1}>
                     <Slider
@@ -300,7 +300,9 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                     />
                 </Col>
                 <Col>
-                    <Text type='secondary'>适用于无服务器交互工具与 OpenCV 裁剪工具</Text>
+                    <Text type='secondary'>
+                        数值越高，保留的多边形细节越多。适用于无服务交互工具、OpenCV 裁剪工具以及多边形简化功能。
+                    </Text>
                 </Col>
             </Row>
         </div>

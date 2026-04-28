@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { numberArrayToPoints, Point } from '../math';
+import { numberArrayToPoints, type Point } from './math-utils';
 
 export interface IntelligentScissorsParams {
     shape: {
@@ -17,7 +17,7 @@ export interface IntelligentScissorsParams {
     };
 }
 
-export interface IntelligentScissors {
+export interface IntelligentScissorsInterface {
     params: IntelligentScissorsParams;
     kind: string;
     run(points: number[]): number[];
@@ -26,7 +26,7 @@ export interface IntelligentScissors {
     switchBlockMode(mode?: boolean): void;
 }
 
-export default class IntelligentScissorsImplementation implements IntelligentScissors {
+export default class IntelligentScissorsImplementation implements IntelligentScissorsInterface {
     public kind = 'opencv_intelligent_scissors';
 
     private cv: any;
