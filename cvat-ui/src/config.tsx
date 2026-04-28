@@ -144,15 +144,12 @@ const PAID_PLACEHOLDER_CONFIG = {
     url: 'https://www.cvat.ai/pricing/cloud',
     features: {
         qualityControl:
-        'The Quality Control feature enables effortless evaluation of annotation quality by creating' +
-        ' a Ground Truth job that works as benchmark. CVAT automatically compares all task-related jobs' +
-        ' to this benchmark, calculating annotation precision to ensure high-quality results.',
+        '质量控制功能可通过创建真值基准作业，轻松完成标注质量评估。系统会自动将该任务下所有作业与这份基准数据进行比对，计算标注精准度，以此保障标注成果质量达标。',
         analyticsReport:
-        'The Analytics Report feature provides comprehensive insights into your resource, including key metrics like' +
-        ' object statistics, working time, and annotation speed. It allows you to filter data by time period,' +
-        ' subresource, or user, offering a clear view of performance trends. Additionally, it presents historical' +
-        ' job data within the resource, along with detailed charts to visualize the information.' +
-        ' This feature is perfect for those seeking in-depth analysis and better resource management.',
+        '分析报告功能可全面展示资源相关数据洞察，涵盖目标统计、工作时长、标注效率等核心指标。' +
+        '支持按时间段、子资源、操作人员筛选数据，清晰呈现工作效能变化趋势。' +
+        '同时，该功能会展示资源内的历史作业数据，并搭配可视化图表直观呈现各项信息。' +
+        '适合需要深度数据分析、优化资源管理的用户使用。',
     },
 };
 

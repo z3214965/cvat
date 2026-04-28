@@ -7,11 +7,33 @@ import { Canvas3d } from 'cvat-canvas3d/src/typescript/canvas3d';
 import { Canvas, RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 import { OrientationVisibility } from 'cvat-canvas3d-wrapper';
 import {
-    Webhook, MLModel, Organization, Job, Task, Project, Label, User,
-    QualityConflict, FramesMetaData, RQStatus, Event, Invitation, SerializedAPISchema,
-    Request, JobValidationLayout, QualitySettings, TaskValidationLayout, ObjectState,
-    ConsensusSettings, AboutData, ShapeType, ObjectType, ApiToken,
-    Membership, AnnotationFormats, CloudStorage,
+    Webhook,
+    MLModel,
+    Organization,
+    Job,
+    Task,
+    Project,
+    Label,
+    User,
+    QualityConflict,
+    FramesMetaData,
+    RQStatus,
+    Event,
+    Invitation,
+    SerializedAPISchema,
+    Request,
+    JobValidationLayout,
+    QualitySettings,
+    TaskValidationLayout,
+    ObjectState,
+    ConsensusSettings,
+    AboutData,
+    ShapeType,
+    ObjectType,
+    ApiToken,
+    Membership,
+    AnnotationFormats,
+    CloudStorage,
 } from 'cvat-core-wrapper';
 
 import { IntelligentScissors } from 'utils/opencv-wrapper/intelligent-scissors';
@@ -175,7 +197,7 @@ export interface ImportState {
         dataset: {
             modalInstance: Project | null;
             uploadState: {
-                id: number | null,
+                id: number | null;
                 format: string;
                 progress: number;
                 status: string;
@@ -184,7 +206,7 @@ export interface ImportState {
         backup: {
             modalVisible: boolean;
             importing: boolean;
-        }
+        };
     };
     tasks: {
         dataset: {
@@ -193,7 +215,7 @@ export interface ImportState {
         backup: {
             modalVisible: boolean;
             importing: boolean;
-        }
+        };
     };
     jobs: {
         dataset: {
@@ -212,7 +234,7 @@ export interface ConsensusState {
         merging: {
             [instanceKey: string]: boolean;
         };
-    }
+    };
 }
 
 export interface FormatsState {
@@ -270,9 +292,9 @@ export interface CloudStoragesState {
         };
     };
     updateWorkspace: {
-        instances: Task[] | Project[] | null,
+        instances: Task[] | Project[] | null;
         onUpdate: (() => void) | null;
-    }
+    };
     selected: number[];
 }
 
@@ -351,18 +373,17 @@ export interface PluginsState {
                     };
                 }) => JSX.Element)[];
 
-                allocationTable: ((
-                    props: {
-                        task: Task;
-                        gtJobId: number;
-                        gtJobMeta: FramesMetaData;
-                        qualitySettings: QualitySettings;
-                        validationLayout: TaskValidationLayout;
-                        onDeleteFrames: (frames: number[]) => void;
-                        onRestoreFrames: (frames: number[]) => void;
-                    }) => JSX.Element)[];
-            }
-            project : {
+                allocationTable: ((props: {
+                    task: Task;
+                    gtJobId: number;
+                    gtJobMeta: FramesMetaData;
+                    qualitySettings: QualitySettings;
+                    validationLayout: TaskValidationLayout;
+                    onDeleteFrames: (frames: number[]) => void;
+                    onRestoreFrames: (frames: number[]) => void;
+                }) => JSX.Element)[];
+            };
+            project: {
                 overviewTab: ((props: {
                     instance: Project;
                     qualitySettings: {
@@ -370,17 +391,15 @@ export interface PluginsState {
                         childrenSettings: QualitySettings[] | null;
                     };
                 }) => JSX.Element)[];
-            }
+            };
         };
         analyticsReportPage: {
-            content: ((
-                props: {
-                    resource: Project | Task | Job;
-                    timePeriod: { startDate: string; endDate: string; } | null;
-                },
-            ) => JSX.Element)[];
+            content: ((props: {
+                resource: Project | Task | Job;
+                timePeriod: { startDate: string; endDate: string } | null;
+            }) => JSX.Element)[];
         };
-    },
+    };
     components: {
         header: {
             userMenu: {
@@ -397,7 +416,7 @@ export interface PluginsState {
             menuActions: {
                 items: PluginComponent[];
             };
-        }
+        };
         modelsPage: {
             topBar: {
                 items: PluginComponent[];
@@ -406,7 +425,7 @@ export interface PluginsState {
                 menu: {
                     items: PluginComponent[];
                 };
-                topBar:{
+                topBar: {
                     menu: {
                         items: PluginComponent[];
                     };
@@ -442,7 +461,7 @@ export interface PluginsState {
             };
         };
         router: PluginComponent[];
-    }
+    };
 }
 
 export interface AboutState {
@@ -718,7 +737,7 @@ export interface NotificationsState {
         };
         bulkOperation: {
             processing: BulkOperationsErrorState | null;
-        }
+        };
     };
     messages: {
         tasks: {
@@ -754,7 +773,7 @@ export interface NotificationsState {
             acceptInvitationDone: null | NotificationState;
             declineInvitationDone: null | NotificationState;
             resendingInvitation: null | NotificationState;
-        }
+        };
     };
 }
 
@@ -854,7 +873,7 @@ export interface AnnotationState {
             validationLayout: JobValidationLayout | null;
             groundTruthJobFramesMeta: FramesMetaData | null;
             groundTruthInstance: Job | null;
-        },
+        };
         attributes: Record<number, any[]>;
         fetching: boolean;
         saving: boolean;
@@ -920,7 +939,7 @@ export interface AnnotationState {
     remove: {
         objectState: any;
         force: boolean;
-    }
+    };
     statistics: {
         collecting: boolean;
         visible: boolean;
@@ -928,7 +947,7 @@ export interface AnnotationState {
     };
     search: {
         visible: boolean;
-    }
+    };
     propagate: {
         visible: boolean;
     };
@@ -1031,7 +1050,7 @@ export interface ShortcutsState {
     visibleShortcutsHelp: boolean;
     keyMap: KeyMap;
     normalizedKeyMap: Record<string, string>;
-    defaultState: Record<string, KeyMapItem>
+    defaultState: Record<string, KeyMapItem>;
 }
 
 export enum ReviewStatus {
@@ -1052,7 +1071,7 @@ export interface ReviewState {
     newIssue: {
         position: number[] | null;
         source: NewIssueSource | null;
-    }
+    };
     issuesHidden: boolean;
     issuesResolvedHidden: boolean;
     conflicts: QualityConflict[];
@@ -1114,7 +1133,7 @@ export interface WebhooksQuery {
 }
 
 export interface WebhooksState {
-    current: Webhook[],
+    current: Webhook[];
     selected: number[];
     totalCount: number;
     fetching: boolean;
@@ -1123,7 +1142,7 @@ export interface WebhooksState {
         deletes: {
             [webhookId: number]: boolean; // deleted (deleting if in dictionary)
         };
-    }
+    };
 }
 
 export interface InvitationsQuery {

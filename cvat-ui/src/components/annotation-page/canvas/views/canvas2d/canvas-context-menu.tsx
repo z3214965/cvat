@@ -57,21 +57,21 @@ function ReviewContextMenu({
     return (
         <Menu onClick={onClick} selectable={false} className='cvat-canvas-context-menu' style={{ top, left }}>
             <Menu.Item className='cvat-context-menu-item' key={ReviewContextMenuKeys.OPEN_ISSUE}>
-                Open an issue ...
+                提出问题 ...
             </Menu.Item>
             {conflict ? (
                 <Menu.Item
                     className='cvat-context-menu-item cvat-quick-issue-from-conflict'
                     key={ReviewContextMenuKeys.QUICK_ISSUE_FROM_CONFLICT}
                 >
-                    {`Quick issue: ${conflict.description}`}
+                    {`紧急问题: ${conflict.description}`}
                 </Menu.Item>
             ) : null}
             <Menu.Item className='cvat-context-menu-item' key={ReviewContextMenuKeys.QUICK_ISSUE_POSITION}>
-                Quick issue: incorrect position
+                紧急问题：位置错误
             </Menu.Item>
             <Menu.Item className='cvat-context-menu-item' key={ReviewContextMenuKeys.QUICK_ISSUE_ATTRIBUTE}>
-                Quick issue: incorrect attribute
+                紧急问题：属性填写错误
             </Menu.Item>
             {latestComments.length ? (
                 <Menu.SubMenu
@@ -96,7 +96,7 @@ function ReviewContextMenu({
                     className='cvat-context-menu-item cvat-quick-copy-object'
                     key={ReviewContextMenuKeys.COPY_OBJECT}
                 >
-                    Copy annotation
+                    复制标注
                 </Menu.Item>
             ) : null}
         </Menu>

@@ -76,13 +76,13 @@ interface DispatchToProps {
 const componentShortcuts = {
     SWITCH_SHORTCUTS: {
         name: 'Show shortcuts',
-        description: 'Open/hide the list of available shortcuts',
+        description: '显示/隐藏快捷键列表',
         sequences: ['f1'],
         scope: ShortcutScope.GENERAL,
     },
     SWITCH_SETTINGS: {
         name: 'Show settings',
-        description: 'Open/hide settings dialog',
+        description: '打开/关闭设置窗口',
         sequences: ['f2'],
         scope: ShortcutScope.GENERAL,
     },
@@ -227,7 +227,7 @@ function HeaderComponent(props: Props): JSX.Element {
     aboutLinks.push([(
         <Col key='discord'>
             <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
-                Find us on Discord
+                前往 Discord 联系我们
             </a>
         </Col>
     ), 20]);
@@ -243,11 +243,11 @@ function HeaderComponent(props: Props): JSX.Element {
                 <div>
                     <p>{`${about.server.description}`}</p>
                     <p>
-                        <Text strong>Server version:</Text>
+                        <Text strong>服务端版本:</Text>
                         <Text type='secondary'>{` ${about.server.version}`}</Text>
                     </p>
                     <p>
-                        <Text strong>UI version:</Text>
+                        <Text strong>前端版本:</Text>
                         <Text type='secondary'>{` ${about.packageVersion.ui}`}</Text>
                     </p>
                     <Row justify='space-around'>

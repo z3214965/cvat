@@ -22,10 +22,7 @@ const defaultState: RequestsState = {
     },
 };
 
-export default function (
-    state = defaultState,
-    action: AnyAction,
-): RequestsState {
+export default function (state = defaultState, action: AnyAction): RequestsState {
     switch (action.type) {
         case RequestsActionsTypes.GET_REQUESTS: {
             const { fetching } = action.payload;

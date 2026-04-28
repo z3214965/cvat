@@ -60,7 +60,7 @@ export class OpenCVWrapper {
 
     private checkInitialization(): void {
         if (!this.initialized) {
-            throw new Error('Need to initialize OpenCV first');
+            throw new Error('需要先初始化OpenCV');
         }
     }
 
@@ -80,7 +80,7 @@ export class OpenCVWrapper {
             response = await fetch(config.OPENCV_PATH);
 
             if (!response.ok) {
-                throw new Error(`Could not fetch data from the server: ${response.status} ${response.statusText}`);
+                throw new Error(`无法从服务器获取数据: ${response.status} ${response.statusText}`);
             }
         }
 
@@ -95,7 +95,7 @@ export class OpenCVWrapper {
             let receivedLength = 0;
 
             if (response.body === null) {
-                throw new Error('Unexpected response body');
+                throw new Error('响应体数据异常');
             }
 
             const reader = response.body.getReader();
@@ -154,7 +154,7 @@ export class OpenCVWrapper {
                 OpenCVConstructor();
             } catch (error: unknown) {
                 delete (window as any).Module;
-                reject(new Error(`Initialization error: ${error instanceof Error ? error.message : 'unknown'}`));
+                reject(new Error(`初始化错误: ${error instanceof Error ? error.message : '未知'}`));
             }
         });
 
@@ -321,9 +321,7 @@ export class OpenCVWrapper {
         };
     }
 
-    public getContoursFromStateSync = (
-        state: { points: Int32Array; shapeType: ShapeType },
-    ): [number, number][][] => {
+    public getContoursFromStateSync = (state: { points: Int32Array; shapeType: ShapeType }): [number, number][][] => {
         if (state.shapeType === ShapeType.MASK) {
             const { length } = state.points;
             const left = state.points[length - 4];
@@ -339,27 +337,26 @@ export class OpenCVWrapper {
             try {
                 const contours = this.contours.findContours(src);
                 if (contours.length) {
-                    return contours.map((contour) => contour.map((val) => (
-                        [val[0] + left, val[1] + top]
-                    )));
+                    return contours.map((contour) => contour.map((val) => [val[0] + left, val[1] + top]));
                 }
-                throw new Error('Empty contour received from state');
+                throw new Error('从状态中获取到空轮廓');
             } finally {
                 src.delete();
             }
         }
 
-        throw new Error(`Not implemented getContour for ${state.shapeType}`);
+        throw new Error(`未为 ${state.shapeType} 实现 getContour 方法`);
     };
 
-    public getContoursFromState = async (
-        state: { points: Int32Array; shapeType: ShapeType },
-    ): Promise<[number, number][][]> => {
+    public getContoursFromState = async (state: {
+        points: Int32Array;
+        shapeType: ShapeType;
+    }): Promise<[number, number][][]> => {
         if (!this.isInitialized) {
             try {
                 await this.initialize(() => {});
             } catch (error: any) {
-                throw new Error('Could not initialize OpenCV');
+                throw new Error('无法初始化OpenCV');
             }
         }
 
@@ -400,7 +397,7 @@ export class OpenCVWrapper {
                     return new TrackerMImplementation(this.cv);
                 },
                 name: 'TrackerMIL',
-                description: 'Lightweight client-side algorithm, useful to track simple objects',
+                description: '轻量级客户端算法，适用于追踪简单对象',
                 kind: 'opencv_tracker_mil',
             },
         };

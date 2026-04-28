@@ -27,7 +27,7 @@ export interface Props {
 const componentShortcuts = {
     SWITCH_SLICE_MODE_STANDARD_CONTROLS: {
         name: 'Slice mode',
-        description: 'Activate or deactivate a mode to slice a polygon/mask',
+        description: '激活或停用一种模式来切割多边形/mask',
         sequences: ['alt+j'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,
     },
@@ -81,7 +81,7 @@ function SliceControl(props: Props): JSX.Element {
                 keyMap={subKeyMap(componentShortcuts, keyMap)}
                 handlers={handlers}
             />
-            <CVATTooltip title={`Slice a mask/polygon shape ${normalizedKeyMap.SWITCH_SLICE_MODE_STANDARD_CONTROLS}`} placement='right'>
+            <CVATTooltip title={`切割 mask/多边形图形 ${normalizedKeyMap.SWITCH_SLICE_MODE_STANDARD_CONTROLS}`} placement='right'>
                 <Icon {...dynamicIconProps} component={SliceIcon} />
             </CVATTooltip>
         </>

@@ -58,20 +58,20 @@ interface Props {
 const componentShortcuts = {
     DELETE_FRAME: {
         name: 'Delete frame',
-        description: 'Delete frame',
+        description: '删除帧',
         sequences: ['alt+del'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     FOCUS_INPUT_FRAME: {
         name: 'Focus input frame',
-        description: 'Focus on the element to change the current frame',
+        description: '聚焦元素以切换当前帧',
         sequences: ['`'],
         displayedSequences: ['~'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     SEARCH_FRAME_BY_NAME: {
         name: 'Search frame by name',
-        description: 'Open search frame by name dialog',
+        description: '按名称打开搜索框对话框',
         sequences: [],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },

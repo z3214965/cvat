@@ -23,7 +23,7 @@ export interface IntelligentScissors {
     run(points: number[]): number[];
     reset(): void;
     setImage(image: ImageData): void;
-    switchBlockMode(mode?:boolean):void;
+    switchBlockMode(mode?: boolean): void;
 }
 
 export default class IntelligentScissorsImplementation implements IntelligentScissors {
@@ -56,7 +56,7 @@ export default class IntelligentScissorsImplementation implements IntelligentSci
         this.reset();
     }
 
-    public switchBlockMode(mode:boolean): void {
+    public switchBlockMode(mode: boolean): void {
         this.scissors.state.blocked = mode;
     }
 
@@ -86,7 +86,7 @@ export default class IntelligentScissorsImplementation implements IntelligentSci
         const { tool } = scissors;
 
         if (!(image instanceof ImageData)) {
-            throw new Error('Image is expected to be an instance of ImageData');
+            throw new Error('预期图片应为 ImageData 实例');
         }
 
         const matImage = cv.matFromImageData(image);
@@ -106,11 +106,11 @@ export default class IntelligentScissorsImplementation implements IntelligentSci
 
     public run(coordinates: number[]): number[] {
         if (!Array.isArray(coordinates)) {
-            throw new Error('Coordinates is expected to be an array');
+            throw new Error('坐标数据必须为数组格式');
         }
 
         if (!coordinates.length) {
-            throw new Error('At least one point is expected');
+            throw new Error('至少需要指定一个点位');
         }
 
         const { cv, scissors } = this;

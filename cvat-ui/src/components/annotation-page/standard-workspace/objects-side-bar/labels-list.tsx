@@ -27,7 +27,7 @@ const makeKey = (index: number) => `SWITCH_LABEL_${index}`;
 for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
     componentShortcuts[makeKey(index)] = {
         name: 'Switch label',
-        description: 'Change label of a selected object or default label of the next created object if no one object is activated',
+        description: '更改选定对象的标签，或者如果没有激活任何对象，则更改下一个创建对象的默认标签',
         sequences: [`ctrl+${index}`],
         nonActive: true,
         scope: ShortcutScope.OBJECTS_SIDEBAR,
@@ -62,8 +62,7 @@ function LabelsListComponent(): JSX.Element {
                     ...updatedComponentShortcuts[key],
                     nonActive: false,
                     name: `Switch label to ${labelName}`,
-                    description: `Changes the label to ${labelName} for the activated
-                        object or for the next drawn object if no objects are activated`,
+                    description: `将激活状态的标签更改为${labelName}，若没有对象被激活，则针对当前对象或下一个绘制的对象`,
                 };
             }
         }
@@ -109,7 +108,7 @@ function LabelsListComponent(): JSX.Element {
                 }
 
                 message.destroy();
-                message.success(`Default label has been changed to "${label.name}"`);
+                message.success(`默认标签已更改为 "${label.name}"`);
             }
         }
     };

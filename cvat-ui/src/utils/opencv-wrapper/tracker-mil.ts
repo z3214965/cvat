@@ -25,7 +25,11 @@ export default class TrackerMILImplementation implements TrackerMIL {
         this.name = 'TrackerMIL';
     }
 
-    private optResize(width: number, height: number, matImage: any): {
+    private optResize(
+        width: number,
+        height: number,
+        matImage: any,
+    ): {
         scale: number;
         width: number;
         height: number;
@@ -36,11 +40,7 @@ export default class TrackerMILImplementation implements TrackerMIL {
             const scaleFactor = Math.min(this.maxSize / height, this.maxSize / width);
             const targetWidth = Math.round(width * scaleFactor);
             const targetHeight = Math.round(height * scaleFactor);
-            this.cv.resize(
-                matImage,
-                resized,
-                new this.cv.Size(targetWidth, targetHeight),
-            );
+            this.cv.resize(matImage, resized, new this.cv.Size(targetWidth, targetHeight));
 
             return {
                 scale: scaleFactor,
@@ -60,7 +60,7 @@ export default class TrackerMILImplementation implements TrackerMIL {
 
     public init(src: ImageData, points: number[]): void {
         if (points.length !== 4) {
-            throw Error(`TrackerMIL must be initialized with rectangle, but got ${points.length % 2} points.`);
+            throw Error(`TrackerMIL 必须使用矩形进行初始化，但实际获取到 ${points.length % 2} 个点。`);
         }
 
         this.imageData = src;
@@ -68,7 +68,10 @@ export default class TrackerMILImplementation implements TrackerMIL {
         try {
             matImage = this.cv.matFromImageData(src);
             const {
-                width: resizedWidth, height: resizedHeight, scale, resized,
+                width: resizedWidth,
+                height: resizedHeight,
+                scale,
+                resized,
             } = this.optResize(src.width, src.height, matImage);
             this.imageScale = scale;
 
@@ -85,7 +88,7 @@ export default class TrackerMILImplementation implements TrackerMIL {
 
             const [boxWidth, boxHeight] = [x2 - x1, y2 - y1];
             if (boxWidth === 0 || boxHeight === 0) {
-                throw Error('TrackerMIL got rectangle out of image bounds');
+                throw Error('TrackerMIL检测到矩形超出图像边界');
             }
 
             const rect = new this.cv.Rect(x1, y1, boxWidth, boxHeight);
@@ -99,7 +102,7 @@ export default class TrackerMILImplementation implements TrackerMIL {
 
     public reinit(points: number[]): void {
         if (!this.imageData) {
-            throw Error('TrackerMIL needs to be initialized before re-initialization');
+            throw Error('在重新初始化之前，需要先初始化TrackerMIL');
         }
 
         this.trackerMIL.delete();
@@ -109,13 +112,13 @@ export default class TrackerMILImplementation implements TrackerMIL {
 
     public update(src: ImageData): TrackingResult {
         if (!this.imageData) {
-            throw Error('TrackerMIL needs to be initialized before updating');
+            throw Error('在更新之前，需要先初始化TrackerMIL');
         }
 
         const prevRes = `${this.imageData.width}x${this.imageData.height}`;
         const curRes = `${src.width}x${src.height}`;
         if (prevRes !== curRes) {
-            throw new Error(`Images have different resolution (previous is ${prevRes}, current one is ${curRes})`);
+            throw new Error(`图片分辨率不一致(上一帧 ${prevRes}, 当前帧 ${curRes})`);
         }
 
         this.imageData = src;

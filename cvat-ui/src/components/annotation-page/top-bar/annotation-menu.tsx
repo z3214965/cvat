@@ -65,7 +65,7 @@ function AnnotationMenuComponent(): JSX.Element {
             message.open({
                 duration: 1,
                 type: 'success',
-                content: 'You tagged the job as completed',
+                content: '你将该作业标记为已完成',
                 className: 'cvat-annotation-job-finished-success',
             });
         }));
@@ -81,7 +81,7 @@ function AnnotationMenuComponent(): JSX.Element {
 
     const changeState = useCallback((state: JobState) => {
         dispatch(updateJobAsync(jobInstance, { state })).then(() => {
-            message.info('Job state updated', 2);
+            message.info('作业状态已更新', 2);
         });
     }, [jobInstance]);
 

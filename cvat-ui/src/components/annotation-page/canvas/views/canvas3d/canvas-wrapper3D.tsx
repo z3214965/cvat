@@ -52,73 +52,73 @@ const cvat = getCore();
 const componentShortcuts = {
     TILT_UP: {
         name: 'Camera Roll Angle Up',
-        description: 'Increases camera roll angle',
+        description: '增大相机横滚角度',
         sequences: ['shift+up'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     TILT_DOWN: {
         name: 'Camera Roll Angle Down',
-        description: 'Decreases camera roll angle',
+        description: '减小相机横滚角度',
         sequences: ['shift+down'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     ROTATE_LEFT: {
         name: 'Camera Pitch Angle Left',
-        description: 'Decreases camera pitch angle',
+        description: '减小相机俯仰角度',
         sequences: ['shift+left'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     ROTATE_RIGHT: {
         name: 'Camera Pitch Angle Right',
-        description: 'Increases camera pitch angle',
+        description: '增大相机俯仰角度',
         sequences: ['shift+right'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     MOVE_UP: {
         name: 'Camera Move Up',
-        description: 'Move the camera up',
+        description: '相机向上移动',
         sequences: ['alt+u'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     MOVE_DOWN: {
-        name: 'Camera Move Down',
+        name: '相机向下移动',
         description: 'Move the camera down',
         sequences: ['alt+o'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     MOVE_LEFT: {
-        name: 'Camera Move Left',
+        name: '相机向左移动',
         description: 'Move the camera left',
         sequences: ['alt+j'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     MOVE_RIGHT: {
-        name: 'Camera Move Right',
+        name: '相机向右移动',
         description: 'Move the camera right',
         sequences: ['alt+l'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     ZOOM_IN: {
-        name: 'Camera Zoom In',
+        name: '放大视图',
         description: 'Performs zoom in',
         sequences: ['alt+i'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     ZOOM_OUT: {
-        name: 'Camera Zoom Out',
+        name: '缩小视图',
         description: 'Performs zoom out',
         sequences: ['alt+k'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE'],
     },
     NEXT_OBJECT: {
         name: 'Next object',
-        description: 'Go to the next object and center it on the canvas',
+        description: '跳转到下一个对象，并在画布居中显示',
         sequences: ['tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     PREVIOUS_OBJECT: {
         name: 'Previous object',
-        description: 'Go to the previous object and center it on the canvas',
+        description: '跳转到上一个对象，并在画布居中显示',
         sequences: ['shift+tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
@@ -516,7 +516,7 @@ export const TopViewComponent = React.memo(
         return (
             <div className='cvat-canvas3d-orthographic-view cvat-canvas3d-topview'>
                 {!canvasIsReady && <Spinner />}
-                <div className='cvat-canvas3d-header'>Top</div>
+                <div className='cvat-canvas3d-header'>顶部</div>
                 <div
                     className='cvat-canvas3d-fullsize'
                     ref={ref}
@@ -543,7 +543,7 @@ export const SideViewComponent = React.memo(
         return (
             <div className='cvat-canvas3d-orthographic-view cvat-canvas3d-sideview'>
                 {!canvasIsReady && <Spinner />}
-                <div className='cvat-canvas3d-header'>Side</div>
+                <div className='cvat-canvas3d-header'>侧面</div>
                 <div
                     className='cvat-canvas3d-fullsize'
                     ref={ref}
@@ -570,7 +570,7 @@ export const FrontViewComponent = React.memo(
         return (
             <div className='cvat-canvas3d-orthographic-view cvat-canvas3d-frontview'>
                 {!canvasIsReady && <Spinner />}
-                <div className='cvat-canvas3d-header'>Front</div>
+                <div className='cvat-canvas3d-header'>前面</div>
                 <div
                     className='cvat-canvas3d-fullsize'
                     ref={ref}

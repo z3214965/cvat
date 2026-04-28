@@ -42,7 +42,7 @@ export default function ConsensusSettingsForm(props: Readonly<Props>): JSX.Eleme
 
     const shapeComparisonTooltip = makeTooltip(
         <>
-            {makeTooltipFragment('Min overlap threshold (IoU)', settings.descriptions.iouThreshold)}
+            {makeTooltipFragment('最小重叠阈值（IoU）', settings.descriptions.iouThreshold)}
         </>,
     );
 
@@ -56,7 +56,7 @@ export default function ConsensusSettingsForm(props: Readonly<Props>): JSX.Eleme
             <Row justify='end' className='cvat-consensus-settings-save-btn'>
                 <Col>
                     <Button onClick={onSave} type='primary'>
-                        Save
+                        保存
                     </Button>
                 </Col>
             </Row>
@@ -74,8 +74,8 @@ export default function ConsensusSettingsForm(props: Readonly<Props>): JSX.Eleme
                 <Col span={6}>
                     <Form.Item
                         name='iouThreshold'
-                        label='Min Overlap (%)'
-                        rules={[{ required: true, message: 'This field is required' }]}
+                        label='最小重叠 (%)'
+                        rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <InputNumber min={0} max={100} precision={0} />
                     </Form.Item>

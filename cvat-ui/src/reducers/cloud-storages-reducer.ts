@@ -158,15 +158,13 @@ export default (
                         error: '',
                     },
                 },
-                current: state.current.map(
-                    (_cloudStorage) => {
-                        if (_cloudStorage.id === cloudStorage.id) {
-                            return cloudStorage;
-                        }
+                current: state.current.map((_cloudStorage) => {
+                    if (_cloudStorage.id === cloudStorage.id) {
+                        return cloudStorage;
+                    }
 
-                        return _cloudStorage;
-                    },
-                ),
+                    return _cloudStorage;
+                }),
             };
         }
         case CloudStorageActionTypes.UPDATE_CLOUD_STORAGE_FAILED: {
@@ -382,7 +380,7 @@ export default (
             if (action.payload.resourceType === SelectedResourceType.CLOUD_STORAGES) {
                 return {
                     ...state,
-                    selected: Array.from(new Set([...state.selected, ...action.payload.resourceIds as number[]])),
+                    selected: Array.from(new Set([...state.selected, ...(action.payload.resourceIds as number[])])),
                 };
             }
             return state;

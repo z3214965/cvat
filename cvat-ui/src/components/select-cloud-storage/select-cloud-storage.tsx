@@ -27,7 +27,7 @@ async function searchCloudStorages(filter: Record<string, string>): Promise<Clou
         return data;
     } catch (error) {
         notification.error({
-            message: 'Could not fetch a list of cloud storages',
+            message: '无法获取云存储列表',
             description: error.toString(),
         });
     }
@@ -96,14 +96,14 @@ function SelectCloudStorage(props: Props): JSX.Element {
         <Form.Item
             label={label || '选择云存储'}
             name={name || 'cloudStorageSelect'}
-            rules={[{ required: true, message: 'Please, specify a cloud storage' }]}
+            rules={[{ required: true, message: '请指定一个云存储服务' }]}
             valuePropName='label'
             colon={false}
         >
             <AutoComplete
                 onBlur={onBlur}
                 value={searchPhrase}
-                placeholder='选择 ...'
+                placeholder='选择...'
                 showSearch
                 onSearch={(phrase: string) => {
                     setSearchPhrase(phrase);

@@ -62,11 +62,11 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
 
     let tag = null;
     if (job.type === JobType.GROUND_TRUTH) {
-        tag = 'Ground truth';
+        tag = '真值';
     } else if (job.replicasCount > 0) {
-        tag = 'Parent';
+        tag = '父任务';
     } else if (job.parentJobId !== null) {
-        tag = 'Replica';
+        tag = '副本任务';
     }
 
     const cardClassName = `cvat-job-page-list-item${selected ? ' cvat-item-selected' : ''}`;
@@ -103,9 +103,9 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                 <Descriptions.Item label='Stage and state'>{`${job.stage} ${job.state}`}</Descriptions.Item>
                 <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
                 {job.assignee ? (
-                    <Descriptions.Item label='Assignee'>{job.assignee.username}</Descriptions.Item>
+                    <Descriptions.Item label='负责人'>{job.assignee.username}</Descriptions.Item>
                 ) : (
-                    <Descriptions.Item label='Assignee'> </Descriptions.Item>
+                    <Descriptions.Item label='负责人'> </Descriptions.Item>
                 )}
             </Descriptions>
             <div

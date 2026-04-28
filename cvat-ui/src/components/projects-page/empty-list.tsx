@@ -24,17 +24,17 @@ export default function EmptyListComponent(props: Props): JSX.Element {
                 <>
                     <Row justify='center' align='middle'>
                         <Col>
-                            <Text strong>No projects created yet...</Text>
+                            <Text strong>尚未创建任何项目...</Text>
                         </Col>
                     </Row>
                     <Row justify='center' align='middle'>
                         <Col>
-                            <Text type='secondary'>To get started with your annotation project</Text>
+                            <Text type='secondary'>开始您的标注项目</Text>
                         </Col>
                     </Row>
                     <Row justify='center' align='middle'>
                         <Col>
-                            <Link to='/projects/create'>create a new one</Link>
+                            <Link to='/projects/create'>创建一个新的</Link>
                         </Col>
                     </Row>
                 </>

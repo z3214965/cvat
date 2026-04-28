@@ -45,13 +45,13 @@ function MultipleShortcutsDisplay(props: Props): JSX.Element {
                 title: '检测到冲突的快捷键',
                 content: (
                     <p>
-                        Added sequence conflicts with the following shortcuts:
+                        添加的序列与以下快捷键冲突:
                         <br />
                         {Object.values(conflictingShortcuts).map((conflictingShortcut: KeyMapItem, idx) => (
                             <span key={`${idx} ${conflictingShortcut.name}`}>
                                 <strong>{conflictingShortcut.name}</strong>
                                 {' '}
-                                in the scope
+                                在范围内
                                 {' '}
                                 <strong>
                                     {ShortcutScope[conflictingShortcut.scope].split('_').join(' ')}

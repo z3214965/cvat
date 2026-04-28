@@ -5,8 +5,14 @@
 import { range, cloneDeep } from 'lodash';
 
 import {
-    Job, Task, ActionParameterType, BaseCollectionAction,
-    ObjectType, ObjectState, Source, ShapeType,
+    Job,
+    Task,
+    ActionParameterType,
+    BaseCollectionAction,
+    ObjectType,
+    ObjectState,
+    Source,
+    ShapeType,
 } from 'cvat-core-wrapper';
 
 type Collection = Parameters<BaseCollectionAction['run']>[0]['collection'];
@@ -46,14 +52,12 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
         // nothing to destroy
     }
 
-    public async run(
-        {
-            collection,
-            frameData: { number },
-            onProgress,
-            cancelled,
-        }: Parameters<BaseCollectionAction['run']>[0],
-    ): ReturnType<BaseCollectionAction['run']> {
+    public async run({
+        collection,
+        frameData: { number },
+        onProgress,
+        cancelled,
+    }: Parameters<BaseCollectionAction['run']>[0]): ReturnType<BaseCollectionAction['run']> {
         const noChanges = {
             created: { shapes: [], tags: [], tracks: [] },
             deleted: { shapes: [], tags: [], tracks: [] },
@@ -64,13 +68,14 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
         }
 
         if (number >= this.#targetFrame) {
-            throw new Error('OpenCV tracking backward is not supported');
+            throw new Error('OpenCV不支持向后追踪');
         }
 
-        const frameNumbers = this.#instance instanceof Job ?
-            await this.#instance.frames.frameNumbers() : range(0, this.#instance.size);
+        const frameNumbers =
+            this.#instance instanceof Job ? await this.#instance.frames.frameNumbers() : range(0, this.#instance.size);
         const targetFrameNumbers = frameNumbers.filter(
-            (frameNumber: number) => frameNumber >= Math.min(number, this.#targetFrame) &&
+            (frameNumber: number) =>
+                frameNumber >= Math.min(number, this.#targetFrame) &&
                 frameNumber <= Math.max(number, this.#targetFrame) &&
                 frameNumber !== number,
         );
@@ -83,71 +88,76 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
         const tracks = [...collection.tracks]; // shallow copy value as it may have added new values
         const { shapes } = collection;
 
-        const [
-            initialShapes,
-            targetObjects,
-            targetObjectStates,
-        ] = ([] as (Shape | Track)[]).concat(shapes, tracks).reduce((acc, object) => {
-            if (!Number.isInteger(object.clientID)) {
-                return acc;
-            }
+        const [initialShapes, targetObjects, targetObjectStates] = ([] as (Shape | Track)[])
+            .concat(shapes, tracks)
+            .reduce(
+                (acc, object) => {
+                    if (!Number.isInteger(object.clientID)) {
+                        return acc;
+                    }
 
-            const objectState = objectStates.find((_objectState) => _objectState.clientID === object.clientID);
-            if (!objectState) {
-                return acc;
-            }
+                    const objectState = objectStates.find((_objectState) => _objectState.clientID === object.clientID);
+                    if (!objectState) {
+                        return acc;
+                    }
 
-            acc[0].push([...objectState.points as number[]]);
+                    acc[0].push([...(objectState.points as number[])]);
 
-            if (this.#convertRectangleShapesToTracks && objectState.objectType === ObjectType.SHAPE) {
-                const castedObject = object as Required<Shape>;
-                const convertedTrack = {
-                    source: Source.AUTO,
-                    attributes: [],
-                    elements: [],
-                    frame: castedObject.frame,
-                    group: castedObject.group,
-                    label_id: castedObject.label_id,
-                    shapes: [{
-                        frame: castedObject.frame,
-                        attributes: [],
-                        occluded: castedObject.occluded,
-                        outside: false,
-                        points: [...castedObject.points],
-                        rotation: castedObject.rotation,
-                        z_order: castedObject.z_order,
-                        type: castedObject.type,
-                    }],
-                };
+                    if (this.#convertRectangleShapesToTracks && objectState.objectType === ObjectType.SHAPE) {
+                        const castedObject = object as Required<Shape>;
+                        const convertedTrack = {
+                            source: Source.AUTO,
+                            attributes: [],
+                            elements: [],
+                            frame: castedObject.frame,
+                            group: castedObject.group,
+                            label_id: castedObject.label_id,
+                            shapes: [
+                                {
+                                    frame: castedObject.frame,
+                                    attributes: [],
+                                    occluded: castedObject.occluded,
+                                    outside: false,
+                                    points: [...castedObject.points],
+                                    rotation: castedObject.rotation,
+                                    z_order: castedObject.z_order,
+                                    type: castedObject.type,
+                                },
+                            ],
+                        };
 
-                tracks.push(convertedTrack);
-                acc[1].push(convertedTrack);
-                acc[2].push(new Proxy(objectState, {
-                    get(_objectState, p, receiver) {
-                        if (p === 'objectType') {
-                            return ObjectType.TRACK;
-                        }
+                        tracks.push(convertedTrack);
+                        acc[1].push(convertedTrack);
+                        acc[2].push(
+                            new Proxy(objectState, {
+                                get(_objectState, p, receiver) {
+                                    if (p === 'objectType') {
+                                        return ObjectType.TRACK;
+                                    }
 
-                        return Reflect.get(_objectState, p, receiver);
-                    },
-                }));
-            } else {
-                acc[1].push(object);
-                acc[2].push(objectState);
-            }
+                                    return Reflect.get(_objectState, p, receiver);
+                                },
+                            }),
+                        );
+                    } else {
+                        acc[1].push(object);
+                        acc[2].push(objectState);
+                    }
 
-            return acc;
-        }, [[], [], []] as [number[][], (Shape | Track)[], ObjectState[]]);
+                    return acc;
+                },
+                [[], [], []] as [number[][], (Shape | Track)[], ObjectState[]],
+            );
 
         if (!this.#openCVWrapper.isInitialized) {
-            onProgress('OpenCV library initialization', 0);
+            onProgress('OpenCV库初始化', 0);
             await this.#openCVWrapper.initialize(() => {});
             if (cancelled()) {
                 return noChanges;
             }
         }
 
-        onProgress('Action is running', 0);
+        onProgress('操作正在进行', 0);
         if (cancelled()) {
             return noChanges;
         }
@@ -235,8 +245,9 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
             created: { shapes: trackedShapes, tags: [], tracks },
             deleted: {
                 // remove shapes converted to tracks
-                shapes: this.#convertRectangleShapesToTracks ?
-                    shapes.filter((shape) => shape.type === ShapeType.RECTANGLE) : [],
+                shapes: this.#convertRectangleShapesToTracks
+                    ? shapes.filter((shape) => shape.type === ShapeType.RECTANGLE)
+                    : [],
                 // remove existing tracks as they were modified and will be rewritten
                 tracks: collection.tracks,
                 tags: [],
@@ -250,8 +261,9 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
         const { collection, frameData } = input;
 
         return {
-            shapes: collection.shapes
-                .filter((shape) => shape.frame === frameData.number && ShapeType.RECTANGLE === shape.type),
+            shapes: collection.shapes.filter(
+                (shape) => shape.frame === frameData.number && ShapeType.RECTANGLE === shape.type,
+            ),
             tags: [],
             tracks: collection.tracks.filter((track) => {
                 if (track.shapes[0].type !== ShapeType.RECTANGLE) {
@@ -259,9 +271,9 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
                 }
 
                 // must be any shapes before current frame
-                const shapesBefore = track.shapes.filter(
-                    (shape) => shape.frame <= frameData.number).sort((a, b) => a.frame - b.frame,
-                );
+                const shapesBefore = track.shapes
+                    .filter((shape) => shape.frame <= frameData.number)
+                    .sort((a, b) => a.frame - b.frame);
 
                 if (shapesBefore.length === 0) {
                     return false;

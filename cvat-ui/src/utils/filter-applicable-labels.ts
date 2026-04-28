@@ -5,9 +5,7 @@
 import { Label, ObjectState, LabelType } from 'cvat-core-wrapper';
 
 export function filterApplicableForType(type: LabelType, labels: Label[]): Label[] {
-    const applicableLabels = labels.filter((label: Label) => (
-        [type, 'any'].includes(label.type)
-    ));
+    const applicableLabels = labels.filter((label: Label) => [type, 'any'].includes(label.type));
 
     return applicableLabels;
 }

@@ -107,7 +107,7 @@ export default function ProjectPageComponent(): JSX.Element {
                 }).catch((error: Error) => {
                     if (mounted.current) {
                         notification.error({
-                            message: 'Could not receive the requested project from the server',
+                            message: '无法从服务器接收请求的项目',
                             description: error.toString(),
                         });
                     }
@@ -118,8 +118,8 @@ export default function ProjectPageComponent(): JSX.Element {
                 });
         } else {
             notification.error({
-                message: 'Could not receive the requested project from the server',
-                description: `Requested project id "${id}" is not valid`,
+                message: '无法从服务器接收请求的项目',
+                description: `请求项目ID "${id}" 是无效的`,
             });
             setFetchingProject(false);
         }
@@ -243,7 +243,7 @@ export default function ProjectPageComponent(): JSX.Element {
             )}
         </BulkWrapper>
     ) : (
-        <Empty description='No tasks found' />
+        <Empty description='未找到任务' />
     );
 
     return (
@@ -346,7 +346,7 @@ export default function ProjectPageComponent(): JSX.Element {
                                         className='cvat-create-task-button'
                                         onClick={() => history.push(`/tasks/create?projectId=${id}`)}
                                     >
-                                        Create a new task
+                                        创建一个新任务
                                     </Button>
                                     <Button
                                         type='primary'
@@ -354,7 +354,7 @@ export default function ProjectPageComponent(): JSX.Element {
                                         className='cvat-create-multi-tasks-button'
                                         onClick={() => history.push(`/tasks/create?projectId=${id}&many=true`)}
                                     >
-                                        Create multi tasks
+                                        创建多个任务
                                     </Button>
                                 </CvatDropdownMenuPaper>
                             )}

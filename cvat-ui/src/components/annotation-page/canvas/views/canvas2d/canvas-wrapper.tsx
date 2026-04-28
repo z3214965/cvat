@@ -277,25 +277,25 @@ function mapStateToProps(state: CombinedState): StateToProps {
 const componentShortcuts = {
     SWITCH_AUTOMATIC_BORDERING: {
         name: 'Toggle snap to contour',
-        description: 'Toggle automatic snap to contour for polygons and polylines during drawing/editing',
+        description: '开启/关闭绘制与编辑时，多边形及多段线自动吸附轮廓功能',
         sequences: [],
         scope: ShortcutScope.STANDARD_WORKSPACE,
     },
     SWITCH_SNAP_TO_POINT: {
         name: 'Toggle snap to point',
-        description: 'Toggle automatic snapping to nearby points',
+        description: '开启/关闭自动吸附邻近点功能',
         sequences: [],
         scope: ShortcutScope.STANDARD_WORKSPACE,
     },
     NEXT_OBJECT: {
         name: 'Next object',
-        description: 'Go to the next object and center it on the canvas',
+        description: '跳转至下一个对象，并在画布中居中显示',
         sequences: ['tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     PREVIOUS_OBJECT: {
         name: 'Previous object',
-        description: 'Go to the previous object and center it on the canvas',
+        description: '跳转至上一个对象，并在画布中居中显示',
         sequences: ['shift+tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
@@ -673,7 +673,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
     private onCanvasWarningOccurrence = (event: any): void => {
         const { message, domain } = event.detail;
         notification.warning({
-            message: domain ? `${domain}` : 'Warning',
+            message: domain ? `${domain}` : '警告',
             description: message,
             duration: 5,
             className: 'cvat-notification-warning-canvas',
@@ -1035,7 +1035,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                                 } catch (error: any) {
                                     notification.error({
                                         description: error.toString(),
-                                        message: 'Image processing error occurred',
+                                        message: '图片处理发生错误',
                                         className: 'cvat-notification-notice-image-processing-error',
                                     });
                                 }
@@ -1245,7 +1245,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                         defaultValue={0}
                         onChange={(value: number): void => onSwitchZLayer(value as number)}
                     />
-                    <CVATTooltip title={`Add new layer ${maxZLayer + 1} and switch to it`}>
+                    <CVATTooltip title={`添加新图层 ${maxZLayer + 1} 并切换至该层`}>
                         <PlusCircleOutlined onClick={onAddZLayer} />
                     </CVATTooltip>
                 </div>

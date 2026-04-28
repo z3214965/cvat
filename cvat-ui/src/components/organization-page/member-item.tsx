@@ -69,7 +69,7 @@ function MemberItem(props: Readonly<Props>): JSX.Element {
             async (m) => {
                 await dispatch(updateOrganizationMemberAsync(organizationInstance, m, newRole));
             },
-            (m, idx, total) => `Updating role for ${m.user.username} (${idx + 1}/${total})`,
+            (m, idx, total) => `正在更新 ${m.user.username} 的角色（${idx + 1}/${total}）`,
             fetchMembers,
         ));
     };
@@ -92,11 +92,11 @@ function MemberItem(props: Readonly<Props>): JSX.Element {
             <Col span={8} className='cvat-organization-member-item-dates'>
                 {invitation ? (
                     <Text type='secondary'>
-                        {`Invited ${dayjs(invitation.createdDate).fromNow()}`}
-                        {invitation.owner && ` by ${invitation.owner.username}`}
+                        {`受邀 ${dayjs(invitation.createdDate).fromNow()}`}
+                        {invitation.owner && ` 通过 ${invitation.owner.username}`}
                     </Text>
                 ) : null}
-                {joinedDate ? <Text type='secondary'>{`Joined ${dayjs(joinedDate).fromNow()}`}</Text> : <Text type='secondary'>Invitation pending</Text>}
+                {joinedDate ? <Text type='secondary'>{`加入 ${dayjs(joinedDate).fromNow()}`}</Text> : <Text type='secondary'>邀请待处理</Text>}
             </Col>
             <Col span={3} className='cvat-organization-member-item-role'>
                 <MemberRoleSelector

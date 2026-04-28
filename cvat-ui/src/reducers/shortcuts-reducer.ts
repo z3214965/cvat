@@ -74,11 +74,14 @@ export default (state = defaultState, action: ShortcutsActions | BoundariesActio
             return {
                 ...state,
                 keyMap: { ...state.keyMap, ...shortcuts },
-                normalizedKeyMap: keys.reduce((acc: Record<string, string>, key: string) => {
-                    const normalized = formatShortcuts(shortcuts[key]);
-                    acc[key] = normalized;
-                    return acc;
-                }, { ...state.normalizedKeyMap }),
+                normalizedKeyMap: keys.reduce(
+                    (acc: Record<string, string>, key: string) => {
+                        const normalized = formatShortcuts(shortcuts[key]);
+                        acc[key] = normalized;
+                        return acc;
+                    },
+                    { ...state.normalizedKeyMap },
+                ),
             };
         }
 

@@ -10,10 +10,7 @@ const defaultState: NavigationState = {
     prevLocation: null,
 };
 
-export default function (
-    state: NavigationState = defaultState,
-    action:NavigationActions,
-): NavigationState {
+export default function (state: NavigationState = defaultState, action: NavigationActions): NavigationState {
     switch (action.type) {
         case NavigationActionTypes.CHANGE_LOCATION: {
             const { BLACKLISTED_GO_BACK_PATHS } = config;

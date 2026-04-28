@@ -202,7 +202,7 @@ function RemoteBrowser(props: Props): JSX.Element {
             } catch (error: any) {
                 if (isRelevant()) {
                     notification.error({
-                        message: 'Storage content fetching failed',
+                        message: '存储内容获取失败',
                         description: error.toString(),
                     });
                 }
@@ -295,7 +295,7 @@ function RemoteBrowser(props: Props): JSX.Element {
 
     const columns = [
         {
-            title: 'Name',
+            title: '名称',
             dataIndex: 'name',
             key: 'name',
             render: (name: string, node: Node) => {
@@ -329,11 +329,11 @@ function RemoteBrowser(props: Props): JSX.Element {
             <>
                 <Empty />
                 <Paragraph className='cvat-remote-browser-empty'>
-                    Please, be sure you had
+                    请确保你已
                     <Text strong>
-                        <a href={SHARE_MOUNT_GUIDE_URL}> mounted </a>
+                        <a href={SHARE_MOUNT_GUIDE_URL}> 挂载 </a>
                     </Text>
-                    share before you built CVAT and the shared storage contains files
+                    在构建之前进行共享，且共享存储中包含文件
                 </Paragraph>
             </>
         );
@@ -363,7 +363,7 @@ function RemoteBrowser(props: Props): JSX.Element {
                     <Input
                         addonBefore={<SearchOutlined />}
                         suffix={resource !== 'share' && !!resource.prefix && (
-                            <CVATTooltip title={`Default prefix "${resource.prefix}" is used`}>
+                            <CVATTooltip title={`使用了默认前缀 "${resource.prefix}" `}>
                                 <InfoCircleOutlined style={{ opacity: 0.5 }} />
                             </CVATTooltip>
                         )}
@@ -402,7 +402,7 @@ function RemoteBrowser(props: Props): JSX.Element {
                             message={(
                                 <>
                                     <Text>
-                                        There is no intersection between the specified prefix and the default one
+                                        指定的前缀与默认前缀之间没有交集
                                     </Text>
                                     <Text strong>{` "${defaultPrefix}". `}</Text>
                                 </>

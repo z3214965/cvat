@@ -41,10 +41,7 @@ const defaultState: OrganizationState = {
     },
 };
 
-export default function (
-    state: OrganizationState = defaultState,
-    action: AnyAction,
-): OrganizationState {
+export default function (state: OrganizationState = defaultState, action: AnyAction): OrganizationState {
     switch (action.type) {
         case OrganizationActionsTypes.ACTIVATE_ORGANIZATION: {
             return {

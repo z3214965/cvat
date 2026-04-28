@@ -8,7 +8,7 @@ interface NameTemplateTooltipProps {
     example: string;
 }
 
-function NameTemplateTooltip({ example }: NameTemplateTooltipProps) {
+function NameTemplateTooltip({ example }: NameTemplateTooltipProps): JSX.Element {
     return (
         <>
             You can use the template:
@@ -16,21 +16,21 @@ function NameTemplateTooltip({ example }: NameTemplateTooltipProps) {
                 <li>
                     <code>{'{{id}}'}</code>
                     <br />
-                    - resource id
+                    - 资源id
                 </li>
                 <li>
                     <code>{'{{name}}'}</code>
                     <br />
-                    - resource name
+                    - 资源名称
                 </li>
                 <li>
                     <code>{'{{index}}'}</code>
                     <br />
-                    - index in selection
+                    - 选择中的索引
                 </li>
             </ul>
             <div>
-                Example:
+                例子:
                 <br />
                 <i>{example}</i>
             </div>

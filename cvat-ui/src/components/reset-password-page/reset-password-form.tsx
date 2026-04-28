@@ -45,12 +45,12 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
             </Row>
             <Row>
                 <Col>
-                    <Title level={2}> Forgot password? </Title>
+                    <Title level={2}> 忘记密码？ </Title>
                 </Col>
             </Row>
             <Row>
                 <Col>
-                    <Title level={2}> Let&apos;s create a new one </Title>
+                    <Title level={2}> 新建一个 </Title>
                 </Col>
             </Row>
             <Form
@@ -69,11 +69,11 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
                     rules={[
                         {
                             type: 'email',
-                            message: 'The input is not valid E-mail!',
+                            message: '输入的不是有效的E-mail!',
                         },
                         {
                             required: true,
-                            message: 'Please specify an email address',
+                            message: '请指定一个email地址',
                         },
                     ]}
                 >
@@ -85,7 +85,7 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
                 </Form.Item>
                 <Row>
                     <Col className='cvat-password-reset-tip'>
-                        <Text> We will send link to your email </Text>
+                        <Text> 我们会将链接发送到您的email </Text>
                     </Col>
                 </Row>
                 <Form.Item>
@@ -94,7 +94,7 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
                         loading={fetching}
                         htmlType='submit'
                     >
-                        Send
+                        发送
                     </Button>
                 </Form.Item>
             </Form>

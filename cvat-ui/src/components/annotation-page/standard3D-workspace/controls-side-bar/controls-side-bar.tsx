@@ -50,44 +50,43 @@ interface Props {
 const componentShortcuts: Record<string, KeyMapItem> = {
     PASTE_SHAPE: {
         name: 'Paste shape',
-        description: 'Paste a shape from internal CVAT clipboard',
+        description: '从内部剪贴板粘贴标注形状',
         sequences: ['ctrl+v'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_DRAW_MODE_STANDARD_3D_CONTROLS: {
         name: 'Draw mode',
-        description:
-            'Repeat the latest procedure of drawing with the same parameters',
+        description: '使用相同参数重复上一次绘制操作',
         sequences: ['n'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_REDRAW_MODE_STANDARD_3D_CONTROLS: {
         name: 'Redraw shape',
-        description: 'Remove selected shape and redraw it from scratch',
+        description: '删除选中形状并重新从头绘制',
         sequences: ['shift+n'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS: {
         name: 'Group mode',
-        description: 'Activate or deactivate mode to grouping shapes',
+        description: '开启/关闭标注形状编组模式',
         sequences: ['g'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     RESET_GROUP_STANDARD_3D_CONTROLS: {
         name: 'Reset group',
-        description: 'Reset group for selected shapes (in group mode)',
+        description: '重置选中形状的编组（编组模式下）',
         sequences: ['shift+g'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS: {
         name: 'Merge mode',
-        description: 'Activate or deactivate mode to merging shapes',
+        description: '开启/关闭形状合并模式',
         sequences: ['m'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_SPLIT_MODE_STANDARD_3D_CONTROLS: {
         name: 'Split mode',
-        description: 'Activate or deactivate mode to splitting shapes',
+        description: '开启/关闭形状拆分模式',
         sequences: ['alt+m'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },

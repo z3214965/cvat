@@ -24,7 +24,7 @@ const validationRules = {
     firstName: [
         {
             required: true,
-            message: 'Please specify a first name',
+            message: '请指定一个名字',
             pattern: patterns.validateName.pattern,
         },
     ],
@@ -32,7 +32,7 @@ const validationRules = {
     lastName: [
         {
             required: true,
-            message: 'Please specify a last name',
+            message: '请指定姓氏',
             pattern: patterns.validateName.pattern,
         },
     ],
@@ -40,18 +40,18 @@ const validationRules = {
     email: [
         {
             type: 'email' as RuleType,
-            message: 'The input is not valid E-mail!',
+            message: '输入的E-mail无效！',
         },
         {
             required: true,
-            message: 'Please specify an email address',
+            message: '请指定一个email地址',
         },
     ],
 
     userName: [
         {
             required: true,
-            message: 'Please specify a username',
+            message: '请指定用户名',
         },
         {
             validator: validateUsername,

@@ -183,7 +183,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
             onReset();
 
             notification.info({
-                message: 'The cloud storage has been attached',
+                message: '云存储已连接',
                 className: 'cvat-notification-create-cloud-storage-success',
             });
         }
@@ -195,7 +195,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
     useEffect(() => {
         if (updatedCloudStorageId && shouldShowUpdationNotification && shouldShowUpdationNotification.current) {
             notification.info({
-                message: 'The cloud storage has been updated',
+                message: '云存储已更新',
                 className: 'cvat-notification-update-cloud-storage-success',
             });
         }
@@ -207,9 +207,8 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
     useEffect(() => {
         if (cloudStorageId && cloudStorage.credentialsType !== CredentialsType.ANONYMOUS_ACCESS) {
             notification.info({
-                message: `For security reasons, your credentials are hidden and represented by fake values
-                    that will not be taken into account when updating the cloud storage.
-                    If you want to replace the original credentials, simply enter new ones.`,
+                message: `出于安全考虑，您的凭据已被隐藏，并由假值代替，在更新云存储时这些假值不会被考虑在内。
+                            如果您想替换原始凭据，只需输入新的凭据即可。`,
                 className: 'cvat-notification-update-info-cloud-storage',
                 duration: 15,
             });
@@ -339,9 +338,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
             return (
                 <>
                     <Form.Item
-                        label='Access key ID'
+                        label='访问密钥ID'
                         name='key'
-                        rules={[{ required: true, message: 'Please, specify your access key ID' }]}
+                        rules={[{ required: true, message: '请指定您的访问密钥ID' }]}
                         {...internalCommonProps}
                     >
                         <Input.Password
@@ -353,9 +352,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                         />
                     </Form.Item>
                     <Form.Item
-                        label='Secret access key'
+                        label='秘密访问密钥'
                         name='secret_key'
-                        rules={[{ required: true, message: 'Please, specify your secret access key' }]}
+                        rules={[{ required: true, message: '请指定您的秘密访问密钥' }]}
                         {...internalCommonProps}
                     >
                         <Input.Password
@@ -377,9 +376,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
             return (
                 <>
                     <Form.Item
-                        label='Account name'
+                        label='账户名称'
                         name='account_name'
-                        rules={[{ required: true, message: 'Please, specify your account name' }]}
+                        rules={[{ required: true, message: '请指定您的账户名' }]}
                         {...internalCommonProps}
                     >
                         <Input.Password
@@ -392,9 +391,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                         />
                     </Form.Item>
                     <Form.Item
-                        label='SAS token'
+                        label='SAS令牌'
                         name='SAS_token'
-                        rules={[{ required: true, message: 'Please, specify your SAS token' }]}
+                        rules={[{ required: true, message: '请指定您的SAS令牌' }]}
                         {...internalCommonProps}
                     >
                         <Input.Password
@@ -412,9 +411,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         if (providerType === ProviderType.AZURE_CONTAINER && credentialsType === CredentialsType.ANONYMOUS_ACCESS) {
             return (
                 <Form.Item
-                    label='Account name'
+                    label='账户名称'
                     name='account_name'
-                    rules={[{ required: true, message: 'Please, specify your account name' }]}
+                    rules={[{ required: true, message: '请指定您的账户名' }]}
                     {...internalCommonProps}
                 >
                     <Input.Password
@@ -430,9 +429,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         if (providerType === ProviderType.AZURE_CONTAINER && credentialsType === CredentialsType.CONNECTION_STRING) {
             return (
                 <Form.Item
-                    label='Connection string'
+                    label='连接字符串'
                     name='connection_string'
-                    rules={[{ required: true, message: 'Please, specify your connection string' }]}
+                    rules={[{ required: true, message: '请指定您的连接字符串' }]}
                     {...internalCommonProps}
                 >
                     <Input.Password
@@ -450,11 +449,8 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                     name='key_file'
                     {...internalCommonProps}
                     label={(
-                        <CVATTooltip title='You can upload a key file.
-                                If you leave this field blank, the environment variable
-                                GOOGLE_APPLICATION_CREDENTIALS will be used.'
-                        >
-                            Key file
+                        <CVATTooltip title='您可以上传一个密钥文件。如果此字段留空，则将使用环境变量GOOGLE_APPLICATION_CREDENTIALS。'>
+                            密钥文件
                             <Button
                                 href='https://cloud.google.com/docs/authentication/getting-started#setting_the_environment_variable'
                                 target='_blank'
@@ -483,7 +479,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                             onRemove={() => setUploadedKeyFile(null)}
                         >
                             <Space>
-                                Attach a file
+                                附加文件
                                 <UploadOutlined />
                             </Space>
                         </Dragger>
@@ -503,30 +499,30 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         return (
             <>
                 <Form.Item
-                    label='Bucket name'
+                    label='存储桶名称'
                     name='resource'
-                    rules={[{ required: true, message: 'Please, specify a bucket name' }]}
+                    rules={[{ required: true, message: '请指定一个存储桶名称' }]}
                     {...internalCommonProps}
                 >
                     <Input disabled={!!cloudStorage} maxLength={63} />
                 </Form.Item>
                 <Form.Item
-                    label='Authentication type'
+                    label='认证类型'
                     name='credentials_type'
-                    rules={[{ required: true, message: 'Please, specify credentials type' }]}
+                    rules={[{ required: true, message: '请指定凭证类型' }]}
                     {...internalCommonProps}
                 >
                     <Select onSelect={(value: CredentialsType) => onChangeCredentialsType(value)}>
                         <Select.Option value={CredentialsType.KEY_SECRET_KEY_PAIR}>
-                            Key id and secret access key pair
+                            密钥ID和秘密访问密钥对
                         </Select.Option>
-                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>Anonymous access</Select.Option>
+                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>匿名访问</Select.Option>
                     </Select>
                 </Form.Item>
                 {credentialsBlock()}
                 <Form.Item
-                    label='Endpoint URL'
-                    help='You can specify an endpoint for your storage when using an S3-compatible cloud storage API'
+                    label='端点URL'
+                    help='在使用与S3兼容的云存储API时，您可以为存储指定一个端点'
                     name='endpoint_url'
                     {...internalCommonProps}
                 >
@@ -549,25 +545,25 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         return (
             <>
                 <Form.Item
-                    label='Container name'
+                    label='容器名称'
                     name='resource'
-                    rules={[{ required: true, message: 'Please, specify a container name' }]}
+                    rules={[{ required: true, message: '请指定一个容器名称' }]}
                     {...internalCommonProps}
                 >
                     <Input disabled={!!cloudStorage} maxLength={63} />
                 </Form.Item>
                 <Form.Item
-                    label='Authentication type'
+                    label='认证类型'
                     name='credentials_type'
-                    rules={[{ required: true, message: 'Please, specify credentials type' }]}
+                    rules={[{ required: true, message: '请指定凭证类型' }]}
                     {...internalCommonProps}
                 >
                     <Select onSelect={(value: CredentialsType) => onChangeCredentialsType(value)}>
                         <Select.Option value={CredentialsType.ACCOUNT_NAME_TOKEN_PAIR}>
-                            Account name and SAS token
+                            账户名称和 SAS 令牌
                         </Select.Option>
-                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>Anonymous access</Select.Option>
-                        <Select.Option value={CredentialsType.CONNECTION_STRING}>Connection string</Select.Option>
+                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>匿名访问</Select.Option>
+                        <Select.Option value={CredentialsType.CONNECTION_STRING}>连接字符串</Select.Option>
                     </Select>
                 </Form.Item>
 
@@ -584,30 +580,30 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         return (
             <>
                 <Form.Item
-                    label='Bucket name'
+                    label='存储桶名称'
                     name='resource'
-                    rules={[{ required: true, message: 'Please, specify a bucket name' }]}
+                    rules={[{ required: true, message: '请指定一个存储桶名称' }]}
                     {...internalCommonProps}
                 >
                     {/* maxlength https://cloud.google.com/storage/docs/naming-buckets#requirements */}
                     <Input disabled={!!cloudStorage} maxLength={222} />
                 </Form.Item>
                 <Form.Item
-                    label='Authentication type'
+                    label='认证类型'
                     name='credentials_type'
-                    rules={[{ required: true, message: 'Please, specify credentials type' }]}
+                    rules={[{ required: true, message: '请指定凭证类型' }]}
                     {...internalCommonProps}
                 >
                     <Select onSelect={(value: CredentialsType) => onChangeCredentialsType(value)}>
                         <Select.Option value={CredentialsType.KEY_FILE_PATH}>
-                            Key file
+                            密钥文件
                         </Select.Option>
-                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>Anonymous access</Select.Option>
+                        <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>匿名访问</Select.Option>
                     </Select>
                 </Form.Item>
                 {credentialsBlock()}
                 <Form.Item
-                    label='Project ID'
+                    label='项目ID'
                     name='project_id'
                     {...internalCommonProps}
                 >
@@ -631,20 +627,20 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
         >
             <Form.Item
                 {...commonProps}
-                label='Display name'
+                label='显示名称'
                 name='display_name'
-                rules={[{ required: true, message: 'Please, specify a display name' }]}
+                rules={[{ required: true, message: '请指定一个显示名称' }]}
             >
                 <Input maxLength={63} />
             </Form.Item>
-            <Form.Item {...commonProps} label='Description' name='description'>
-                <TextArea autoSize={{ minRows: 1, maxRows: 5 }} placeholder='Any useful description' />
+            <Form.Item {...commonProps} label='描述' name='description'>
+                <TextArea autoSize={{ minRows: 1, maxRows: 5 }} placeholder='任何有用的描述' />
             </Form.Item>
             <Form.Item
                 {...commonProps}
-                label='Provider'
+                label='提供者'
                 name='provider_type'
-                rules={[{ required: true, message: 'Please, specify a cloud storage provider' }]}
+                rules={[{ required: true, message: '请指定一个云存储提供商' }]}
             >
                 <Select
                     disabled={!!cloudStorage}
@@ -679,8 +675,8 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
             {providerType === ProviderType.GOOGLE_CLOUD_STORAGE && googleCloudStorageConfiguration()}
             <Form.Item
                 label={(
-                    <CVATTooltip title='Prefix is used to filter bucket content'>
-                        Prefix
+                    <CVATTooltip title='前缀用于过滤存储桶内容'>
+                        前缀
                         <QuestionCircleOutlined className='cvat-cloud-storage-help-button' />
                     </CVATTooltip>
                 )}
@@ -697,7 +693,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                         className='cvat-cloud-storage-reset-button'
                         disabled={loading}
                     >
-                        Cancel
+                        取消
                     </Button>
                 </Col>
                 <Col offset={1}>
@@ -708,7 +704,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                         loading={loading}
                         disabled={loading}
                     >
-                        {cloudStorage ? 'Update' : 'Submit'}
+                        {cloudStorage ? '更新' : '提交'}
                     </Button>
                 </Col>
             </Row>

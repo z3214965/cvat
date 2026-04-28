@@ -8,12 +8,12 @@ import { KeyMap, KeyMapItem } from './mousetrap-react';
 import { ShortcutScope } from './enums';
 
 interface FlatKeyMapItem {
-    sequences: string[],
-    items: Record<string, KeyMapItem>
+    sequences: string[];
+    items: Record<string, KeyMapItem>;
 }
 
 interface FlatKeyMap {
-    [scope:string]: FlatKeyMapItem
+    [scope: string]: FlatKeyMapItem;
 }
 
 export function conflict(sequence: string, existingSequence: string): boolean {
@@ -71,20 +71,10 @@ function updatedFlatKeyMap(scope: string, flatKeyMap: FlatKeyMap): FlatKeyMapIte
             );
         } else if (scope.includes('WORKSPACE') && !scope.includes('CONTROLS')) {
             const sidebar = `${scope}_CONTROLS`;
-            scopes.push(
-                scope,
-                sidebar,
-                ShortcutScope.OBJECTS_SIDEBAR,
-                ShortcutScope.ANNOTATION_PAGE,
-            );
+            scopes.push(scope, sidebar, ShortcutScope.OBJECTS_SIDEBAR, ShortcutScope.ANNOTATION_PAGE);
         } else if (scope.includes('WORKSPACE') && scope.includes('CONTROLS')) {
             const workspace = scope.split(' controls')[0];
-            scopes.push(
-                scope,
-                workspace,
-                ShortcutScope.ANNOTATION_PAGE,
-                ShortcutScope.OBJECTS_SIDEBAR,
-            );
+            scopes.push(scope, workspace, ShortcutScope.ANNOTATION_PAGE, ShortcutScope.OBJECTS_SIDEBAR);
         } else {
             scopes.push(scope);
         }
@@ -120,9 +110,10 @@ export function conflictDetector(
         for (const sequence of sequences.filter((seq) => !currentSequences.includes(seq))) {
             for (const existingSequence of flatKeyMapUpdated.sequences) {
                 if (conflict(sequence, existingSequence)) {
-                    const conflictingActions = Object.keys(flatKeyMapUpdated.items)
-                        .filter((a) => flatKeyMapUpdated.items[a].sequences.includes(existingSequence));
-                    console.warn(`The shortcut: ${sequence} of ${label} have conflicts with these shortcuts: ${conflictingActions.join(', ')}`);
+                    const conflictingActions = Object.keys(flatKeyMapUpdated.items).filter((a) =>
+                        flatKeyMapUpdated.items[a].sequences.includes(existingSequence),
+                    );
+                    console.warn(`快捷键：${label}的${sequence}与以下快捷键存在冲突：${conflictingActions.join(', ')}`);
                     conflictingActions.forEach((conflictingAction) => {
                         conflictingItems[conflictingAction] = flatKeyMapUpdated.items[conflictingAction];
                     });
@@ -140,7 +131,8 @@ export function conflictDetector(
 export function unsetExistingShortcuts(
     conflictingShortcuts: Record<string, KeyMapItem>,
     updatedSequence: string[],
-    shortcut: Record<string, KeyMapItem>): void {
+    shortcut: Record<string, KeyMapItem>,
+): void {
     const updatedShortcuts: Record<string, KeyMapItem> = {};
     for (const key of Object.keys(conflictingShortcuts)) {
         const conflictingItem: KeyMapItem = conflictingShortcuts[key];
@@ -152,9 +144,9 @@ export function unsetExistingShortcuts(
                 sequences: [...currentSequence.filter((s) => !conflict(s, newSequence)), newSequence],
             };
         } else {
-            const commonSequences = updatedSequence.map((s) => (
-                conflictingItem.sequences.filter((seq) => conflict(seq, s))
-            ));
+            const commonSequences = updatedSequence.map((s) =>
+                conflictingItem.sequences.filter((seq) => conflict(seq, s)),
+            );
             const newSequences = conflictingItem.sequences.filter((s) => !commonSequences.flat().includes(s));
             updatedShortcuts[key] = { ...conflictingItem, sequences: newSequences };
         }
@@ -162,22 +154,14 @@ export function unsetExistingShortcuts(
     registerComponentShortcuts(updatedShortcuts);
 }
 
-function removeConflictingSequences(
-    sequences: string[],
-    conflictingSequences: string[],
-): string[] {
+function removeConflictingSequences(sequences: string[], conflictingSequences: string[]): string[] {
     const isConflict = (sequence: string) => (conflictingSequence: string) => conflict(sequence, conflictingSequence);
-    const nonConflictingSequence = (sequence: string): boolean => (
-        !conflictingSequences.some(isConflict(sequence))
-    );
+    const nonConflictingSequence = (sequence: string): boolean => !conflictingSequences.some(isConflict(sequence));
 
     return sequences.filter(nonConflictingSequence);
 }
 
-export function resolveConflicts(
-    updateKeyMap: KeyMap,
-    shortcutsKeyMap: KeyMap,
-): KeyMap {
+export function resolveConflicts(updateKeyMap: KeyMap, shortcutsKeyMap: KeyMap): KeyMap {
     const resultMap = cloneDeep(updateKeyMap);
 
     Object.entries(resultMap).forEach(([key, currValue]) => {

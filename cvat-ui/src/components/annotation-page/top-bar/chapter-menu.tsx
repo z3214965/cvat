@@ -73,7 +73,7 @@ function ChapterMenu(props: Readonly<Props>): JSX.Element {
             className='cvat-player-chapter-menu'
         >
 
-            <CvatTooltip title='Select chapter'>
+            <CvatTooltip title='选择章节'>
                 <Icon
                     className='cvat-player-chapters-menu-button'
                     component={ChapterMenuIcon}

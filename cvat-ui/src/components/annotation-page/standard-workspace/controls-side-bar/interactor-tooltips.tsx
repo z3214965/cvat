@@ -26,20 +26,20 @@ function InteractorTooltips(props: Props): JSX.Element {
                 <>
                     <Paragraph>{desc}</Paragraph>
                     <Paragraph>
-                        <Text>You can prevent server requests holding</Text>
+                        <Text>您可以防止服务器请求被占用</Text>
                         <Text strong>{' Ctrl '}</Text>
                         <Text>key</Text>
                     </Paragraph>
                     <Paragraph>
-                        <Text>Positive points can be added by left-clicking the image. </Text>
+                        <Text>在图片上左键单击，可添加正样本点。</Text>
                         {withNegativePoints ? (
-                            <Text>Negative points can be added by right-clicking the image. </Text>
+                            <Text>在图片上右键单击，可添加负样本点。</Text>
                         ) : null}
                     </Paragraph>
                     {gif ? <Image className='cvat-interactor-tip-image' alt='Example gif' src={gif} /> : null}
                 </>
             ) : (
-                <Text>Select an interactor to see help message</Text>
+                <Text>选择交互工具以查看帮助提示</Text>
             )}
         </div>
     );

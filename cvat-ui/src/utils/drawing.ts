@@ -17,10 +17,7 @@ export function finishDrawAvailable(activeControl: ActiveControl): boolean {
 }
 
 export function finishDraw(canvas: Canvas | Canvas3d, activeControl: ActiveControl): void {
-    if (
-        [ActiveControl.AI_TOOLS, ActiveControl.OPENCV_TOOLS].includes(activeControl) &&
-        canvas instanceof Canvas
-    ) {
+    if ([ActiveControl.AI_TOOLS, ActiveControl.OPENCV_TOOLS].includes(activeControl) && canvas instanceof Canvas) {
         canvas.interact({ enabled: false });
         return;
     }

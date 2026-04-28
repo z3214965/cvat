@@ -11,7 +11,9 @@ import { ImportState } from '.';
 
 const defaultProgress = 0.0;
 
-export function defineActititiesField(instance: ProjectOrTaskOrJob | RequestInstanceType): 'projects' | 'tasks' | 'jobs' {
+export function defineActititiesField(
+    instance: ProjectOrTaskOrJob | RequestInstanceType,
+): 'projects' | 'tasks' | 'jobs' {
     return `${getInstanceType(instance)}s`;
 }
 
@@ -63,8 +65,7 @@ export default (state: ImportState = defaultState, action: ImportActions): Impor
                         modalInstance: instance,
                     },
                 },
-                instanceType: activitiesField
-                    .slice(0, activitiesField.length - 1) as 'project' | 'task' | 'job',
+                instanceType: activitiesField.slice(0, activitiesField.length - 1) as 'project' | 'task' | 'job',
             };
         }
         case ImportActionTypes.CLOSE_IMPORT_DATASET_MODAL: {
@@ -97,7 +98,7 @@ export default (state: ImportState = defaultState, action: ImportActions): Impor
             if (activitiesField === 'projects') {
                 updatedActivity = {
                     ...updatedActivity,
-                    status: 'The file is being uploaded to the server',
+                    status: '文件正在上传至服务器',
                     progress: defaultProgress,
                 };
                 return {

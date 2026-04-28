@@ -54,18 +54,10 @@ export default function (
         case ModelsActionTypes.GET_MODELS_SUCCESS: {
             return {
                 ...state,
-                interactors: action.payload.models.filter((model: MLModel) => (
-                    model.kind === ModelKind.INTERACTOR
-                )),
-                detectors: action.payload.models.filter((model: MLModel) => (
-                    model.kind === ModelKind.DETECTOR
-                )),
-                trackers: action.payload.models.filter((model: MLModel) => (
-                    model.kind === ModelKind.TRACKER
-                )),
-                reid: action.payload.models.filter((model: MLModel) => (
-                    model.kind === ModelKind.REID
-                )),
+                interactors: action.payload.models.filter((model: MLModel) => model.kind === ModelKind.INTERACTOR),
+                detectors: action.payload.models.filter((model: MLModel) => model.kind === ModelKind.DETECTOR),
+                trackers: action.payload.models.filter((model: MLModel) => model.kind === ModelKind.TRACKER),
+                reid: action.payload.models.filter((model: MLModel) => model.kind === ModelKind.REID),
                 totalCount: action.payload.count,
                 initialized: true,
                 fetching: false,
@@ -203,7 +195,7 @@ export default function (
             if (action.payload.resourceType === SelectedResourceType.MODELS) {
                 return {
                     ...state,
-                    selected: Array.from(new Set([...state.selected, ...action.payload.resourceIds as number[]])),
+                    selected: Array.from(new Set([...state.selected, ...(action.payload.resourceIds as number[])])),
                 };
             }
             return state;

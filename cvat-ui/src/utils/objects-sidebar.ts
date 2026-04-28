@@ -18,10 +18,7 @@ function scrollSidebarItemIntoViewById(id: string): void {
     }
 }
 
-export function scrollAndExpandState(
-    state: ObjectState,
-    expandObject: (objectState: ObjectState) => void,
-): void {
+export function scrollAndExpandState(state: ObjectState, expandObject: (objectState: ObjectState) => void): void {
     const sidebarItemId = getSidebarItemId(state);
     scrollSidebarItemIntoViewById(sidebarItemId);
     expandObject(state);

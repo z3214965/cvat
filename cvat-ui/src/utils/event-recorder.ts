@@ -12,7 +12,7 @@ const core = getCore();
 const { CONTROLS_LOGS_INTERVAL, ACTIVITY_EVENTS_INTERVAL_MS } = config;
 
 interface Logger {
-    log(...parameters: Parameters<typeof core.logger.log>): ReturnType<typeof core.logger['log']>;
+    log(...parameters: Parameters<typeof core.logger.log>): ReturnType<(typeof core.logger)['log']>;
 }
 
 const defaultLogger: Logger = core.logger;
@@ -51,11 +51,15 @@ class EventRecorder {
     public recordMouseEvent(event: MouseEvent): void {
         const elementToRecord = this.isEventToBeRecorded(event.target as HTMLElement | null, ['ant-btn']);
         if (elementToRecord) {
-            (this.#logger || defaultLogger).log(EventScope.clickElement, {
-                obj_val: elementToRecord.innerText,
-                obj_name: this.filterClassName(elementToRecord.className),
-                location: window.location.pathname,
-            }, false);
+            (this.#logger || defaultLogger).log(
+                EventScope.clickElement,
+                {
+                    obj_val: elementToRecord.innerText,
+                    obj_name: this.filterClassName(elementToRecord.className),
+                    location: window.location.pathname,
+                },
+                false,
+            );
         }
     }
 
@@ -67,7 +71,8 @@ class EventRecorder {
                 this.initSave();
             };
 
-            core.logger.save()
+            core.logger
+                .save()
                 .then(scheduleSave)
                 .catch((error: unknown) => {
                     if (error instanceof ServerError && error.code === 401) {
@@ -92,7 +97,10 @@ class EventRecorder {
 
     private filterClassName(cls: string): string {
         if (typeof cls === 'string') {
-            return cls.split(/\s+/).filter((_cls: string) => _cls.startsWith('cvat')).join(' ');
+            return cls
+                .split(/\s+/)
+                .filter((_cls: string) => _cls.startsWith('cvat'))
+                .join(' ');
         }
 
         return '';

@@ -24,13 +24,13 @@ export class BaseImageFilter implements ImageProcessing {
     public currentProcessedImage: number | null = null;
 
     processImage(_r: ImageData, _frameNumber: number): ImageData {
-        throw new Error('Process image is not implemented');
+        throw new Error('未实现流程图片');
     }
 
     configure(_options: object): void {}
 
     toJSON(): SerializedImageFilter {
-        throw new Error('Method is not implemented');
+        throw new Error('方法未实现');
     }
 }
 

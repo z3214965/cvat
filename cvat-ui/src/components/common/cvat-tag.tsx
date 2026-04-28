@@ -21,13 +21,13 @@ function CVATTag(props: TagProps): JSX.Element | null {
 
     switch (type) {
         case TagType.GROUND_TRUTH:
-            return <Tag className='cvat-tag-ground-truth' color='#ED9C00'>Ground truth</Tag>;
+            return <Tag className='cvat-tag-ground-truth' color='#ED9C00'>真值</Tag>;
         case TagType.CONSENSUS:
-            return <Tag className='cvat-tag-consensus' color='#1890FF'>Consensus</Tag>;
+            return <Tag className='cvat-tag-consensus' color='#1890FF'>一致性</Tag>;
         case TagType.PARENT:
-            return <Tag className='cvat-tag-parent' color='#1890FF'>Parent</Tag>;
+            return <Tag className='cvat-tag-parent' color='#1890FF'>上一级</Tag>;
         case TagType.REPLICA:
-            return <Tag className='cvat-tag-replica' color='#13c2c2'>Replica</Tag>;
+            return <Tag className='cvat-tag-replica' color='#13c2c2'>复制</Tag>;
         default:
             return null;
     }

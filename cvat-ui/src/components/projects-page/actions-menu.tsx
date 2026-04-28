@@ -170,8 +170,8 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
                 `删除所选中的 ${projectsToDelete.length} 项目` :
                 `项目 #${projectInstance.id} 将要被删除`,
             content: isBulkMode ?
-                '所有选定项目的相关数据（包括图像和标注）都将丢失。是否继续？' :
-                '所有相关数据（图像、标注）都将丢失。是否继续？',
+                '所有选定项目的相关数据（包括图片和标注）都将丢失。是否继续？' :
+                '所有相关数据（图片、标注）都将丢失。是否继续？',
             className: 'cvat-modal-confirm-remove-project',
             onOk: () => {
                 dispatch(makeBulkOperationAsync<Project>(

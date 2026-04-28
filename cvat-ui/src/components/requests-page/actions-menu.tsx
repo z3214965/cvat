@@ -76,7 +76,7 @@ function RequestActionsComponent(props: Readonly<Props>): JSX.Element | null {
             async (request) => {
                 await dispatch(cancelRequestAsync(request));
             },
-            (request, idx, total) => `Canceling request #${request.id} (${idx + 1}/${total})`,
+            (request, idx, total) => `取消请求 #${request.id} (${idx + 1}/${total})`,
         ));
     }, [requestsToAct]);
 
@@ -94,14 +94,14 @@ function RequestActionsComponent(props: Readonly<Props>): JSX.Element | null {
     if (downloadableCount > 0) {
         menuItems.push({
             key: 'download',
-            label: withCount('Download', downloadableCount),
+            label: withCount('下载', downloadableCount),
             onClick: onDownload,
         });
     }
     if (queuedCount > 0) {
         menuItems.push({
             key: 'cancel',
-            label: withCount('Cancel', queuedCount),
+            label: withCount('取消', queuedCount),
             onClick: onCancel,
         });
     }

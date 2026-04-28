@@ -43,19 +43,19 @@ function QualityManagementTab(props: Readonly<Props>): JSX.Element {
         <div className='cvat-quality-control-management-tab' ref={tabRef}>
             <Row className='cvat-quality-control-management-tab-summary'>
                 <Card
-                    title='Total validation frames'
+                    title='验证集总帧数'
                     className='cvat-allocation-summary-total'
                     value={totalCount}
                     size={{ cardSize: 8 }}
                 />
                 <Card
-                    title='Excluded validation frames'
+                    title='已排除验证集帧数'
                     className='cvat-allocation-summary-excluded'
                     value={excludedCount}
                     size={{ cardSize: 8 }}
                 />
                 <Card
-                    title='Active validation frames'
+                    title='有效验证集帧数'
                     className='cvat-allocation-summary-active'
                     value={activeCount}
                     size={{ cardSize: 8 }}
@@ -64,7 +64,7 @@ function QualityManagementTab(props: Readonly<Props>): JSX.Element {
             { validationModeTextRepresentation ? (
                 <Row className='cvat-quality-control-validation-mode-hint'>
                     <Text type='secondary'>
-                        The task&apos;s validation mode is configured as&nbsp;
+                        该任务的验证模式已设置为：
                     </Text>
                     <Text type='secondary' strong>{validationModeTextRepresentation}</Text>
                 </Row>

@@ -3,10 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { BulkActionsState } from 'reducers';
-import {
-    BulkActionsTypes,
-    BulkActions,
-} from '../actions/bulk-actions';
+import { BulkActionsTypes, BulkActions } from '../actions/bulk-actions';
 
 const initialState: BulkActionsState = {
     fetching: false,
@@ -14,10 +11,7 @@ const initialState: BulkActionsState = {
     cancelled: false,
 };
 
-export default function bulkActionsReducer(
-    state = initialState,
-    action: BulkActions,
-): BulkActionsState {
+export default function bulkActionsReducer(state = initialState, action: BulkActions): BulkActionsState {
     switch (action.type) {
         case BulkActionsTypes.START_BULK_ACTION:
             return {

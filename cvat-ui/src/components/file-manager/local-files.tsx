@@ -17,8 +17,7 @@ interface Props {
 
 export default function LocalFiles(props: Props): JSX.Element {
     const { files, onUpload, many } = props;
-    const hintText = many ? 'You can upload one or more videos' :
-        'You can upload an archive with images, a video, or multiple images';
+    const hintText = many ? '你可以上传一个或多个视频' : '你可以上传包含图片、视频或多个图片的压缩文件';
 
     return (
         <>
@@ -36,13 +35,13 @@ export default function LocalFiles(props: Props): JSX.Element {
                 <p className='ant-upload-drag-icon'>
                     <InboxOutlined />
                 </p>
-                <p className='ant-upload-text'>Click or drag files to this area</p>
+                <p className='ant-upload-text'>将文件点击或拖动到此区域</p>
                 <p className='ant-upload-hint'>{ hintText }</p>
             </Upload.Dragger>
             {files.length >= 5 && (
                 <>
                     <br />
-                    <Text className='cvat-text-color'>{`${files.length} files selected`}</Text>
+                    <Text className='cvat-text-color'>{`已选择 ${files.length} 个文件`}</Text>
                 </>
             )}
         </>

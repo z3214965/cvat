@@ -366,7 +366,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 return e?.fileList[0];
             }}
             name='dragger'
-            rules={[{ required: true, message: 'The file is required' }]}
+            rules={[{ required: true, message: '该文件是必需的' }]}
         >
             <Upload.Dragger
                 listType='text'
@@ -380,8 +380,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                     } else if (isAnnotation() &&
                                 !selectedLoader.format.toLowerCase().split(', ').includes(_file.name.split('.')[_file.name.split('.').length - 1])) {
                         message.error(
-                            `For ${selectedLoader.name} format only files with ` +
-                                `${selectedLoader.format.toLowerCase()} extension can be used`,
+                            `仅支持 ${selectedLoader.name} 格式 ` +
+                                `仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`,
                         );
                     } else {
                         dispatch(reducerActions.setFile(_file));
@@ -411,8 +411,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 const allowedExtensions = selectedLoader.format.toLowerCase().split(', ');
                 if (!allowedExtensions.includes(extension)) {
                     return Promise.reject(new Error(
-                        `For ${selectedLoader.name} format only files with ` +
-                        `${selectedLoader.format.toLowerCase()} extension can be used`,
+                        `仅支持 ${selectedLoader.name} 格式 ` +
+                        `仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`,
                     ));
                 }
             }
@@ -432,7 +432,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             name='fileName'
             hasFeedback
             dependencies={['selectedFormat']}
-            rules={[{ validator: validateFileName }, { required: true, message: 'Please, specify a name' }]}
+            rules={[{ validator: validateFileName }, { required: true, message: '请指定一个名称' }]}
             required
         >
             <Input
@@ -468,10 +468,10 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                     uploadParams.convMaskToPoly,
                 ));
             const resToPrint = uploadParams.resource.charAt(0).toUpperCase() + uploadParams.resource.slice(1);
-            const description = `${resToPrint} import was started for ${instanceType}.` +
-            ' You can check progress [here](/requests).';
+            const description = `已开始为 ${instanceType} 导入 ${resToPrint}。` +
+            ' 你可以查看进度[here](/requests).';
             Notification.info({
-                message: `${resToPrint} import started`,
+                message: `${resToPrint} 导入已开始`,
                 description: (
                     <CVATMarkdown history={history}>{description}</CVATMarkdown>
                 ),
@@ -482,8 +482,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
 
     const confirmUpload = (): void => {
         confirm({
-            title: 'Current annotation will be lost',
-            content: `You are going to upload new annotations to ${instanceType}. Continue?`,
+            title: '当前标注将会丢失',
+            content: `您即将向 ${instanceType} 上传新的标注。是否继续？`,
             className: `cvat-modal-content-load-${instanceType.split(' ')[0]}-annotation`,
             onOk: () => {
                 onUpload();
@@ -492,7 +492,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 type: 'primary',
                 danger: true,
             },
-            okText: 'Update',
+            okText: '更新',
         });
     };
 
@@ -554,7 +554,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 <Form.Item
                     name='selectedFormat'
                     label='导入格式'
-                    rules={[{ required: true, message: 'Format must be selected' }]}
+                    rules={[{ required: true, message: '必须选择格式' }]}
                     hasFeedback
                 >
                     <Select

@@ -54,43 +54,43 @@ interface LabelAttrMap {
 const componentShortcuts = {
     NEXT_ATTRIBUTE: {
         name: 'Next attribute',
-        description: 'Go to the next attribute',
+        description: '转到下一个属性',
         sequences: ['down'],
         scope: ShortcutScope.ATTRIBUTE_ANNOTATION_WORKSPACE,
     },
     PREVIOUS_ATTRIBUTE: {
         name: 'Previous attribute',
-        description: 'Go to the previous attribute',
+        description: '转到上一个属性',
         sequences: ['up'],
         scope: ShortcutScope.ATTRIBUTE_ANNOTATION_WORKSPACE,
     },
     SWITCH_LOCK: {
         name: 'Lock/unlock an object',
-        description: 'Change locked state for an active object',
+        description: '修改选中对象的锁定状态',
         sequences: ['l'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_OCCLUDED: {
         name: 'Switch occluded',
-        description: 'Change occluded property for an active object',
+        description: '修改当前对象的遮挡属性',
         sequences: ['q', '/'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_PINNED: {
         name: 'Switch pinned property',
-        description: 'Change pinned property for an active object',
+        description: '修改当前对象的固定属性',
         sequences: ['p'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     NEXT_KEY_FRAME: {
         name: 'Next keyframe',
-        description: 'Go to the next keyframe of an active track',
+        description: '跳转到当前追踪轨迹的下一关键帧',
         sequences: ['r'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     PREV_KEY_FRAME: {
         name: 'Previous keyframe',
-        description: 'Go to the previous keyframe of an active track',
+        description: '跳转到当前追踪轨迹的上一关键帧',
         sequences: ['e'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
@@ -371,7 +371,7 @@ function AttributeAnnotationSidebar(props: StateToProps & DispatchToProps): JSX.
                     </>
                 ) : (
                     <div className='attribute-annotations-sidebar-not-found-wrapper'>
-                        <Text strong>No attributes found</Text>
+                        <Text strong>没有发现属性</Text>
                     </div>
                 )}
 
@@ -387,11 +387,11 @@ function AttributeAnnotationSidebar(props: StateToProps & DispatchToProps): JSX.
                 className='cvat-objects-sidebar-sider'
                 onClick={collapse}
             >
-                {sidebarCollapsed ? <MenuFoldOutlined title='Show' /> : <MenuUnfoldOutlined title='Hide' />}
+                {sidebarCollapsed ? <MenuFoldOutlined title='显示' /> : <MenuUnfoldOutlined title='隐藏' />}
             </span>
             <div className='cvat-sidebar-collapse-button-spacer' />
             <div className='attribute-annotations-sidebar-not-found-wrapper'>
-                <Text strong>No objects found</Text>
+                <Text strong>没有发现对象</Text>
             </div>
         </Layout.Sider>
     );

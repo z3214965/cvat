@@ -80,7 +80,7 @@ function ReviewSummaryComponent({ jobInstance }: Readonly<{ jobInstance: Job }>)
 
         return (
             <>
-                <p>Loading.. </p>
+                <p>加载中... </p>
                 <LoadingOutlined />
             </>
         );
@@ -91,13 +91,13 @@ function ReviewSummaryComponent({ jobInstance }: Readonly<{ jobInstance: Job }>)
             <tbody>
                 <tr>
                     <td>
-                        <Text strong>Unsolved issues</Text>
+                        <Text strong>未解决的问题</Text>
                     </td>
                     <td>{summary.issues_unsolved}</td>
                 </tr>
                 <tr>
                     <td>
-                        <Text strong>Resolved issues</Text>
+                        <Text strong>已解决的问题</Text>
                     </td>
                     <td>{summary.issues_resolved}</td>
                 </tr>
@@ -127,7 +127,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
     }
     const frameCountPercent = ((job.frameCount / (task.size || 1)) * 100).toFixed(0);
     const frameCountPercentRepresentation = frameCountPercent === '0' ? '<1' : frameCountPercent;
-    const jobName = `Job #${job.id}`;
+    const jobName = `作业 #${job.id}`;
 
     let tag = null;
     if (job.type === JobType.GROUND_TRUTH) {
@@ -177,13 +177,13 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                     </Row>
                     <Row className='cvat-job-item-dates-info'>
                         <Col>
-                            <Text>Created: </Text>
+                            <Text>创建: </Text>
                             <Text type='secondary'>{`${formatDate(created)}`}</Text>
                         </Col>
                     </Row>
                     <Row>
                         <Col>
-                            <Text>Updated: </Text>
+                            <Text>更新: </Text>
                             <Text type='secondary'>{`${formatDate(updated)}`}</Text>
                         </Col>
                     </Row>
@@ -194,7 +194,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                             <Row>
                                 <Col className='cvat-job-item-select'>
                                     <Row>
-                                        <Text>Assignee:</Text>
+                                        <Text>负责人:</Text>
                                     </Row>
                                     <UserSelector
                                         className='cvat-job-assignee-selector'
@@ -208,7 +208,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Col className='cvat-job-item-select'>
                                     <Row justify='space-between' align='middle'>
                                         <Col>
-                                            <Text>Stage:</Text>
+                                            <Text>阶段:</Text>
                                         </Col>
                                     </Row>
                                     <JobStageSelector
@@ -221,7 +221,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Col className='cvat-job-item-select'>
                                     <Row justify='space-between' align='middle'>
                                         <Col>
-                                            <Text>State:</Text>
+                                            <Text>状态:</Text>
                                         </Col>
                                     </Row>
                                     <JobStateSelector
@@ -241,7 +241,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                             <Row>
                                 <Col>
                                     <Icon component={DurationIcon} />
-                                    <Text>Duration: </Text>
+                                    <Text>持续时间: </Text>
                                     <Text type='secondary'>
                                         {`${dayjs
                                             .duration(now.diff(created))
@@ -252,7 +252,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                             <Row>
                                 <Col>
                                     <BorderOutlined />
-                                    <Text>Frame count: </Text>
+                                    <Text>帧数: </Text>
                                     <Text type='secondary' className='cvat-job-item-frames'>
                                         {`${job.frameCount} (${frameCountPercentRepresentation}%)`}
                                     </Text>
@@ -262,7 +262,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Row>
                                     <Col>
                                         <Icon component={FramesIcon} />
-                                        <Text>Frame range: </Text>
+                                        <Text>帧范围: </Text>
                                         <Text type='secondary' className='cvat-job-item-frame-range'>
                                             {`${job.startFrame}-${job.stopFrame}`}
                                         </Text>

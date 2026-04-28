@@ -12,12 +12,12 @@ export interface HistogramEqualization extends ImageProcessing {
 export default class HistogramEqualizationImplementation extends BaseImageFilter {
     private cv: any;
 
-    constructor(cv:any) {
+    constructor(cv: any) {
         super();
         this.cv = cv;
     }
 
-    public processImage(src: ImageData, frameNumber: number) : ImageData {
+    public processImage(src: ImageData, frameNumber: number): ImageData {
         const { cv } = this;
         let matImage = null;
         const RGBImage = new cv.Mat();
@@ -39,9 +39,12 @@ export default class HistogramEqualizationImplementation extends BaseImageFilter
             cv.equalizeHist(Y, equalizedY);
             Y.delete();
             channels = new cv.MatVector();
-            channels.push_back(equalizedY); equalizedY.delete();
-            channels.push_back(U); U.delete();
-            channels.push_back(V); V.delete();
+            channels.push_back(equalizedY);
+            equalizedY.delete();
+            channels.push_back(U);
+            U.delete();
+            channels.push_back(V);
+            V.delete();
             cv.merge(channels, YUVDist);
             cv.cvtColor(YUVDist, RGBDist, cv.COLOR_YUV2RGB, 0);
             cv.cvtColor(RGBDist, RGBADist, cv.COLOR_RGB2RGBA, 0);

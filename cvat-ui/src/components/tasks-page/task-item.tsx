@@ -57,7 +57,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
     const [importingState, setImportingState] = useState<ImportingState | null>(
         taskInstance.size > 0 ? null : {
             state: null,
-            message: 'Request current progress',
+            message: '请求当前进度',
             progress: 0,
         },
     );
@@ -150,21 +150,21 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                         <div>
                             {numOfCompleted > 0 && (
                                 <Text strong className='cvat-task-completed-progress'>
-                                    {`\u2022 ${numOfCompleted} done `}
+                                    {`\u2022 ${numOfCompleted} 项完成 `}
                                 </Text>
                             )}
                             {numOfValidation > 0 && (
                                 <Text strong className='cvat-task-validation-progress'>
-                                    {`\u2022 ${numOfValidation} on review `}
+                                    {`\u2022 ${numOfValidation} 项待审核 `}
                                 </Text>
                             )}
                             {numOfAnnotation > 0 && (
                                 <Text strong className='cvat-task-annotation-progress'>
-                                    {`\u2022 ${numOfAnnotation} annotating `}
+                                    {`\u2022 ${numOfAnnotation} 项标注中 `}
                                 </Text>
                             )}
                             <Text strong type='secondary'>
-                                {`\u2022 ${numOfJobs} total`}
+                                {`\u2022 共 ${numOfJobs} 项作业`}
                             </Text>
                         </div>
                         <Progress
@@ -212,11 +212,11 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                 <br />
                 {owner && (
                     <>
-                        <Text type='secondary'>{`Created ${owner ? `by ${owner}` : ''} on ${created}`}</Text>
+                        <Text type='secondary'>{`${owner ? `由 ${owner}` : ''} 创建于 ${created}`}</Text>
                         <br />
                     </>
                 )}
-                <Text type='secondary'>{`Last updated ${updated}`}</Text>
+                <Text type='secondary'>{`最后更新 ${updated}`}</Text>
             </Col>
             {renderProgress()}
             <Col span={3}>
@@ -230,7 +230,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                                 size='large'
                                 ghost
                             >
-                                Open
+                                打开
                             </Button>
                         </Link>
                     </Col>
@@ -241,7 +241,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
                             onClick={handleContextMenuClick}
                             className='cvat-task-item-actions-button cvat-actions-menu-button'
                         >
-                            <Text className='cvat-text-color'>Actions</Text>
+                            <Text className='cvat-text-color'>操作</Text>
                             <MoreOutlined className='cvat-menu-icon' />
                         </div>
                     </Col>

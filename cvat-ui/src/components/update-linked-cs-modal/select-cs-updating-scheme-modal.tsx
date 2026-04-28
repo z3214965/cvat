@@ -43,10 +43,10 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
     }
 
     const capitalizedInstanceType = instanceType.charAt(0).toUpperCase() + instanceType.slice(1);
-    const alert = 'Data-linked storage will only be reset during the transfer and must be updated manually afterward';
+    const alert = '数据关联存储仅会在迁移过程中重置，后续需手动更新';
     const message = instances.length > 1 ?
-        'Some resources are linked to a cloud storage' :
-        `${capitalizedInstanceType} #${instances[0].id} is linked to a cloud storage`;
+        '部分资源已链接至云存储' :
+        `${capitalizedInstanceType} #${instances[0].id} 已链接到云存储`;
 
     return (
         <Modal
@@ -57,15 +57,13 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
                         title={(
                             <>
                                 <div>
-                                    <strong>Move & Detach</strong>
-                                    : Transfer and unlink from a cloud storage.
+                                    <strong>移动并解除关联</strong>
+                                    : 转移数据并与云存储解除绑定。
                                 </div>
                                 <div>
-                                    <strong>Move & Auto Match</strong>
-                                    : Transfer and attempt to auto-link with a similar cloud storage
-                                     in the target workspace. A similar cloud storage is defined
-                                     by comparing the whole cloud storage configuration except credentials
-                                     and owner.
+                                    <strong>移动并自动匹配</strong>
+                                    : 转移数据，并尝试在目标工作空间内自动关联配置相似的云存储。
+                                    相似云存储的判定规则：除密钥凭证与归属用户外，其余云存储配置完全一致。
                                 </div>
                             </>
                         )}
@@ -79,7 +77,7 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
             open
             footer={[
                 <Button key='cancel' onClick={() => closeModal()}>
-                    Cancel
+                    取消
                 </Button>,
                 <Button
                     key='move_and_detach'
@@ -99,7 +97,7 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
                         onUpdate();
                     }}
                 >
-                    Move & detach
+                    移动并解除关联
                 </Button>,
                 // do not show option "move and auto match" when only data storage is linked
                 (
@@ -115,7 +113,7 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
                             onUpdate();
                         }}
                     >
-                        Move & Auto match
+                        移动并自动匹配
                     </Button>
                 ),
             ]}
@@ -135,7 +133,7 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
             }
 
             <p>
-                Please choose how you would like the transfer to be done.
+                请选择您希望的转账方式。
             </p>
         </Modal>
     );

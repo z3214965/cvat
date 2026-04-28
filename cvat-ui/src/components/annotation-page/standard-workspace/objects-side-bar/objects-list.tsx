@@ -93,7 +93,7 @@ function ObjectListComponent(props: Props): JSX.Element {
                                 {renderZLayer && (
                                     <div className='cvat-objects-sidebar-z-layer-mark'>
                                         <Text strong>
-                                            {`Layer ${zOrder}`}
+                                            {`图层 ${zOrder}`}
                                         </Text>
                                     </div>
                                 )}

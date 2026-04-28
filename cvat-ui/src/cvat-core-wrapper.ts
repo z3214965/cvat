@@ -10,12 +10,14 @@ import ObjectState from 'cvat-core/src/object-state';
 import Webhook from 'cvat-core/src/webhook';
 import MLModel from 'cvat-core/src/ml-model';
 import CloudStorage from 'cvat-core/src/cloud-storage';
+import { Label, Attribute } from 'cvat-core/src/labels';
 import {
-    Label, Attribute,
-} from 'cvat-core/src/labels';
-import {
-    SerializedAttribute, SerializedLabel, SerializedAPISchema,
-    OrganizationMembersFilter, AnalyticsEventsFilter, SerializedApiToken,
+    SerializedAttribute,
+    SerializedLabel,
+    SerializedAPISchema,
+    OrganizationMembersFilter,
+    AnalyticsEventsFilter,
+    SerializedApiToken,
     ApiTokensFilter,
 } from 'cvat-core/src/server-response-types';
 import { ApiTokenModifiableFields } from 'cvat-core/src/server-request-types';
@@ -30,9 +32,19 @@ import ApiToken from 'cvat-core/src/api-token';
 import { FramesMetaData, FrameData } from 'cvat-core/src/frames';
 import { ServerError, RequestError } from 'cvat-core/src/exceptions';
 import {
-    ShapeType, ObjectType, LabelType, ModelKind, ModelProviders,
-    DimensionType, JobType, Source, MembershipRole,
-    JobStage, JobState, RQStatus, StorageLocation,
+    ShapeType,
+    ObjectType,
+    LabelType,
+    ModelKind,
+    ModelProviders,
+    DimensionType,
+    JobType,
+    Source,
+    MembershipRole,
+    JobStage,
+    JobState,
+    RQStatus,
+    StorageLocation,
 } from 'cvat-core/src/enums';
 import { Storage, StorageData } from 'cvat-core/src/storage';
 import Issue from 'cvat-core/src/issue';

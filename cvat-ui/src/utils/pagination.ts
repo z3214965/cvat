@@ -21,7 +21,7 @@ export async function fetchAllPaginated<T>(
     fetcher: PaginatedFetcher<T>,
     filter: PaginationFilter = {},
     pageSize: number = 500,
-): Promise<{ items: T[], count: number }> {
+): Promise<{ items: T[]; count: number }> {
     if ('page' in filter || 'pageSize' in filter) {
         const result = await fetcher(filter);
         const items = Array.from(result) as T[];

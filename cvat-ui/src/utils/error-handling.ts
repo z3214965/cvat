@@ -12,9 +12,7 @@ export function ensureError(error: unknown): Error {
     }
 
     if (error && typeof error === 'object') {
-        const message = 'message' in error && typeof error.message === 'string' ?
-            error.message :
-            JSON.stringify(error);
+        const message = 'message' in error && typeof error.message === 'string' ? error.message : JSON.stringify(error);
         return new Error(message);
     }
 

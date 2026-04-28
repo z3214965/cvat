@@ -11,23 +11,15 @@ import { AuthActionTypes } from 'actions/auth-actions';
 import { BoundariesActionTypes } from 'actions/boundaries-actions';
 import { Canvas, CanvasMode } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
-import {
-    DimensionType, JobStage, Label, LabelType, ObjectType, ShapeType,
-} from 'cvat-core-wrapper';
+import { DimensionType, JobStage, Label, LabelType, ObjectType, ShapeType } from 'cvat-core-wrapper';
 import { clamp } from 'utils/math';
 
-import {
-    ActiveControl,
-    AnnotationState,
-    ContextMenuType,
-    NavigationType,
-    Workspace,
-} from '.';
+import { ActiveControl, AnnotationState, ContextMenuType, NavigationType, Workspace } from '.';
 
 function updateActivatedStateID(newStates: any[], prevActivatedStateID: number | null): number | null {
-    return prevActivatedStateID === null || newStates.some((_state: any) => _state.clientID === prevActivatedStateID) ?
-        prevActivatedStateID :
-        null;
+    return prevActivatedStateID === null || newStates.some((_state: any) => _state.clientID === prevActivatedStateID)
+        ? prevActivatedStateID
+        : null;
 }
 
 export function labelShapeType(labelData?: Label | Partial<LabelType>): ShapeType | null {
@@ -236,11 +228,10 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     instance: job,
                     meta: jobMeta,
                     labels: job.labels,
-                    attributes: job.labels
-                        .reduce((acc: Record<number, any[]>, label: any): Record<number, any[]> => {
-                            acc[label.id] = label.attributes;
-                            return acc;
-                        }, {}),
+                    attributes: job.labels.reduce((acc: Record<number, any[]>, label: any): Record<number, any[]> => {
+                        acc[label.id] = label.attributes;
+                        return acc;
+                    }, {}),
                     groundTruthInfo: {
                         validationLayout,
                         groundTruthInstance,
@@ -282,8 +273,8 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     instance: job.dimension === DimensionType.DIMENSION_2D ? new Canvas() : new Canvas3d(),
                 },
                 colors,
-                workspace: isReview && job.dimension === DimensionType.DIMENSION_2D ?
-                    Workspace.REVIEW : workspaceSelected,
+                workspace:
+                    isReview && job.dimension === DimensionType.DIMENSION_2D ? Workspace.REVIEW : workspaceSelected,
             };
         }
         case AnnotationActionTypes.GET_JOB_FAILED: {
@@ -606,9 +597,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.UPDATE_ANNOTATIONS_SUCCESS: {
-            const {
-                history, states: updatedStates, minZ, maxZ,
-            } = action.payload;
+            const { history, states: updatedStates, minZ, maxZ } = action.payload;
             const { states: prevStates } = state.annotations;
             const nextStates = [...prevStates];
 
@@ -662,10 +651,10 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: { highlightedConflict, states },
             } = state;
 
-            const objectDoesNotExist = activatedStateID !== null &&
-                !states.some((_state) => _state.clientID === activatedStateID);
-            const canvasIsNotReady = (instance as Canvas | Canvas3d)
-                .mode() !== CanvasMode.IDLE || activeControl !== ActiveControl.CURSOR;
+            const objectDoesNotExist =
+                activatedStateID !== null && !states.some((_state) => _state.clientID === activatedStateID);
+            const canvasIsNotReady =
+                (instance as Canvas | Canvas3d).mode() !== CanvasMode.IDLE || activeControl !== ActiveControl.CURSOR;
 
             if (objectDoesNotExist || canvasIsNotReady || highlightedConflict) {
                 return state;
@@ -904,9 +893,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.UPDATE_CANVAS_CONTEXT_MENU: {
-            const {
-                visible, left, top, type, pointID,
-            } = action.payload;
+            const { visible, left, top, type, pointID } = action.payload;
 
             const { activatedElementID, activatedStateID } = state.annotations;
 
@@ -941,9 +928,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         }
         case AnnotationActionTypes.FETCH_ANNOTATIONS_SUCCESS: {
             const { activatedStateID } = state.annotations;
-            const {
-                states, history, minZ, maxZ,
-            } = action.payload;
+            const { states, history, minZ, maxZ } = action.payload;
 
             return {
                 ...state,
@@ -1038,9 +1023,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 },
                 canvas: {
                     ...state.canvas,
-                    activeControl: activeInteractor.kind.startsWith('opencv') ?
-                        ActiveControl.OPENCV_TOOLS :
-                        ActiveControl.AI_TOOLS,
+                    activeControl: activeInteractor.kind.startsWith('opencv')
+                        ? ActiveControl.OPENCV_TOOLS
+                        : ActiveControl.AI_TOOLS,
                 },
             };
         }
@@ -1071,7 +1056,6 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     states: state.annotations.states.filter((_state) => !_state.isGroundTruth),
                     activatedStateID: null,
                     activatedAttributeID: null,
-
                 },
                 canvas: {
                     ...state.canvas,
@@ -1124,12 +1108,15 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         case AnnotationActionTypes.HIGHLIGHT_CONFLICT: {
             const { conflict } = action.payload;
             if (conflict) {
-                const { annotationConflicts: [mainConflict] } = conflict;
+                const {
+                    annotationConflicts: [mainConflict],
+                } = conflict;
 
                 // object may be hidden using annotations filter
                 // it is not guaranteed to be visible
-                const conflictObject = state.annotations.states
-                    .find((_state) => _state.serverID === mainConflict.serverID);
+                const conflictObject = state.annotations.states.find(
+                    (_state) => _state.serverID === mainConflict.serverID,
+                );
 
                 return {
                     ...state,

@@ -123,7 +123,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                                     onClick={(): void => history.push('/tasks/create')}
                                     icon={<PlusOutlined />}
                                 >
-                                    Create a new task
+                                    创建一个新任务
                                 </Button>
                                 <Button
                                     className='cvat-create-multi-tasks-button'
@@ -131,7 +131,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                                     onClick={(): void => history.push('/tasks/create?many=true')}
                                     icon={<span className='anticon'><MultiPlusIcon /></span>}
                                 >
-                                    Create multi tasks
+                                    创建多个任务
                                 </Button>
                                 <Button
                                     className='cvat-import-task-button'
@@ -140,7 +140,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                                     icon={importing ? <LoadingOutlined /> : <UploadOutlined />}
                                     onClick={() => dispatch(importActions.openImportBackupModal('task'))}
                                 >
-                                    Create from backup
+                                    从备份创建
                                 </Button>
                             </CvatDropdownMenuPaper>
                         )}

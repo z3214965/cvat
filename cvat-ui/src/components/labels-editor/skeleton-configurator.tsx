@@ -53,7 +53,7 @@ interface State {
 const componentShortcuts = {
     CANCEL_SKELETON_EDGE: {
         name: 'Cancel skeleton drawing',
-        description: 'Interrupts drawing a new skeleton edge',
+        description: '终止新骨架连线的绘制',
         sequences: ['esc'],
         scope: ShortcutScope.LABELS_EDITOR,
     },
@@ -609,7 +609,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
     public wrappedSubmit(): SkeletonConfiguration {
         const svg = this.svgRef.current;
         if (!svg) {
-            throw new Error('SVG reference is null');
+            throw new Error('SVG引用为空');
         }
 
         const sublabels = Object.values(this.labels);
@@ -626,7 +626,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                         child.setAttribute('data-label-name', elementLabel.name);
                     } else {
                         throw new Error(
-                            `Element ${elementID} does not refer to any label`,
+                            `元素 ${elementID} 未引用任何标签`,
                         );
                     }
                 }
@@ -638,7 +638,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                     const node2 = svg.querySelector(`[data-node-to="${dataNodeTo}"]`);
                     if (!node1 || !node2) {
                         throw new Error(
-                            `Edge's nodeFrom ${dataNodeFrom} or nodeTo ${dataNodeTo} do not to refer to any node`,
+                            `边的起始节点 ${dataNodeFrom} 或结束节点 ${dataNodeTo} 未指向任何有效节点`,
                         );
                     }
                 }
@@ -646,13 +646,12 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
         });
 
         if (!sublabels.length || !elements) {
-            throw new Error('At least one skeleton element is necessary');
+            throw new Error('至少需要一个骨架元素');
         }
 
         if (elements !== sublabels.length) {
             throw new Error(
-                `Skeleton configurator state is not consistent. Number of sublabels ${sublabels.length} ` +
-                `differs from number of elements ${elements}`,
+                `骨架配置器状态不一致。子标签数量 ${sublabels.length} 与元素数量 ${elements} 不匹配`,
             );
         }
 
@@ -738,7 +737,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                 if (!['image/jpeg', 'image/png'].includes(file.type)) {
                                     notification.error({
                                         message:
-                                            `File must be a JPEG or PNG image. Detected mime type is "${file.type}"`,
+                                            `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`,
                                     });
                                 }
                                 this.setState({ image: file }, () => {
@@ -748,7 +747,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                             }}
                         >
                             <p className='ant-upload-drag-icon'>
-                                <CVATTooltip title='Upload a background image'>
+                                <CVATTooltip title='上传背景图片'>
                                     <Button className='cvat-upload-skeleton-constructor-background' icon={<PictureOutlined />} />
                                 </CVATTooltip>
                             </p>
@@ -766,25 +765,25 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                     this.setState({ activeTool: e.target.value });
                                 }}
                             >
-                                <CVATTooltip title='Click the canvas to add a point'>
+                                <CVATTooltip title='点击画布以添加一个点'>
                                     <Radio.Button defaultChecked value='point'>
                                         <Icon component={PointIcon} />
                                     </Radio.Button>
                                 </CVATTooltip>
 
-                                <CVATTooltip title='Click and drag points'>
+                                <CVATTooltip title='点击并拖动点'>
                                     <Radio.Button defaultChecked value='drag'>
                                         <DragOutlined />
                                     </Radio.Button>
                                 </CVATTooltip>
 
-                                <CVATTooltip title='Click two points to setup an edge'>
+                                <CVATTooltip title='点击两个点以设置一条边'>
                                     <Radio.Button value='join'>
                                         <LineOutlined />
                                     </Radio.Button>
                                 </CVATTooltip>
 
-                                <CVATTooltip title='Click an element to remove it'>
+                                <CVATTooltip title='点击某个元素以将其移除'>
                                     <Radio.Button value='delete'>
                                         <DeleteOutlined />
                                     </Radio.Button>
@@ -793,7 +792,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                         </Col>
                     </Row>
                     <Row justify='space-between' className='cvat-skeleton-configurator-svg-buttons'>
-                        <CVATTooltip title='Download skeleton as SVG'>
+                        <CVATTooltip title='下载骨架为SVG'>
                             <Button
                                 className='cvat-download-skeleton-svg-button'
                                 type='default'
@@ -873,7 +872,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                         this.setupSkeleton(svg, labels as Record<string, LabelOptColor>);
                                     } catch (_: unknown) {
                                         notification.error({
-                                            message: 'Wrong skeleton structure',
+                                            message: '错误的骨架结构',
                                         });
                                     }
                                 });
@@ -881,7 +880,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                 return false;
                             }}
                         >
-                            <CVATTooltip title='Upload a skeleton from SVG'>
+                            <CVATTooltip title='从SVG上传骨架'>
                                 <Button
                                     className='cvat-upload-skeleton-svg-button'
                                     style={disabledStyle}

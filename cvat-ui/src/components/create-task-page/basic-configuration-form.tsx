@@ -55,7 +55,7 @@ export default class BasicConfigurationForm extends React.PureComponent<Props> {
             return this.formRef.current.validateFields();
         }
 
-        return Promise.reject(new Error('Form ref is empty'));
+        return Promise.reject(new Error('表单引用为空'));
     }
 
     public resetFields(): void {
@@ -79,11 +79,11 @@ export default class BasicConfigurationForm extends React.PureComponent<Props> {
                     className={many ? 'cvat-task-name-field-has-tooltip' : ''}
                     hasFeedback
                     name='name'
-                    label={<span>Name</span>}
+                    label={<span>名称</span>}
                     rules={[
                         {
                             required: true,
-                            message: 'Task name cannot be empty',
+                            message: '任务名不能为空',
                         },
                     ]}
                     initialValue={this.initialName}
@@ -97,32 +97,32 @@ export default class BasicConfigurationForm extends React.PureComponent<Props> {
                     <Text type='secondary'>
                         <Tooltip title={() => (
                             <>
-                                You can use in the template:
+                                可在模板中使用：
                                 <ul>
                                     <li>
-                                        some_text - any text
+                                        任意文本 - 直接输入文字
                                     </li>
                                     <li>
                                         {'{{'}
                                         index
                                         {'}}'}
-                                        &nbsp;- index file in set
+                                        &nbsp;- 文件序号
                                     </li>
                                     <li>
                                         {'{{'}
                                         file_name
                                         {'}}'}
-                                        &nbsp;- name of file
+                                        &nbsp;- 文件名称
                                     </li>
                                 </ul>
-                                Example:&nbsp;
+                                示例:&nbsp;
                                 <i>
-                                    {exampleMultiTaskName || 'Task name 1 - video_1.mp4'}
+                                    {exampleMultiTaskName || '任务名称 1 - video_1.mp4'}
                                 </i>
                             </>
                         )}
                         >
-                            When forming the name, a template is used.
+                            生成名称时将使用模板。
                             {' '}
                             <QuestionCircleOutlined />
                         </Tooltip>

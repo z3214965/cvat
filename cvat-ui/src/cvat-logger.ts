@@ -14,13 +14,9 @@ const { EventScope } = core.enums;
 
 const ignoredSources = ['snippet://', 'chrome-extension://'];
 
-export function logError(
-    error: unknown,
-    save: boolean,
-    extras: { type: string } & Record<string, unknown>,
-): void {
+export function logError(error: unknown, save: boolean, extras: { type: string } & Record<string, unknown>): void {
     if (!(error instanceof Error)) {
-        console.warn('Unknown error type caught', error);
+        console.warn('捕获到未知错误类型', error);
         return;
     }
     // stack is not guaranteed by ECMA but
@@ -29,7 +25,7 @@ export function logError(
     if (error.stack) {
         const stackFrames = ErrorStackParser.parse(error);
         if (!stackFrames.length) {
-            console.warn('Error cannot be logged. No stack frames found', error);
+            console.warn('错误无法记录。未找到堆栈帧', error);
             return;
         }
 
@@ -45,7 +41,7 @@ export function logError(
 
         if (!filename || ignoredSources.some((source) => filename.startsWith(source))) {
             // filename is missing or the error comes from external script (extension, console, snippets, etc)
-            console.warn('Error will not be logged as comes from external source', error);
+            console.warn('由于错误来自外部源，因此不会记录该错误', error);
             return;
         }
 
@@ -53,7 +49,7 @@ export function logError(
         const { instance: job } = state.annotation.job;
 
         const onError = (_error: unknown): void => {
-            const message = 'Error occurred during another error logging';
+            const message = '在记录另一个错误时发生了错误';
             console.error(message, _error instanceof Error ? _error.message : String(_error));
         };
 

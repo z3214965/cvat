@@ -65,8 +65,8 @@ function RightGroup(props: Props): JSX.Element {
             }
         }).catch((error: unknown) => {
             notification.error({
-                message: 'Could not receive annotation guide',
-                description: error instanceof Error ? error.message : 'Unknown error',
+                message: '无法接收标注指南',
+                description: error instanceof Error ? error.message : '未知错误',
             });
         });
     }, [jobInstance]);
@@ -83,7 +83,7 @@ function RightGroup(props: Props): JSX.Element {
                 try {
                     seenGuides = JSON.parse(localStorage.getItem('seenGuides') || '[]');
                     if (!Array.isArray(seenGuides) || seenGuides.some((el) => !Number.isInteger(el))) {
-                        throw new Error('Wrong structure stored in local storage');
+                        throw new Error('本地存储数据结构异常');
                     }
                 } catch (error: unknown) {
                     seenGuides = [];
@@ -128,7 +128,7 @@ function RightGroup(props: Props): JSX.Element {
                     onClick={openGuide}
                 >
                     <Icon component={GuideIcon} />
-                    Guide
+                    指南
                 </Button>
             )}
             <Button
@@ -137,7 +137,7 @@ function RightGroup(props: Props): JSX.Element {
                 onClick={showStatistics}
             >
                 <InfoCircleOutlined />
-                Info
+                信息
             </Button>
             <Button
                 type='link'
@@ -147,7 +147,7 @@ function RightGroup(props: Props): JSX.Element {
                 onClick={showFilters}
             >
                 <Icon component={FilterIcon} />
-                Filters
+                过滤器
             </Button>
             <div>
                 <Select

@@ -8,9 +8,7 @@ import { AnyAction } from 'redux';
 import { AuthActionTypes } from 'actions/auth-actions';
 import { SettingsActionTypes } from 'actions/settings-actions';
 import { AnnotationActionTypes } from 'actions/annotation-actions';
-import {
-    SettingsState, GridColor, FrameSpeed, ColorBy,
-} from 'reducers';
+import { SettingsState, GridColor, FrameSpeed, ColorBy } from 'reducers';
 
 const defaultState: SettingsState = {
     shapes: {
@@ -446,10 +444,7 @@ export default (state = defaultState, action: AnyAction): SettingsState => {
             }
             return {
                 ...state,
-                imageFilters: [
-                    ...state.imageFilters,
-                    action.payload.filter,
-                ],
+                imageFilters: [...state.imageFilters, action.payload.filter],
             };
         }
         case SettingsActionTypes.DISABLE_IMAGE_FILTER: {

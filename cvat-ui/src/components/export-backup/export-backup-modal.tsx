@@ -164,14 +164,13 @@ function ExportBackupModal(): JSX.Element {
                         );
                     },
                     (inst: Exclude<ProjectOrTaskOrJob, Job>, idx: number, total: number) => (
-                        `Exporting backup for ${instanceType}#${inst.id} [${idx + 1}/${total}]`
+                        `导出备份 ${instanceType}#${inst.id} [${idx + 1}/${total}]`
                     ),
                 ));
                 closeModal();
-                const description =
-                    'Bulk backup export was started. You can check progress [here](/requests).';
+                const description = '批量备份导出已开始。您可以在[here](/requests)查看进度。';
                 Notification.info({
-                    message: 'Bulk backup export started',
+                    message: '批量备份导出已开始',
                     description: (
                         <CVATMarkdown history={history}>{description}</CVATMarkdown>
                     ),
@@ -200,10 +199,10 @@ function ExportBackupModal(): JSX.Element {
                 closeModal();
 
                 const description = isBulkMode ?
-                    'Bulk backup export was started. You can check progress [here](/requests).' :
-                    'Backup export was started. You can check progress [here](/requests).';
+                    '批量备份导出已开始。您可以在[here](/requests)查看进度。' :
+                    '备份导出已开始。您可以在[here](/requests)查看进度。';
                 Notification.info({
-                    message: isBulkMode ? 'Bulk backup export started' : 'Backup export started',
+                    message: isBulkMode ? '批量备份导出已开始' : '备份导出已开始',
                     description: (
                         <CVATMarkdown history={history}>{description}</CVATMarkdown>
                     ),
@@ -270,7 +269,7 @@ function ExportBackupModal(): JSX.Element {
                                     />
                                 )}
                             >
-                                When forming the backup name, a template is used.
+                                在生成备份名称时，会使用一个模板。
                                 {' '}
                                 <QuestionCircleOutlined />
                             </Tooltip>

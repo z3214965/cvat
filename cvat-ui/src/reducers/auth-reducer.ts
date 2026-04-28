@@ -187,9 +187,9 @@ export default function (state = defaultState, action: AuthActions | BoundariesA
                 apiTokens: {
                     ...state.apiTokens,
                     fetching: false,
-                    current: state.apiTokens.current.map((token) => (
-                        token.id === updatedToken.id ? updatedToken : token
-                    )),
+                    current: state.apiTokens.current.map((token) =>
+                        token.id === updatedToken.id ? updatedToken : token,
+                    ),
                 },
             };
         }

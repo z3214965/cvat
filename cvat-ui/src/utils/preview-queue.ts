@@ -3,9 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Dispatch } from 'redux';
-import {
-    Job, Task, Project, CloudStorage,
-} from 'cvat-core-wrapper';
+import { Job, Task, Project, CloudStorage } from 'cvat-core-wrapper';
 import MLModel from 'cvat-core/src/ml-model';
 import { getJobPreviewAsync } from 'actions/jobs-actions';
 import { getTaskPreviewAsync } from 'actions/tasks-actions';
@@ -42,8 +40,9 @@ class PreviewQueue {
     private currentRequest: PreviewRequest | null = null;
 
     public addRequest(request: PreviewRequest): void {
-        const isDuplicate = this.queue.some((req) => req.id === request.id) ||
-                           (this.currentRequest && this.currentRequest.id === request.id);
+        const isDuplicate =
+            this.queue.some((req) => req.id === request.id) ||
+            (this.currentRequest && this.currentRequest.id === request.id);
 
         if (!isDuplicate) {
             this.queue.push(request);

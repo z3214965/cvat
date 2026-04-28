@@ -101,7 +101,7 @@ function QualitySettingsTab(props: Readonly<Props>): JSX.Element | null {
             <div className='cvat-quality-control-settings-header'>
                 <Switch checked={settings?.inherit} onChange={onInheritChange} />
                 <Text>使用</Text>
-                <Link to={`/projects/${instance.projectId}/quality-control#settings`}>&nbsp;项目设置</Link>
+                <Link to={`/projects/${instance.projectId}/quality-control#settings`}>项目设置</Link>
             </div>
         );
     } else if (instance instanceof Project && nonInheritedChildSettings.length !== 0) {
@@ -130,7 +130,7 @@ function QualitySettingsTab(props: Readonly<Props>): JSX.Element | null {
                                 });
                             }}
                         >
-                            Force project settings
+                            强制项目设置
                         </Button>
                     )}
                 />

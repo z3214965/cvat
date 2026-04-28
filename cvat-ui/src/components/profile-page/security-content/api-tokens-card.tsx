@@ -166,7 +166,7 @@ function ApiTokensCard(): JSX.Element {
             className: 'cvat-api-token-created-date',
         },
         {
-            title: '过期',
+            title: '过期时间',
             dataIndex: 'expiryDate',
             key: 'expiryDate',
             sorter: (a: RowData, b: RowData) => {

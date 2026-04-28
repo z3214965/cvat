@@ -73,7 +73,7 @@ function CreateURLItem(props: ItemProps): JSX.Element {
             icon={<LinkOutlined />}
             onClick={createURL}
         >
-            Create object URL
+            创建对象URL
         </Button>
     );
 }
@@ -82,14 +82,14 @@ function MakeCopyItem(props: ItemProps): JSX.Element {
     const { toolProps } = props;
     const { copyShortcut, pasteShortcut, copy } = toolProps;
     return (
-        <CVATTooltip title={`${copyShortcut} and ${pasteShortcut}`}>
+        <CVATTooltip title={`${copyShortcut} 和 ${pasteShortcut}`}>
             <Button
                 className='cvat-object-item-menu-make-copy'
                 type='link'
                 icon={<CopyOutlined />}
                 onClick={copy}
             >
-                Make a copy
+                复制一份
             </Button>
         </CVATTooltip>
     );
@@ -99,14 +99,14 @@ function EditMaskItem(props: ItemProps): JSX.Element {
     const { toolProps } = props;
     const { edit } = toolProps;
     return (
-        <CVATTooltip title='Shift + Double click'>
+        <CVATTooltip title='Shift + 双击'>
             <Button
                 type='link'
                 icon={<EditOutlined />}
                 onClick={edit}
                 className='cvat-object-item-menu-edit-object'
             >
-                Edit
+                编辑
             </Button>
         </CVATTooltip>
     );
@@ -116,14 +116,14 @@ function SliceItem(props: ItemProps): JSX.Element {
     const { toolProps } = props;
     const { slice, sliceShortcut } = toolProps;
     return (
-        <CVATTooltip title={`Cut the shape into two parts ${sliceShortcut}`}>
+        <CVATTooltip title={`将形状切成两部分 ${sliceShortcut}`}>
             <Button
                 type='link'
                 icon={<Icon component={SliceIcon} />}
                 onClick={slice}
                 className='cvat-object-item-menu-slice-object'
             >
-                Slice
+                分割
             </Button>
         </CVATTooltip>
     );
@@ -140,7 +140,7 @@ function PropagateItem(props: ItemProps): JSX.Element {
                 onClick={propagate}
                 className='cvat-object-item-menu-propagate-item'
             >
-                Propagate
+                传播标注
             </Button>
         </CVATTooltip>
     );
@@ -156,7 +156,7 @@ function SwitchOrientationItem(props: ItemProps): JSX.Element {
             onClick={switchOrientation}
             className='cvat-object-item-menu-switch-orientation'
         >
-            Switch orientation
+            切换方向
         </Button>
     );
 }
@@ -171,7 +171,7 @@ function ResetPerspectiveItem(props: ItemProps): JSX.Element {
             className='cvat-object-item-menu-reset-perspective'
         >
             <Icon component={ResetPerspectiveIcon} />
-            Reset perspective
+            重置视角
         </Button>
     );
 }
@@ -187,7 +187,7 @@ function ToBackgroundItem(props: ItemProps): JSX.Element {
                 className='cvat-object-item-menu-to-layer-background'
             >
                 <Icon component={BackgroundIcon} />
-                To background
+                移至背景
             </Button>
         </CVATTooltip>
     );
@@ -204,7 +204,7 @@ function ToForegroundItem(props: ItemProps): JSX.Element {
                 className='cvat-object-item-menu-to-layer-foreground'
             >
                 <Icon component={ForegroundIcon} />
-                To foreground
+                移至前景
             </Button>
         </CVATTooltip>
     );
@@ -221,7 +221,7 @@ function ToOneLayerBackwardItem(props: Readonly<ItemProps>): JSX.Element {
                 className='cvat-object-item-menu-to-one-layer-backward'
             >
                 <Icon component={OneLayerBackwardIcon} />
-                To one layer backward
+                向后一层
             </Button>
         </CVATTooltip>
     );
@@ -238,7 +238,7 @@ function ToOneLayerForwardItem(props: Readonly<ItemProps>): JSX.Element {
                 className='cvat-object-item-menu-to-one-layer-forward'
             >
                 <Icon component={OneLayerForwardIcon} />
-                To one layer forward
+                向前一层
             </Button>
         </CVATTooltip>
     );
@@ -269,7 +269,7 @@ function RemoveItem(props: ItemProps): JSX.Element {
                 onClick={remove}
                 className='cvat-object-item-menu-remove-object'
             >
-                Remove
+                移除
             </Button>
         </CVATTooltip>
     );
@@ -286,7 +286,7 @@ function RunAnnotationActionItem(props: ItemProps): JSX.Element {
                 onClick={runAnnotationAction}
                 className='cvat-object-item-menu-remove-object'
             >
-                Run annotation action
+                执行标注操作
             </Button>
         </CVATTooltip>
     );

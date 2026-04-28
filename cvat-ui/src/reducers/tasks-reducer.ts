@@ -53,10 +53,12 @@ export default (state: TasksState = defaultState, action: AnyAction): TasksState
                 initialized: false,
                 fetching: true,
                 count: 0,
-                gettingQuery: action.payload.updateQuery ? {
-                    ...defaultState.gettingQuery,
-                    ...action.payload.query,
-                } : state.gettingQuery,
+                gettingQuery: action.payload.updateQuery
+                    ? {
+                          ...defaultState.gettingQuery,
+                          ...action.payload.query,
+                      }
+                    : state.gettingQuery,
             };
         case TasksActionTypes.GET_TASKS_SUCCESS: {
             return {

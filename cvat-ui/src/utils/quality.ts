@@ -19,8 +19,13 @@ export function sorter(path: string) {
 
         if (field1 !== null && field2 !== null) {
             if (typeof field1 === 'string' && typeof field2 === 'string') return field1.localeCompare(field2);
-            if (typeof field1 === 'number' && typeof field2 === 'number' &&
-            Number.isFinite(field1) && Number.isFinite(field2)) return field1 - field2;
+            if (
+                typeof field1 === 'number' &&
+                typeof field2 === 'number' &&
+                Number.isFinite(field1) &&
+                Number.isFinite(field2)
+            )
+                return field1 - field2;
             if (typeof field1 === 'boolean' && typeof field2 === 'boolean') {
                 if (field1 === field2) {
                     return 0;

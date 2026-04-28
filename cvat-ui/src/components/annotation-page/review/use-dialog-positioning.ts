@@ -49,7 +49,7 @@ export function useDialogPositioning({
 
             // Check if dialog extends beyond bottom edge
             if (clickRelativeY + dialogHeight > canvasRect.height) {
-                const overflow = (clickRelativeY + dialogHeight) - canvasRect.height + margin;
+                const overflow = clickRelativeY + dialogHeight - canvasRect.height + margin;
                 const deltaX = overflow * Math.sin(angleRad);
                 const deltaY = overflow * Math.cos(angleRad);
                 totalDeltaX -= deltaX;
@@ -58,15 +58,15 @@ export function useDialogPositioning({
 
             // Check if dialog extends beyond right edge
             if (clickRelativeX + dialogWidth > canvasRect.width) {
-                const overflow = (clickRelativeX + dialogWidth) - canvasRect.width + margin;
+                const overflow = clickRelativeX + dialogWidth - canvasRect.width + margin;
                 const deltaX = overflow * Math.cos(angleRad);
                 const deltaY = -overflow * Math.sin(angleRad);
                 totalDeltaX -= deltaX;
                 totalDeltaY -= deltaY;
             }
 
-            newLeft = left + (totalDeltaX * scale);
-            newTop = top + (totalDeltaY * scale);
+            newLeft = left + totalDeltaX * scale;
+            newTop = top + totalDeltaY * scale;
 
             setPosition({ top: newTop, left: newLeft });
         }

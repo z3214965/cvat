@@ -16,13 +16,13 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
         },
         name: {
-            label: 'Name',
+            label: '名称',
             type: 'text',
             valueSources: ['value'],
             operators: ['like'],
         },
         assignee: {
-            label: 'Assignee',
+            label: '负责人',
             type: 'select',
             valueSources: ['value'],
             operators: ['select_equals'],
@@ -33,7 +33,7 @@ export const config: Partial<Config> = {
             },
         },
         owner: {
-            label: 'Owner',
+            label: '所有者',
             type: 'select',
             valueSources: ['value'],
             operators: ['select_equals'],
@@ -44,12 +44,12 @@ export const config: Partial<Config> = {
             },
         },
         updated_date: {
-            label: 'Last updated',
+            label: '最后更新',
             type: 'datetime',
             operators: ['between', 'greater', 'greater_or_equal', 'less', 'less_or_equal'],
         },
         status: {
-            label: 'Status',
+            label: '状态',
             type: 'select',
             valueSources: ['value'],
             operators: ['select_equals', 'select_any_in', 'select_not_any_in'],

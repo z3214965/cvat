@@ -35,8 +35,8 @@ function UpdateWebhookPage(): JSX.Element {
                 }
             }).catch((error: unknown) => {
                 notification.error({
-                    message: 'Failed to fetch the webhook',
-                    description: error instanceof Error ? error.message : 'Unknown error',
+                    message: '未能获取到webhook',
+                    description: error instanceof Error ? error.message : '未知错误',
                 });
             });
         } else {
@@ -50,7 +50,7 @@ function UpdateWebhookPage(): JSX.Element {
                 <Col md={20} lg={16} xl={14} xxl={9}>
                     <Button className='cvat-webhooks-go-back' onClick={() => history.goBack()} type='link' size='large'>
                         <LeftOutlined />
-                        Back to webhooks
+                        返回webhooks
                     </Button>
                 </Col>
             </Row>

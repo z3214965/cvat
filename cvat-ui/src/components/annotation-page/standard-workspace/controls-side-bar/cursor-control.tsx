@@ -26,7 +26,7 @@ export interface Props {
 const componentShortcuts = {
     CANCEL: {
         name: 'Cancel',
-        description: 'Cancel any active canvas mode',
+        description: '取消所有激活的画布模式',
         sequences: ['esc'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,
     },
@@ -60,7 +60,7 @@ function CursorControl(props: Props): JSX.Element {
                 keyMap={subKeyMap(componentShortcuts, keyMap)}
                 handlers={handlers}
             />
-            <CVATTooltip title={`Cursor ${cursorShortkey}`} placement='right'>
+            <CVATTooltip title={`光标 ${cursorShortkey}`} placement='right'>
                 <Icon
                     component={CursorIcon}
                     className={

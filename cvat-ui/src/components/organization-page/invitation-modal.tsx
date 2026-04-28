@@ -49,11 +49,11 @@ function InvitationModal(props: Props): JSX.Element {
                 form={form}
             >
                 <Paragraph>
-                    <Text>Invite CVAT users to collaborate </Text>
+                    <Text>邀请用户协作 </Text>
                 </Paragraph>
                 <Paragraph>
                     <Text type='secondary'>
-                            If the email address is registered on CVAT, the user will be added to the organization
+                            如果该电子邮件地址已注册，则该用户将被添加到组织中
                     </Text>
                 </Paragraph>
                 <Form.List name='users'>
@@ -68,11 +68,11 @@ function InvitationModal(props: Props): JSX.Element {
                                             name={[field.name, 'email']}
                                             fieldKey={[field.fieldKey, 'email']}
                                             rules={[
-                                                { required: true, message: 'This field is required' },
-                                                { type: 'email', message: 'The input is not a valid email' },
+                                                { required: true, message: '此字段为必填项' },
+                                                { type: 'email', message: '输入不是有效的电子email' },
                                             ]}
                                         >
-                                            <Input placeholder='Enter an email address' />
+                                            <Input placeholder='输入email地址' />
                                         </Form.Item>
                                     </Col>
                                     <Col span={10} offset={1}>
@@ -81,12 +81,12 @@ function InvitationModal(props: Props): JSX.Element {
                                             name={[field.name, 'role']}
                                             fieldKey={[field.fieldKey, 'role']}
                                             initialValue='worker'
-                                            rules={[{ required: true, message: 'This field is required' }]}
+                                            rules={[{ required: true, message: '此字段为必填项' }]}
                                         >
                                             <Select>
-                                                <Select.Option value='worker'>Worker</Select.Option>
-                                                <Select.Option value='supervisor'>Supervisor</Select.Option>
-                                                <Select.Option value='maintainer'>Maintainer</Select.Option>
+                                                <Select.Option value='worker'>标注员</Select.Option>
+                                                <Select.Option value='supervisor'>审核员</Select.Option>
+                                                <Select.Option value='maintainer'>管理员</Select.Option>
                                             </Select>
                                         </Form.Item>
                                     </Col>
@@ -99,7 +99,7 @@ function InvitationModal(props: Props): JSX.Element {
                             ))}
                             <Form.Item>
                                 <Button className='cvat-invite-more-org-members-button' icon={<PlusCircleOutlined />} onClick={() => add()}>
-                                        Invite more
+                                        邀请更多
                                 </Button>
                             </Form.Item>
                         </>

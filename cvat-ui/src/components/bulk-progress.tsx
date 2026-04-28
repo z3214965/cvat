@@ -23,7 +23,7 @@ export default function BulkProgress(): JSX.Element | null {
     }));
 
     const percent = status?.percent ?? 0;
-    const message = status?.message ?? 'Processing...';
+    const message = status?.message ?? '处理中...';
 
     const handleRetry = (): void => {
         if (bulkError?.retryPayload) {
@@ -39,11 +39,12 @@ export default function BulkProgress(): JSX.Element | null {
             <>
                 {remainingItemsCount > 0 ? (
                     <>
-                        Some items failed to process. You can retry the operation for the remaining
-                        {` ${remainingItemsCount} items.`}
+                        部分项目处理失败，你可对剩余
+                        {`${remainingItemsCount}个项目。`}
+                        重试该操作
                     </>
                 ) : (
-                    'An error occurred during the bulk operation.'
+                    '批量操作过程中出错。'
                 )}
                 {remainingItemsCount > 0 && (
                     <>
@@ -56,7 +57,7 @@ export default function BulkProgress(): JSX.Element | null {
                                 handleRetry();
                             }}
                         >
-                            Retry
+                            重试
                         </Button>
                     </>
                 )}
@@ -87,7 +88,7 @@ export default function BulkProgress(): JSX.Element | null {
                 onClick={() => dispatch(bulkActions.cancelBulkAction())}
                 type='primary'
             >
-                Cancel
+                取消
             </Button>
         </div>
     );

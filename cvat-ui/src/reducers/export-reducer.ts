@@ -48,8 +48,7 @@ export default (state: ExportState = defaultState, action: ExportActions): Expor
                         modalInstance: instance,
                     },
                 },
-                instanceType: activitiesField
-                    .slice(0, activitiesField.length - 1) as 'project' | 'task' | 'job',
+                instanceType: activitiesField.slice(0, activitiesField.length - 1) as 'project' | 'task' | 'job',
             };
         }
         case ExportActionTypes.CLOSE_EXPORT_DATASET_MODAL: {
@@ -81,8 +80,7 @@ export default (state: ExportState = defaultState, action: ExportActions): Expor
                         modalInstance: instance,
                     },
                 },
-                instanceType: field
-                    .slice(0, field.length - 1) as 'project' | 'task',
+                instanceType: field.slice(0, field.length - 1) as 'project' | 'task',
             };
         }
         case ExportActionTypes.CLOSE_EXPORT_BACKUP_MODAL: {

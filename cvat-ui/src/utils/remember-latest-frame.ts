@@ -9,13 +9,12 @@ export function readLatestFrameStorage(): Map<number, number> {
     try {
         latestFrameStorage = JSON.parse(localStorage.getItem('latestFrameStorage') || '[]');
         if (
-            !Array.isArray(latestFrameStorage) || latestFrameStorage.some((item) => (
-                !Array.isArray(item) ||
-                !Number.isInteger(item[0]) ||
-                !Number.isInteger(item[1])
-            ))
+            !Array.isArray(latestFrameStorage) ||
+            latestFrameStorage.some(
+                (item) => !Array.isArray(item) || !Number.isInteger(item[0]) || !Number.isInteger(item[1]),
+            )
         ) {
-            throw new Error('Incorrect format from local storage');
+            throw new Error('local存储的格式不正确');
         }
     } catch (error: unknown) {
         return new Map([]);
@@ -31,8 +30,7 @@ export function writeLatestFrame(jobID: number, frame: number): void {
     } else {
         storage = new Map([
             [jobID, frame],
-            ...Array.from(storage.entries())
-                .slice(0, config.LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT - 1),
+            ...Array.from(storage.entries()).slice(0, config.LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT - 1),
         ]);
     }
     localStorage.setItem('latestFrameStorage', JSON.stringify(Array.from(storage.entries())));

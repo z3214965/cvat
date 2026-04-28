@@ -41,19 +41,19 @@ interface Props {
 const componentShortcuts = {
     UNDO: {
         name: 'Undo action',
-        description: 'Cancel the latest action related with objects',
+        description: '取消最近一次对象相关操作',
         sequences: ['ctrl+z'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     REDO: {
         name: 'Redo action',
-        description: 'Cancel undo action',
+        description: '撤销回退操作',
         sequences: ['ctrl+shift+z', 'ctrl+y'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     SWITCH_TOOLS_BLOCKER_STATE: {
         name: 'Switch algorithm blocker',
-        description: 'Postpone running the algorithm for interaction tools',
+        description: '延迟执行交互工具的算法运算',
         sequences: ['tab'],
         scope: ShortcutScope.STANDARD_WORKSPACE,
     },
@@ -114,14 +114,14 @@ function LeftGroup(props: Props): JSX.Element {
                     closable={false}
                     footer={[]}
                 >
-                    <Text>CVAT is saving your annotations, please wait </Text>
+                    <Text>正在保存您的标注，请稍候 </Text>
                     <LoadingOutlined />
                 </Modal>
             )}
             <Col className='cvat-annotation-header-left-group'>
                 <AnnotationMenuComponent />
                 <SaveAnnotationsButton />
-                <CVATTooltip overlay={`Undo: ${undoAction} ${undoShortcut}`}>
+                <CVATTooltip overlay={`撤销: ${undoAction} ${undoShortcut}`}>
                     <Button
                         style={{ pointerEvents: undoAction ? 'initial' : 'none', opacity: undoAction ? 1 : 0.5 }}
                         type='link'
@@ -129,10 +129,10 @@ function LeftGroup(props: Props): JSX.Element {
                         onClick={onUndoClick}
                     >
                         <Icon component={UndoIcon} />
-                        <span>Undo</span>
+                        <span>撤销</span>
                     </Button>
                 </CVATTooltip>
-                <CVATTooltip overlay={`Redo: ${redoAction} ${redoShortcut}`}>
+                <CVATTooltip overlay={`恢复: ${redoAction} ${redoShortcut}`}>
                     <Button
                         style={{ pointerEvents: redoAction ? 'initial' : 'none', opacity: redoAction ? 1 : 0.5 }}
                         type='link'
@@ -140,19 +140,19 @@ function LeftGroup(props: Props): JSX.Element {
                         onClick={onRedoClick}
                     >
                         <Icon component={RedoIcon} />
-                        Redo
+                        恢复
                     </Button>
                 </CVATTooltip>
                 {includesDoneButton ? (
-                    <CVATTooltip overlay={`Press "${drawShortcut}" to finish`}>
+                    <CVATTooltip overlay={`按下 "${drawShortcut}" 完成 `}>
                         <Button type='link' className='cvat-annotation-header-done-button cvat-annotation-header-button' onClick={onFinishDraw}>
                             <CheckCircleOutlined />
-                            Done
+                            完成
                         </Button>
                     </CVATTooltip>
                 ) : null}
                 {includesToolsBlockerButton ? (
-                    <CVATTooltip overlay={`Press "${switchToolsBlockerShortcut}" to postpone running the algorithm `}>
+                    <CVATTooltip overlay={`按下快捷键 "${switchToolsBlockerShortcut}" 可延迟执行算法运算 `}>
                         <Button
                             type='link'
                             className={`cvat-annotation-header-block-tool-button cvat-annotation-header-button ${
@@ -161,7 +161,7 @@ function LeftGroup(props: Props): JSX.Element {
                             onClick={onSwitchToolsBlockerState}
                         >
                             <StopOutlined />
-                            Block
+                            锁定
                         </Button>
                     </CVATTooltip>
                 ) : null}

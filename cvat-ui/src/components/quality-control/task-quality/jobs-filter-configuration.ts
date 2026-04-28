@@ -8,18 +8,24 @@ import { config as jobPageFilterConfig } from 'components/jobs-page/jobs-filter-
 
 export const config: Partial<Config> = {
     fields: {
-        ..._.pick(
-            jobPageFilterConfig.fields, ['state', 'stage', 'assignee', 'updatedDate', 'id', 'task_name', 'task_id'],
-        ),
+        ..._.pick(jobPageFilterConfig.fields, [
+            'state',
+            'stage',
+            'assignee',
+            'updatedDate',
+            'id',
+            'task_name',
+            'task_id',
+        ]),
         type: {
-            label: 'Job Type',
+            label: '作业类型',
             type: 'select',
             operators: ['select_equals'],
             valueSources: ['value'],
             fieldSettings: {
                 listValues: [
-                    { value: 'annotation', title: 'Annotation' },
-                    { value: 'consensus_replica', title: 'Consensus replica' },
+                    { value: 'annotation', title: '标注' },
+                    { value: 'consensus_replica', title: '共识副本' },
                 ],
             },
         },

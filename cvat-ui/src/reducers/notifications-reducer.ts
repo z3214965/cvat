@@ -267,7 +267,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         login: {
-                            message: 'Could not login on the server',
+                            message: '无法登录服务器',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-login-failed',
@@ -284,7 +284,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         logout: {
-                            message: 'Could not logout from the server',
+                            message: '无法从服务器注销',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -300,7 +300,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         register: {
-                            message: 'Could not register on the server',
+                            message: '无法在服务器上注册',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -317,8 +317,8 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         auth: {
                             ...state.messages.auth,
                             registerDone: {
-                                message: `To use your account, you need to confirm the email address. \
-                                We have sent an email with a confirmation link to ${action.payload.userEmail}.`,
+                                message: `要使用您的账户，您需要确认电子邮件地址。 \
+                                我们已向 ${action.payload.userEmail} 发送了一封包含确认链接的电子邮件。`,
                             },
                         },
                     },
@@ -337,7 +337,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.messages.auth,
                         changePasswordDone: {
-                            message: 'New password has been saved.',
+                            message: '新密码已保存。',
                             className: 'cvat-notification-notice-change-password-success',
                         },
                     },
@@ -352,7 +352,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         changePassword: {
-                            message: 'Could not change password',
+                            message: '无法更改密码',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-change-password-failed',
@@ -369,8 +369,8 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.messages.auth,
                         requestPasswordResetDone: {
-                            message: `Check your email for a link to reset your password.
-                            If it doesn't appear within a few minutes, check your spam folder.`,
+                            message: `请查看您的电子邮件，以获取重置密码的链接。
+                            如果几分钟内未收到，请检查您的垃圾邮件文件夹。`,
                         },
                     },
                 },
@@ -384,7 +384,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         requestPasswordReset: {
-                            message: 'Could not reset password on the server.',
+                            message: '无法在服务器上重置密码。',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -400,7 +400,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.messages.auth,
                         resetPasswordDone: {
-                            message: 'Password has been reset with the new password.',
+                            message: '密码已重置为新密码。',
                         },
                     },
                 },
@@ -414,7 +414,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         resetPassword: {
-                            message: 'Could not set new password on the server.',
+                            message: '无法在服务器上设置新密码。',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -430,7 +430,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         updateUser: {
-                            message: 'Could not update user information.',
+                            message: '无法更新用户信息。',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -446,7 +446,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     serverAPI: {
                         ...state.errors.serverAPI,
                         fetching: {
-                            message: 'Could not receive server schema',
+                            message: '无法获取服务器配置方案',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -463,7 +463,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         invitations: {
                             ...state.messages.invitations,
                             newInvitations: {
-                                message: 'You\'ve received an invitation to join an organization! [Click here](/invitations) to get details.',
+                                message: '你已收到加入组织的邀请！[点击此处](/invitations) 查看详情。',
                             },
                         },
                     },
@@ -479,7 +479,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     invitations: {
                         ...state.errors.invitations,
                         fetching: {
-                            message: 'Could not get invitations',
+                            message: '无法获取邀请函',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-get-invitations-failed',
@@ -496,7 +496,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     invitations: {
                         ...state.errors.invitations,
                         acceptingInvitation: {
-                            message: 'Could not accept invitation',
+                            message: '无法接受邀请',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-accept-organization-invitation-failed',
@@ -513,7 +513,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     invitations: {
                         ...state.errors.invitations,
                         decliningInvitation: {
-                            message: 'Could not decline invitation',
+                            message: '无法拒绝邀请',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-decline-organization-invitation-failed',
@@ -530,7 +530,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     invitations: {
                         ...state.errors.invitations,
                         resendingInvitation: {
-                            message: 'Could not resend invitation',
+                            message: '无法重新发送邀请',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-resend-organization-invitation-failed',
@@ -547,7 +547,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     invitations: {
                         ...state.messages.invitations,
                         resendingInvitation: {
-                            message: 'Invitation was sent successfully',
+                            message: '邀请已发送成功',
                         },
                     },
                 },
@@ -563,7 +563,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         ...state.errors.exporting,
                         dataset: {
                             message:
-                                'Could not export dataset for the ' +
+                                '无法导出数据集 ' +
                                 `[${instanceType} ${instance.id}](/${instanceType}s/${instance.id})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
@@ -573,15 +573,12 @@ export default function (state = defaultState, action: AnyAction): Notifications
             };
         }
         case ExportActionTypes.EXPORT_DATASET_SUCCESS: {
-            const {
-                instance, instanceType, resource, target,
-            } = action.payload;
+            const { instance, instanceType, resource, target } = action.payload;
             let description = `Export ${resource} for ${instanceType} ${instance.id} is finished. `;
             if (target === StorageLocation.LOCAL) {
-                description += 'You can [download it here](/requests).';
+                description += '你可[在此处下载](/requests)。';
             } else if (target === StorageLocation.CLOUD_STORAGE) {
-                description =
-                    `Export ${resource} for ${instanceType} ${instance.id} has been uploaded to cloud storage.`;
+                description = `${instanceType} ${instance.id} 的 ${resource} 导出文件已上传至云存储。`;
             }
             return {
                 ...state,
@@ -590,7 +587,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     exporting: {
                         ...state.messages.exporting,
                         dataset: {
-                            message: 'Export is finished',
+                            message: '导出已完成',
                             duration: config.REQUEST_SUCCESS_NOTIFICATION_DURATION,
                             className: `cvat-notification-notice-export-${instanceType.split(' ')[0]}-finished`,
                             description,
@@ -608,8 +605,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     exporting: {
                         ...state.errors.exporting,
                         backup: {
-                            message:
-                                `Could not export the ${instanceType} №${instance.id}`,
+                            message: `无法导出 ${instanceType} №${instance.id} `,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -618,15 +614,12 @@ export default function (state = defaultState, action: AnyAction): Notifications
             };
         }
         case ExportActionTypes.EXPORT_BACKUP_SUCCESS: {
-            const {
-                instance, instanceType, target,
-            } = action.payload;
-            let description = `Backup for the ${instanceType} ${instance.id} is finished. `;
+            const { instance, instanceType, target } = action.payload;
+            let description = `${instanceType} ${instance.id} 的备份已完成。 `;
             if (target === StorageLocation.LOCAL) {
-                description += 'You can [download it here](/requests).';
+                description += '你可以[在此处下载](/requests)。';
             } else if (target === StorageLocation.CLOUD_STORAGE) {
-                description =
-                    `Backup for the ${instanceType} ${instance.id} has been uploaded to cloud storage.`;
+                description = `${instanceType} ${instance.id}的备份已上传至云存储。`;
             }
             return {
                 ...state,
@@ -635,7 +628,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     exporting: {
                         ...state.messages.exporting,
                         backup: {
-                            message: 'Backup export is finished',
+                            message: '备份导出已完成',
                             duration: config.REQUEST_SUCCESS_NOTIFICATION_DURATION,
                             description,
                         },
@@ -645,16 +638,14 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ImportActionTypes.IMPORT_DATASET_SUCCESS: {
             const { instance, resource } = action.payload;
-            let description = resource === 'annotation' ?
-                'Annotations have been loaded to the ' :
-                'Dataset was imported to the ';
+            let description = resource === 'annotation' ? '标注已加载到 ' : '数据集已导入到 ';
             const instanceType = getInstanceType(instance);
             if (instanceType === 'project') {
-                description += `[Project #${instance.id}](/projects/${instance.id})`;
+                description += `[项目 #${instance.id}](/projects/${instance.id})`;
             } else if (instanceType === 'task') {
-                description += `[Task #${instance.id}](/tasks/${instance.id})`;
+                description += `[任务 #${instance.id}](/tasks/${instance.id})`;
             } else {
-                description += `[Job #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id})`;
+                description += `[作业 #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id})`;
             }
 
             return {
@@ -664,7 +655,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     importing: {
                         ...state.messages.importing,
                         [resource]: {
-                            message: 'Annotations import is finished',
+                            message: '标注导入已完成',
                             duration: config.REQUEST_SUCCESS_NOTIFICATION_DURATION,
                             description,
                         },
@@ -674,10 +665,11 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ImportActionTypes.IMPORT_DATASET_FAILED: {
             const { instance, resource } = action.payload;
-            const message = resource === 'annotation' ?
-                'Could not upload annotation for the ' +
-                `[task #${instance?.taskId || instance.id}](/tasks/${instance?.taskId || instance.id})` :
-                `Could not import dataset to the [project #${instance.id}](/projects/${instance.id})`;
+            const message =
+                resource === 'annotation'
+                    ? '无法上传标注 ' +
+                      `[任务 #${instance?.taskId || instance.id}](/tasks/${instance?.taskId || instance.id})`
+                    : `无法将数据集导入到 [项目 #${instance.id}](/projects/${instance.id})`;
             return {
                 ...state,
                 errors: {
@@ -688,7 +680,8 @@ export default function (state = defaultState, action: AnyAction): Notifications
                             message,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
-                            className: 'cvat-notification-notice-' +
+                            className:
+                                'cvat-notification-notice-' +
                                 `${resource === 'annotation' ? 'load-annotation' : 'import-dataset'}-failed`,
                         },
                     },
@@ -697,8 +690,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ImportActionTypes.IMPORT_BACKUP_SUCCESS: {
             const { instanceId, instanceType } = action.payload;
-            const description = `The ${instanceType} has been restored successfully.
-                Click [here](/${instanceType}s/${instanceId}) to open`;
+            const description = `${instanceType}已成功恢复。点击[此处](/${instanceType}s/${instanceId}) 打开`;
             return {
                 ...state,
                 messages: {
@@ -706,7 +698,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     importing: {
                         ...state.messages.importing,
                         backup: {
-                            message: 'Import backup is finished',
+                            message: '导入备份已完成',
                             duration: config.REQUEST_SUCCESS_NOTIFICATION_DURATION,
                             description,
                         },
@@ -723,8 +715,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     importing: {
                         ...state.errors.importing,
                         backup: {
-                            message:
-                                `Could not restore ${instanceType} backup.`,
+                            message: `无法恢复 ${instanceType} 备份。`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -740,7 +731,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     tasks: {
                         ...state.errors.tasks,
                         fetching: {
-                            message: 'Could not fetch tasks',
+                            message: '无法获取任务',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -757,7 +748,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     tasks: {
                         ...state.errors.tasks,
                         deleting: {
-                            message: `Could not delete the [task #${taskID}](/tasks/${taskID})`,
+                            message: `无法删除[任务 #${taskID}](/tasks/${taskID})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-delete-task-failed',
@@ -768,10 +759,10 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case TasksActionTypes.UPDATE_TASK_FAILED: {
             const { taskId, error, updateType } = action.payload;
-            let message = `Could not update the [task #${taskId}](/tasks/${taskId})`;
+            let message = `不能更新[任务 #${taskId}](/tasks/${taskId})`;
 
             if (updateType === ResourceUpdateTypes.UPDATE_ORGANIZATION) {
-                message = `Could not transfer the [task #${taskId}](/tasks/${taskId}) to the new workspace`;
+                message = `无法传输[任务 #${taskId}](/tasks/${taskId})到新的工作区`;
             }
 
             return {
@@ -795,10 +786,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
             let message = '';
             const instanceType = getInstanceType(instance);
             if (instanceType === 'job') {
-                message =
-                    `Consensus [job #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id}) has been merged`;
+                message = `共识 [作业 #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id})已被合并`;
             } else if (instanceType === 'task') {
-                message = `Consensus jobs in the [task #${instance.id}](/tasks/${instance.id}) have been merged`;
+                message = `[任务 #${instance.id}](/tasks/${instance.id})内的共识作业已完成合并。`;
             }
             return {
                 ...state,
@@ -818,10 +808,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
             let message = '';
             const instanceType = getInstanceType(instance);
             if (instanceType === 'job') {
-                message =
-                    `Could not merge the [job #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id})`;
+                message = `无法合并[作业 #${instance.id}](/tasks/${instance.taskId}/jobs/${instance.id})`;
             } else if (instanceType === 'task') {
-                message = `Could not merge the [task #${instance.id}](/tasks/${instance.id})`;
+                message = `无法合并[任务 #${instance.id}](/tasks/${instance.id})`;
             }
             return {
                 ...state,
@@ -847,7 +836,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     tasks: {
                         ...state.errors.tasks,
                         creating: {
-                            message: 'Could not create the task',
+                            message: '无法创建任务',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-task-failed',
@@ -864,7 +853,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     projects: {
                         ...state.errors.projects,
                         fetching: {
-                            message: 'Could not fetch projects',
+                            message: '无法获取项目',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -880,7 +869,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     projects: {
                         ...state.errors.projects,
                         creating: {
-                            message: 'Could not create the project',
+                            message: '无法创建项目',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-project-failed',
@@ -898,7 +887,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     projects: {
                         ...state.errors.projects,
                         updating: {
-                            message: `Could not delete [project #${projectId}](/project/${projectId})`,
+                            message: `无法删除[项目 #${projectId}](/project/${projectId})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-delete-project-failed',
@@ -909,10 +898,10 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ProjectsActionTypes.UPDATE_PROJECT_FAILED: {
             const { projectId, error, updateType } = action.payload;
-            let message = `Could not update the [project #${projectId}](/projects/${projectId})`;
+            let message = `无法更新[项目 #${projectId}](/projects/${projectId})`;
 
             if (updateType === ResourceUpdateTypes.UPDATE_ORGANIZATION) {
-                message = `Could not transfer the [project #${projectId}](/projects/${projectId}) to the new workspace`;
+                message = `无法传输[项目 #${projectId}](/projects/${projectId})到新的工作区`;
             }
 
             return {
@@ -939,7 +928,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     formats: {
                         ...state.errors.formats,
                         fetching: {
-                            message: 'Could not get formats from the server',
+                            message: '无法从服务器获取格式信息',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -955,7 +944,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     about: {
                         ...state.errors.about,
                         fetching: {
-                            message: 'Could not get info about the server',
+                            message: '无法获取服务器信息',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -973,8 +962,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         models: {
                             ...state.messages.models,
                             inferenceDone: {
-                                message: 'Automatic annotation accomplished for the ' +
-                                `[task #${taskID}](/tasks/${taskID})`,
+                                message: `自动标注已完成[任务 #${taskID}](/tasks/${taskID})`,
                             },
                         },
                     },
@@ -997,7 +985,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     models: {
                         ...state.errors.models,
                         metaFetching: {
-                            message: 'Could not fetch models meta information',
+                            message: '无法获取模型元信息',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1014,7 +1002,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     models: {
                         ...state.errors.models,
                         inferenceStatusFetching: {
-                            message: `Fetching inference status for the [task #${taskID}](/tasks/${taskID})`,
+                            message: `获取推理状态[任务 #${taskID}](/tasks/${taskID})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1030,7 +1018,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     models: {
                         ...state.errors.models,
                         fetching: {
-                            message: 'Could not get models from the server',
+                            message: '无法从服务器获取模型',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1047,7 +1035,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     models: {
                         ...state.errors.models,
                         starting: {
-                            message: `Could not infer model for the [task #${taskID}](/tasks/${taskID})`,
+                            message: `无法推断出模型[任务 #${taskID}](/tasks/${taskID})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1064,7 +1052,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     models: {
                         ...state.errors.models,
                         canceling: {
-                            message: `Could not cancel model inference for the [task #${taskID}](/tasks/${taskID})`,
+                            message: `无法取消模型的推理[任务 #${taskID}](/tasks/${taskID})`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1080,7 +1068,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         jobFetching: {
-                            message: 'Error during fetching a job',
+                            message: '获取任务时出错',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-fetch-job-failed',
@@ -1097,7 +1085,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         frameFetching: {
-                            message: `Could not receive frame ${action.payload.number}`,
+                            message: `无法接收帧 ${action.payload.number}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1113,7 +1101,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         saving: {
-                            message: 'Could not save annotations',
+                            message: '无法保存标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-save-annotations-failed',
@@ -1130,7 +1118,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         updating: {
-                            message: 'Could not update annotations',
+                            message: '不能更新标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-update-annotations-failed',
@@ -1147,7 +1135,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         creating: {
-                            message: 'Could not create annotations',
+                            message: '不能创建标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1163,7 +1151,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         merging: {
-                            message: 'Could not merge annotations',
+                            message: '不能合并标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1179,7 +1167,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         grouping: {
-                            message: 'Could not group annotations',
+                            message: '无法分组标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1195,7 +1183,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         joining: {
-                            message: 'Could not join annotations',
+                            message: '无法加入标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1211,7 +1199,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         slicing: {
-                            message: 'Could not slice the object',
+                            message: '无法分割该标注对象',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1227,7 +1215,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         splitting: {
-                            message: 'Could not split the track',
+                            message: '无法拆分该追踪轨迹',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1243,7 +1231,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         removing: {
-                            message: 'Could not remove the object',
+                            message: '不能删除对象',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-remove-object-failed',
@@ -1260,7 +1248,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         propagating: {
-                            message: 'Could not propagate the object',
+                            message: '无法扩散该标注对象',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1276,7 +1264,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         collectingStatistics: {
-                            message: 'Could not collect annotations statistics',
+                            message: '无法收集标注统计信息',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1287,10 +1275,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
         case AnnotationActionTypes.UPLOAD_JOB_ANNOTATIONS_FAILED: {
             const { job, error } = action.payload;
 
-            const {
-                id: jobID,
-                taskId: taskID,
-            } = job;
+            const { id: jobID, taskId: taskID } = job;
 
             return {
                 ...state,
@@ -1299,8 +1284,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         uploadAnnotations: {
-                            message:
-                                `Could not upload annotations for the [job ${jobID}](/tasks/${taskID}/jobs/${jobID})`,
+                            message: `无法上传标注[作业 ${jobID}](/tasks/${taskID}/jobs/${jobID})`,
                             reason: error.toString(),
                             className: 'cvat-notification-notice-upload-annotations-fail',
                         },
@@ -1316,7 +1300,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         removeAnnotations: {
-                            message: 'Could not remove annotations',
+                            message: '不能删除标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1332,7 +1316,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         fetchingAnnotations: {
-                            message: 'Could not fetch annotations',
+                            message: '无法获取标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1348,7 +1332,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         redo: {
-                            message: 'Could not redo',
+                            message: '无法重做',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1364,7 +1348,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         undo: {
-                            message: 'Could not undo',
+                            message: '无法撤销',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1380,7 +1364,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         search: {
-                            message: 'Could not execute search annotations',
+                            message: '无法执行搜索标注',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1396,7 +1380,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         savingLogs: {
-                            message: 'Could not send logs to the server',
+                            message: '无法将日志发送到服务器',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1412,7 +1396,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     boundaries: {
                         ...state.errors.annotation,
                         resetError: {
-                            message: 'Could not reset the state',
+                            message: '无法重置状态',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1428,7 +1412,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     userAgreements: {
                         ...state.errors.userAgreements,
                         fetching: {
-                            message: 'Could not get user agreements from the server',
+                            message: '无法从服务器获取用户协议',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1444,7 +1428,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         finishingIssue: {
-                            message: 'Could not open a new issue',
+                            message: '无法创建新问题',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1460,7 +1444,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         resolvingIssue: {
-                            message: 'Could not resolve the issue',
+                            message: '未能解决问题',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1476,7 +1460,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         reopeningIssue: {
-                            message: 'Could not reopen the issue',
+                            message: '无法重新打开该问题',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1492,7 +1476,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     requests: {
                         ...state.errors.requests,
                         fetching: {
-                            message: 'Could not fetch requests from the server',
+                            message: '无法从服务器获取请求',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1508,7 +1492,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     requests: {
                         ...state.errors.requests,
                         canceling: {
-                            message: 'Could not cancel the request',
+                            message: '无法取消请求',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1524,7 +1508,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     requests: {
                         ...state.errors.requests,
                         deleting: {
-                            message: 'Could not delete the request',
+                            message: '不能删除请求',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1540,7 +1524,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         commentingIssue: {
-                            message: 'Could not comment the issue',
+                            message: '无法评论该问题',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1556,7 +1540,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         submittingReview: {
-                            message: `Could not submit review for the job ${action.payload.jobId}`,
+                            message: `无法为作业 #${action.payload.jobId} 提交审核。`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1572,7 +1556,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     review: {
                         ...state.errors.review,
                         deletingIssue: {
-                            message: 'Could not remove issue from the server',
+                            message: '无法从服务器中移除问题',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1604,7 +1588,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         jobFetching: {
-                            message: 'Could not receive image data',
+                            message: '无法接收图片数据',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-fetch-frame-data-from-the-server-failed',
@@ -1621,7 +1605,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         canvas: {
-                            message: 'Canvas error occurred',
+                            message: '画布错误发生',
                             reason: action.payload.error,
                             shouldLog: true,
                             className: 'cvat-notification-notice-canvas-error-occurred',
@@ -1638,7 +1622,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         deleteFrame: {
-                            message: 'Could not delete frame',
+                            message: '不能删除帧',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1654,7 +1638,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     annotation: {
                         ...state.errors.annotation,
                         restoreFrame: {
-                            message: 'Could not restore frame',
+                            message: '无法恢复帧',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1670,7 +1654,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         fetching: {
-                            message: 'Could not fetch cloud storage',
+                            message: '无法获取云存储',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                         },
@@ -1686,7 +1670,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         creating: {
-                            message: 'Could not create the cloud storage',
+                            message: '无法创建云存储',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-cloud-storage-failed',
@@ -1704,7 +1688,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         updating: {
-                            message: `Could not update cloud storage #${cloudStorage.id}`,
+                            message: `不能更新云存储 #${cloudStorage.id}`,
                             reason: error.toString(),
                             className: 'cvat-notification-notice-update-cloud-storage-failed',
                         },
@@ -1721,8 +1705,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         deleting: {
-                            message:
-                                `Could not delete cloud storage ${cloudStorageID}`,
+                            message: `不能删除云存储 #${cloudStorageID}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-delete-cloud-storage-failed',
@@ -1740,7 +1723,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         fetching: {
-                            message: `Could not fetch content for cloud storage #${cloudStorageID}`,
+                            message: `无法获取云存储 #${cloudStorageID} 的内容`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-fetch-cloud-storage-content-failed',
@@ -1758,7 +1741,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         fetching: {
-                            message: `Could not fetch cloud storage #${cloudStorageID} status`,
+                            message: `无法获取云存储 #${cloudStorageID} 的状态`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-fetch-cloud-storage-status-failed',
@@ -1777,7 +1760,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     cloudStorages: {
                         ...state.errors.cloudStorages,
                         fetching: {
-                            message: `Could not fetch preview for cloud storage #${cloudStorageID}`,
+                            message: `无法获取云存储 #${cloudStorageID} 的预览`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-fetch-cloud-storage-preview-failed',
@@ -1794,7 +1777,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         creating: {
-                            message: `Could not create organization ${action.payload.slug}`,
+                            message: `无法创建组织 ${action.payload.slug}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-organization-failed',
@@ -1812,7 +1795,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         updating: {
-                            message: `Could not update organization "${slug}"`,
+                            message: `不能更新组织 "${slug}"`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-update-organization-failed',
@@ -1829,7 +1812,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         activation: {
-                            message: `Could not activate organization ${action.payload.slug || ''}`,
+                            message: `不能激活组织 ${action.payload.slug || ''}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-activate-organization-failed',
@@ -1846,7 +1829,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         deleting: {
-                            message: `Could not remove organization ${action.payload.slug}`,
+                            message: `不能删除组织 ${action.payload.slug}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-remove-organization-failed',
@@ -1863,7 +1846,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         inviting: {
-                            message: 'Could not invite organization members',
+                            message: '无法邀请组织成员',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-invite-organization-members-failed',
@@ -1880,7 +1863,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         inviting: {
-                            message: `Could not invite this member "${action.payload.email}" to the organization`,
+                            message: `无法将此成员 "${action.payload.email}" 邀请到组织中`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-invite-organization-member-failed',
@@ -1897,7 +1880,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         leaving: {
-                            message: 'Could not leave the organization',
+                            message: '无法离开该组织',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-leave-organization-failed',
@@ -1914,7 +1897,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         removingMembership: {
-                            message: `Could not remove member "${action.payload.username}" from the organization`,
+                            message: `无法从组织中移除成员 "${action.payload.username}"`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-remove-organization-member-failed',
@@ -1932,7 +1915,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         updatingMembership: {
-                            message: `Could not assign role "${role}" to the user "${username}"`,
+                            message: ` 无法将角色"${role}"分配给用户"${username}"`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-update-organization-membership-failed',
@@ -1950,7 +1933,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     organizations: {
                         ...state.errors.organizations,
                         fetching: {
-                            message: 'Could not fetch the list of organizations',
+                            message: '无法获取组织列表',
                             reason: error,
                             shouldLog: shouldLog(error),
                         },
@@ -1966,7 +1949,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     jobs: {
                         ...state.errors.jobs,
                         fetching: {
-                            message: 'Could not fetch a list of jobs',
+                            message: '无法获取作业列表',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-get-jobs-failed',
@@ -1983,7 +1966,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     jobs: {
                         ...state.errors.jobs,
                         creating: {
-                            message: 'Could not create job',
+                            message: '无法创建作业',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-job-failed',
@@ -2000,7 +1983,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     jobs: {
                         ...state.errors.jobs,
                         updating: {
-                            message: 'Could not update job',
+                            message: '无法更新作业',
                             reason: action.payload.error.toString(),
                             className: 'cvat-notification-notice-update-job-failed',
                         },
@@ -2017,7 +2000,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     jobs: {
                         ...state.errors.jobs,
                         deleting: {
-                            message: `Could not delete the job #${jobID}`,
+                            message: `不能删除作业 #${jobID}`,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-delete-job-failed',
@@ -2034,7 +2017,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     webhooks: {
                         ...state.errors.webhooks,
                         fetching: {
-                            message: 'Could not fetch a list of webhooks',
+                            message: '无法获取webhooks列表',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-get-webhooks-failed',
@@ -2051,7 +2034,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     webhooks: {
                         ...state.errors.webhooks,
                         creating: {
-                            message: 'Could not create webhook',
+                            message: '不能创建webhook',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-webhook-failed',
@@ -2068,7 +2051,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     webhooks: {
                         ...state.errors.webhooks,
                         updating: {
-                            message: 'Could not update webhook',
+                            message: '不能更新webhook',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-update-webhook-failed',
@@ -2085,7 +2068,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     webhooks: {
                         ...state.errors.webhooks,
                         deleting: {
-                            message: 'Could not delete webhook',
+                            message: '不能删除webhook',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-delete-webhook-failed',
@@ -2102,7 +2085,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     bulkOperation: {
                         ...state.errors.bulkOperation,
                         processing: {
-                            message: 'Bulk operation failed.',
+                            message: '批量操作失败。',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-bulk-operation-failed',
@@ -2122,7 +2105,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         getApiTokens: {
-                            message: 'Could not get API tokens',
+                            message: '无法获取API令牌',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-get-api-tokens-failed',
@@ -2139,7 +2122,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         createApiToken: {
-                            message: 'Could not create API token',
+                            message: '无法创建API令牌',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-create-api-token-failed',
@@ -2156,7 +2139,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         updateApiToken: {
-                            message: 'Could not update API token',
+                            message: '无法更新API令牌',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-update-api-token-failed',
@@ -2173,7 +2156,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         revokeApiToken: {
-                            message: 'Could not revoke API token',
+                            message: '无法撤销API令牌',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-revoke-api-token-failed',
