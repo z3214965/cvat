@@ -54,9 +54,9 @@ docker run -d --privileged --name cvat \
   -v /var/run/docker.sock:/var/run/docker.sock \
   almalinux:10.1 tail -f /dev/null
 
-docker build -f Dockerfile.ui -t cvat/ui:v20260422 .
-docker save cvat/ui:v20260422 > cvat_ui_v20260422.tar
-docker load --input cvat_ui_v20260422.tar
+docker build -f Dockerfile.ui -t cvat/ui:v20260430 .
+docker save cvat/ui:v20260430 > cvat_ui_v20260422.tar
+docker load --input cvat_ui_v20260430.tar
 
 
 docker load --input cvat_server_v2.62.0.tar
@@ -74,9 +74,9 @@ export CVAT_HOST=192.168.1.17
 export CVAT_HOST=47.96.137.124
 export CVAT_POSTGRES_PASSWORD=diorszhang1987.
 
-CVAT_VERSION=v2.62.0 docker-compose up -d  /  docker-compose down -v
+CVAT_VERSION=v2.64.0 docker-compose up -d  /  docker-compose down -v
 
-CVAT_VERSION=v2.62.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml up -d /  docker-compose -f docker-compose.yml -f docker-compose.external_db.yml down -v
+CVAT_VERSION=v2.64.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml up -d /  docker-compose -f docker-compose.yml -f docker-compose.external_db.yml down -v
 
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 admin/superuser123456789

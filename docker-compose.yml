@@ -241,8 +241,8 @@ services:
 
   cvat_ui:
     container_name: cvat_ui
-    image: cvat/ui:${CVAT_VERSION:-dev}
-    # image: cvat/ui:v20260422
+    # image: cvat/ui:${CVAT_VERSION:-dev}
+    image: cvat/ui:v20260430
     restart: always
     depends_on:
       - cvat_server
