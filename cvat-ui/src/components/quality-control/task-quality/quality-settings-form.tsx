@@ -102,7 +102,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
     );
 
     const jobValidationTooltip = makeTooltip(
-        makeTooltipFragment('每个作业的最大验证次数', settings.descriptions.maxValidationsPerJob),
+        makeTooltipFragment('每个作业的最大校验次数', settings.descriptions.maxValidationsPerJob),
     );
 
     const shapeComparisonTooltip = makeTooltip(
@@ -166,7 +166,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                     <Form.Item
                         name='targetMetric'
                         label='目标指标'
-                        rules={[{ required: true, message: 'This field is required' }]}
+                        rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <Select
                             style={{ width: '70%' }}
@@ -187,7 +187,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='targetMetricThreshold'
-                        label='Target metric threshold'
+                        label='目标指标阈值'
                         rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <InputNumber min={0} max={100} precision={0} />
@@ -222,7 +222,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='jobFilter'
-                        label='作业筛选条件'
+                        label='作业筛选器'
                         trigger='onApplyFilter'
                     >
                         {/* value and onApplyFilter will be automatically provided by Form.Item */}
@@ -246,7 +246,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
             <Divider />
             <Row className='cvat-quality-settings-title'>
                 <Text strong>
-                    作业验证
+                    作业校验
                 </Text>
                 <CVATTooltip title={jobValidationTooltip} className='cvat-settings-tooltip' overlayStyle={{ maxWidth: '500px' }}>
                     <QuestionCircleOutlined
@@ -258,7 +258,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='maxValidationsPerJob'
-                        label='每个作业的最大验证次数'
+                        label='每个作业的最大校验次数'
                         rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <InputNumber
@@ -315,7 +315,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='oksSigma'
-                        label='OKS 西格玛(包围盒边长占比 %)'
+                        label='目标关键点相似度(包围盒边长占比 %)'
                         rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <InputNumber min={0} max={100} precision={0} />
@@ -337,7 +337,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='pointSizeBase'
-                        label='基础点尺寸'
+                        label='基准点大小'
                         rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <Select
@@ -369,7 +369,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='lineThickness'
-                        label='相对粗细(画面边长占比 %)'
+                        label='线条粗细(画面边长占比 %)'
                         rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <InputNumber min={0} max={1000} precision={0} />

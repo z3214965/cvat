@@ -8,8 +8,12 @@ import { RegisterData } from 'components/register-page/register-form';
 import { ensureError } from 'utils/error-handling';
 import { fetchAllPaginated } from 'utils/pagination';
 import {
-    getCore, User, ApiToken, ApiTokenModifiableFields,
-    ApiTokensFilter, SerializedApiToken,
+    getCore,
+    User,
+    ApiToken,
+    ApiTokenModifiableFields,
+    ApiTokensFilter,
+    SerializedApiToken,
 } from 'cvat-core-wrapper';
 import { ChangePasswordData } from 'reducers';
 
@@ -60,13 +64,11 @@ export const authActions = {
     authenticatedFailed: (error: any) => createAction(AuthActionTypes.AUTHENTICATED_FAILED, { error }),
     login: () => createAction(AuthActionTypes.LOGIN),
     loginSuccess: (user: User) => createAction(AuthActionTypes.LOGIN_SUCCESS, { user }),
-    loginFailed: (error: any, hasEmailVerificationBeenSent = false) => (
-        createAction(AuthActionTypes.LOGIN_FAILED, { error, hasEmailVerificationBeenSent })
-    ),
+    loginFailed: (error: any, hasEmailVerificationBeenSent = false) =>
+        createAction(AuthActionTypes.LOGIN_FAILED, { error, hasEmailVerificationBeenSent }),
     register: () => createAction(AuthActionTypes.REGISTER),
-    registerSuccess: (
-        payload: { isVerified: boolean, userEmail: string },
-    ) => createAction(AuthActionTypes.REGISTER_SUCCESS, payload),
+    registerSuccess: (payload: { isVerified: boolean; userEmail: string }) =>
+        createAction(AuthActionTypes.REGISTER_SUCCESS, payload),
     registerFailed: (error: any) => createAction(AuthActionTypes.REGISTER_FAILED, { error }),
     logout: () => createAction(AuthActionTypes.LOGOUT),
     logoutSuccess: () => createAction(AuthActionTypes.LOGOUT_SUCCESS),
@@ -84,9 +86,8 @@ export const authActions = {
     updateUserSuccess: (user: User) => createAction(AuthActionTypes.UPDATE_USER_SUCCESS, { user }),
     updateUserFailed: (error: unknown) => createAction(AuthActionTypes.UPDATE_USER_FAILED, { error }),
     getApiTokens: () => createAction(AuthActionTypes.GET_API_TOKENS),
-    getApiTokensSuccess: (tokens: ApiToken[], count: number) => (
-        createAction(AuthActionTypes.GET_API_TOKENS_SUCCESS, { tokens, count })
-    ),
+    getApiTokensSuccess: (tokens: ApiToken[], count: number) =>
+        createAction(AuthActionTypes.GET_API_TOKENS_SUCCESS, { tokens, count }),
     getApiTokensFailed: (error: Error) => createAction(AuthActionTypes.GET_API_TOKENS_FAILED, { error }),
     createApiToken: () => createAction(AuthActionTypes.CREATE_API_TOKEN),
     createApiTokenSuccess: (token: ApiToken) => createAction(AuthActionTypes.CREATE_API_TOKEN_SUCCESS, { token }),
@@ -95,59 +96,54 @@ export const authActions = {
     updateApiTokenSuccess: (token: ApiToken) => createAction(AuthActionTypes.UPDATE_API_TOKEN_SUCCESS, { token }),
     updateApiTokenFailed: (error: Error) => createAction(AuthActionTypes.UPDATE_API_TOKEN_FAILED, { error }),
     revokeApiToken: () => createAction(AuthActionTypes.REVOKE_API_TOKEN),
-    revokeApiTokenSuccess: (token: ApiToken) => (
-        createAction(AuthActionTypes.REVOKE_API_TOKEN_SUCCESS, { token })
-    ),
+    revokeApiTokenSuccess: (token: ApiToken) => createAction(AuthActionTypes.REVOKE_API_TOKEN_SUCCESS, { token }),
     revokeApiTokenFailed: (error: Error) => createAction(AuthActionTypes.REVOKE_API_TOKEN_FAILED, { error }),
 };
 
 export type AuthActions = ActionUnion<typeof authActions>;
 
-export const registerAsync = (
-    registerData: RegisterData,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.register());
+export const registerAsync =
+    (registerData: RegisterData): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.register());
 
-    const {
-        username,
-        firstName,
-        lastName,
-        email,
-        password,
-        confirmations,
-    } = registerData;
+        const { username, firstName, lastName, email, password, confirmations } = registerData;
 
-    try {
-        const registeredUser = await cvat.server.register(
-            username,
-            firstName,
-            lastName,
-            email,
-            password,
-            confirmations,
-        );
+        try {
+            const registeredUser = await cvat.server.register(
+                username,
+                firstName,
+                lastName,
+                email,
+                password,
+                confirmations,
+            );
 
-        dispatch(authActions.registerSuccess({
-            userEmail: registeredUser.email,
-            isVerified: !registeredUser.email_verification_required,
-        }));
-    } catch (error) {
-        dispatch(authActions.registerFailed(error));
-    }
-};
+            dispatch(
+                authActions.registerSuccess({
+                    userEmail: registeredUser.email,
+                    isVerified: !registeredUser.email_verification_required,
+                }),
+            );
+        } catch (error) {
+            dispatch(authActions.registerFailed(error));
+        }
+    };
 
-export const loginAsync = (credential: string, password: string): ThunkAction => async (dispatch) => {
-    dispatch(authActions.login());
+export const loginAsync =
+    (credential: string, password: string): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.login());
 
-    try {
-        await cvat.server.login(credential, password);
-        const users = await cvat.users.get({ self: true });
-        dispatch(authActions.loginSuccess(users[0]));
-    } catch (error) {
-        const hasEmailVerificationBeenSent = error.message.includes('Unverified email');
-        dispatch(authActions.loginFailed(error, hasEmailVerificationBeenSent));
-    }
-};
+        try {
+            await cvat.server.login(credential, password);
+            const users = await cvat.users.get({ self: true });
+            dispatch(authActions.loginSuccess(users[0]));
+        } catch (error) {
+            const hasEmailVerificationBeenSent = error.message.includes('Unverified email');
+            dispatch(authActions.loginFailed(error, hasEmailVerificationBeenSent));
+        }
+    };
 
 export const logoutAsync = (): ThunkAction => async (dispatch) => {
     dispatch(authActions.logout());
@@ -176,135 +172,130 @@ export const authenticatedAsync = (): ThunkAction => async (dispatch) => {
     }
 };
 
-export const changePasswordAsync = (
-    changePasswordData: ChangePasswordData,
-    onSuccess?: () => void,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.changePassword());
+export const changePasswordAsync =
+    (changePasswordData: ChangePasswordData, onSuccess?: () => void): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.changePassword());
 
-    const { oldPassword, newPassword1, newPassword2 } = changePasswordData;
-    try {
-        await cvat.server.changePassword(oldPassword, newPassword1, newPassword2);
+        const { oldPassword, newPassword1, newPassword2 } = changePasswordData;
+        try {
+            await cvat.server.changePassword(oldPassword, newPassword1, newPassword2);
 
-        if (onSuccess) {
-            onSuccess();
+            if (onSuccess) {
+                onSuccess();
+            }
+            dispatch(authActions.changePasswordSuccess());
+        } catch (error) {
+            dispatch(authActions.changePasswordFailed(error));
         }
-        dispatch(authActions.changePasswordSuccess());
-    } catch (error) {
-        dispatch(authActions.changePasswordFailed(error));
-    }
-};
+    };
 
-export const requestPasswordResetAsync = (email: string): ThunkAction => async (dispatch) => {
-    dispatch(authActions.requestPasswordReset());
+export const requestPasswordResetAsync =
+    (email: string): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.requestPasswordReset());
 
-    try {
-        await cvat.server.requestPasswordReset(email);
-        dispatch(authActions.requestPasswordResetSuccess());
-    } catch (error) {
-        dispatch(authActions.requestPasswordResetFailed(error));
-    }
-};
+        try {
+            await cvat.server.requestPasswordReset(email);
+            dispatch(authActions.requestPasswordResetSuccess());
+        } catch (error) {
+            dispatch(authActions.requestPasswordResetFailed(error));
+        }
+    };
 
-export const resetPasswordAsync = (
-    newPassword1: string,
-    newPassword2: string,
-    uid: string,
-    token: string,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.resetPassword());
+export const resetPasswordAsync =
+    (newPassword1: string, newPassword2: string, uid: string, token: string): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.resetPassword());
 
-    try {
-        await cvat.server.resetPassword(newPassword1, newPassword2, uid, token);
-        dispatch(authActions.resetPasswordSuccess());
-    } catch (error) {
-        dispatch(authActions.resetPasswordFailed(error));
-    }
-};
+        try {
+            await cvat.server.resetPassword(newPassword1, newPassword2, uid, token);
+            dispatch(authActions.resetPasswordSuccess());
+        } catch (error) {
+            dispatch(authActions.resetPasswordFailed(error));
+        }
+    };
 
-export const updateUserAsync = (
-    userInstance: User,
-    fields: Parameters<User['save']>[0],
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.updateUser());
+export const updateUserAsync =
+    (userInstance: User, fields: Parameters<User['save']>[0]): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.updateUser());
 
-    try {
-        const updatedUser = await userInstance.save(fields);
+        try {
+            const updatedUser = await userInstance.save(fields);
 
-        dispatch(authActions.updateUserSuccess(updatedUser));
-    } catch (error) {
-        dispatch(authActions.updateUserFailed(error));
-        throw error;
-    }
-};
+            dispatch(authActions.updateUserSuccess(updatedUser));
+        } catch (error) {
+            dispatch(authActions.updateUserFailed(error));
+            throw error;
+        }
+    };
 
-export const getApiTokensAsync = (filter: ApiTokensFilter = {}): ThunkAction => async (dispatch) => {
-    dispatch(authActions.getApiTokens());
+export const getApiTokensAsync =
+    (filter: ApiTokensFilter = {}): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.getApiTokens());
 
-    try {
-        const { items: tokens, count } = await fetchAllPaginated(
-            (paginationFilter) => cvat.apiTokens.get(paginationFilter),
-            filter,
-        );
+        try {
+            const { items: tokens, count } = await fetchAllPaginated(
+                (paginationFilter) => cvat.apiTokens.get(paginationFilter),
+                filter,
+            );
 
-        dispatch(authActions.getApiTokensSuccess(tokens, count));
-    } catch (error: unknown) {
-        dispatch(authActions.getApiTokensFailed(ensureError(error)));
-    }
-};
+            dispatch(authActions.getApiTokensSuccess(tokens, count));
+        } catch (error: unknown) {
+            dispatch(authActions.getApiTokensFailed(ensureError(error)));
+        }
+    };
 
-export const createApiTokenAsync = (
-    tokenData: ApiTokenModifiableFields,
-    onSuccess: (token: ApiToken) => void,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.createApiToken());
+export const createApiTokenAsync =
+    (tokenData: ApiTokenModifiableFields, onSuccess: (token: ApiToken) => void): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.createApiToken());
 
-    try {
-        const data: Partial<SerializedApiToken> = {
-            name: tokenData.name,
-            expiry_date: tokenData.expiryDate,
-            read_only: tokenData.readOnly,
-        };
+        try {
+            const data: Partial<SerializedApiToken> = {
+                name: tokenData.name,
+                expiry_date: tokenData.expiryDate,
+                read_only: tokenData.readOnly,
+            };
 
-        let token = new cvat.classes.ApiToken(data);
-        token = await token.save();
+            let token = new cvat.classes.ApiToken(data);
+            token = await token.save();
 
-        dispatch(authActions.createApiTokenSuccess(token));
-        onSuccess(token);
-    } catch (error: unknown) {
-        dispatch(authActions.createApiTokenFailed(ensureError(error)));
-    }
-};
+            dispatch(authActions.createApiTokenSuccess(token));
+            onSuccess(token);
+        } catch (error: unknown) {
+            dispatch(authActions.createApiTokenFailed(ensureError(error)));
+        }
+    };
 
-export const updateApiTokenAsync = (
-    token: ApiToken,
-    tokenData: ApiTokenModifiableFields,
-    onSuccess: (token: ApiToken) => void,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.updateApiToken());
+export const updateApiTokenAsync =
+    (token: ApiToken, tokenData: ApiTokenModifiableFields, onSuccess: (token: ApiToken) => void): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.updateApiToken());
 
-    try {
-        await token.save(tokenData);
+        try {
+            await token.save(tokenData);
 
-        dispatch(authActions.updateApiTokenSuccess(token));
-        onSuccess(token);
-    } catch (error: unknown) {
-        dispatch(authActions.updateApiTokenFailed(ensureError(error)));
-    }
-};
+            dispatch(authActions.updateApiTokenSuccess(token));
+            onSuccess(token);
+        } catch (error: unknown) {
+            dispatch(authActions.updateApiTokenFailed(ensureError(error)));
+        }
+    };
 
-export const revokeApiTokenAsync = (
-    token: ApiToken,
-    onSuccess: () => void,
-): ThunkAction => async (dispatch) => {
-    dispatch(authActions.revokeApiToken());
+export const revokeApiTokenAsync =
+    (token: ApiToken, onSuccess: () => void): ThunkAction =>
+    async (dispatch) => {
+        dispatch(authActions.revokeApiToken());
 
-    try {
-        await token.revoke();
+        try {
+            await token.revoke();
 
-        dispatch(authActions.revokeApiTokenSuccess(token));
-        onSuccess();
-    } catch (error: unknown) {
-        dispatch(authActions.revokeApiTokenFailed(ensureError(error)));
-    }
-};
+            dispatch(authActions.revokeApiTokenSuccess(token));
+            onSuccess();
+        } catch (error: unknown) {
+            dispatch(authActions.revokeApiTokenFailed(ensureError(error)));
+        }
+    };

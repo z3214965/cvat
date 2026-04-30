@@ -16,6 +16,7 @@ import { CombinedState } from 'reducers';
 import { importActions, importBackupAsync } from 'actions/import-actions';
 import SourceStorageField from 'components/storage/source-storage-field';
 import { shallowEqual } from 'utils/redux';
+import { getInstanceTypeText } from 'utils/conversion-txt';
 import Input from 'antd/lib/input/Input';
 
 import { Storage, StorageData, StorageLocation } from 'cvat-core-wrapper';
@@ -50,6 +51,8 @@ function ImportBackupModal(): JSX.Element {
 
         return { instanceType: instanceT, modalVisible: visible };
     }, shallowEqual);
+
+    const instanceTxt = getInstanceTypeText(instanceType);
 
     const dispatch = useDispatch();
     const [selectedSourceStorage, setSelectedSourceStorage] = useState<StorageData>({
@@ -145,7 +148,7 @@ function ImportBackupModal(): JSX.Element {
             );
 
             Notification.info({
-                message: `从备份创建的 ${instanceType} 已启动`,
+                message: `从备份创建${instanceTxt}已启动`,
                 className: 'cvat-notification-notice-import-backup-start',
             });
             closeModal();
@@ -157,7 +160,7 @@ function ImportBackupModal(): JSX.Element {
         <Modal
             title={(
                 <Text strong>
-                    {`从备份中创建 ${instanceType} `}
+                    {`从备份中创建${instanceTxt}`}
                 </Text>
             )}
             open={modalVisible}
@@ -166,7 +169,7 @@ function ImportBackupModal(): JSX.Element {
             className='cvat-modal-import-backup'
         >
             <Form
-                name={`从备份文件创建 ${instanceType} `}
+                name={`Create ${instanceType} from backup file`}
                 form={form}
                 onFinish={handleImport}
                 layout='vertical'

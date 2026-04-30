@@ -281,7 +281,7 @@ function OrganizationTopBar(props: Readonly<Props>): JSX.Element {
                         </div>
                         <div>
                             <MailOutlined />
-                            { !contact.email ? <Text type='secondary'>添加email</Text> : null }
+                            { !contact.email ? <Text type='secondary'>添加邮箱</Text> : null }
                             <Text
                                 type='secondary'
                                 editable={{

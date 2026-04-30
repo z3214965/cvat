@@ -120,7 +120,7 @@ function LoginFormComponent(props: Props): JSX.Element {
                         >
                             <Input
                                 autoComplete='credential'
-                                prefix={<Text>Email or username</Text>}
+                                prefix={<Text>邮箱或用户名</Text>}
                                 className={credential ? 'cvat-input-floating-label-above' : 'cvat-input-floating-label'}
                                 suffix={credential && (
                                     <Icon

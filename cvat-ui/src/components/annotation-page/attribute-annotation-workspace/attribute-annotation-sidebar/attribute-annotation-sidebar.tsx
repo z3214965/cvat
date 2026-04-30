@@ -53,43 +53,43 @@ interface LabelAttrMap {
 
 const componentShortcuts = {
     NEXT_ATTRIBUTE: {
-        name: 'Next attribute',
+        name: '下一属性',
         description: '转到下一个属性',
         sequences: ['down'],
         scope: ShortcutScope.ATTRIBUTE_ANNOTATION_WORKSPACE,
     },
     PREVIOUS_ATTRIBUTE: {
-        name: 'Previous attribute',
+        name: '上一属性',
         description: '转到上一个属性',
         sequences: ['up'],
         scope: ShortcutScope.ATTRIBUTE_ANNOTATION_WORKSPACE,
     },
     SWITCH_LOCK: {
-        name: 'Lock/unlock an object',
+        name: '锁定/解锁对象',
         description: '修改选中对象的锁定状态',
         sequences: ['l'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_OCCLUDED: {
-        name: 'Switch occluded',
+        name: '切换遮挡属性',
         description: '修改当前对象的遮挡属性',
         sequences: ['q', '/'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_PINNED: {
-        name: 'Switch pinned property',
+        name: '切换固定属性',
         description: '修改当前对象的固定属性',
         sequences: ['p'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     NEXT_KEY_FRAME: {
-        name: 'Next keyframe',
+        name: '下一关键帧',
         description: '跳转到当前追踪轨迹的下一关键帧',
         sequences: ['r'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     PREV_KEY_FRAME: {
-        name: 'Previous keyframe',
+        name: '上一关键帧',
         description: '跳转到当前追踪轨迹的上一关键帧',
         sequences: ['e'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,

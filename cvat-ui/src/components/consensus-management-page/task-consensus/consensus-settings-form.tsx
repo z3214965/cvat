@@ -42,7 +42,7 @@ export default function ConsensusSettingsForm(props: Readonly<Props>): JSX.Eleme
 
     const shapeComparisonTooltip = makeTooltip(
         <>
-            {makeTooltipFragment('最小重叠阈值（IoU）', settings.descriptions.iouThreshold)}
+            {makeTooltipFragment('最小重叠阈值(IoU)', settings.descriptions.iouThreshold)}
         </>,
     );
 

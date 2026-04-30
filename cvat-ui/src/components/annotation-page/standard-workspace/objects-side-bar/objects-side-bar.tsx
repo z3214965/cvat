@@ -107,7 +107,7 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
                     label: '标签',
                     forceRender: true,
                     children: <LabelsList />,
-                }, ...(is2D ? [{ key: 'issues', label: 'Issues', children: <IssuesListComponent /> }] : [])]}
+                }, ...(is2D ? [{ key: 'issues', label: '问题', children: <IssuesListComponent /> }] : [])]}
             />
             {!sidebarCollapsed && <AppearanceBlock />}
         </Layout.Sider>

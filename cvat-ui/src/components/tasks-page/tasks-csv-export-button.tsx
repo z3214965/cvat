@@ -11,26 +11,26 @@ const cvat = getCore();
 
 const columns: CSVColumn<Task>[] = [
     { header: 'ID', accessor: (task) => task.id },
-    { header: '名称', accessor: (task) => task.name },
-    { header: '任务URL', accessor: (task) => `${window.location.origin}/tasks/${task.id}` },
-    { header: '项目ID', accessor: (task) => task.projectId },
-    { header: '项目名', accessor: (task) => task.projectName ?? '' },
-    { header: '项目URL', accessor: (task) => (task.projectId ? `${window.location.origin}/projects/${task.projectId}` : '') },
-    { header: '拥有者', accessor: (task) => task.owner?.username ?? '' },
-    { header: '负责人', accessor: (task) => task.assignee?.username ?? '' },
-    { header: '状态', accessor: (task) => task.status },
-    { header: '模型', accessor: (task) => task.mode },
-    { header: '大小', accessor: (task) => task.size },
-    { header: '子集', accessor: (task) => task.subset ?? '' },
+    { header: 'Name', accessor: (task) => task.name },
+    { header: 'Task URL', accessor: (task) => `${window.location.origin}/tasks/${task.id}` },
+    { header: 'Project ID', accessor: (task) => task.projectId },
+    { header: 'Project Name', accessor: (task) => task.projectName ?? '' },
+    { header: 'Project URL', accessor: (task) => (task.projectId ? `${window.location.origin}/projects/${task.projectId}` : '') },
+    { header: 'Owner', accessor: (task) => task.owner?.username ?? '' },
+    { header: 'Assignee', accessor: (task) => task.assignee?.username ?? '' },
+    { header: 'Status', accessor: (task) => task.status },
+    { header: 'Mode', accessor: (task) => task.mode },
+    { header: 'Size', accessor: (task) => task.size },
+    { header: 'Subset', accessor: (task) => task.subset ?? '' },
     {
-        header: '创建日期',
+        header: 'Created Date',
         accessor: (task) => task.createdDate,
     },
     {
-        header: '更新日期',
+        header: 'Updated Date',
         accessor: (task) => task.updatedDate,
     },
-    { header: 'Bug追踪', accessor: (task) => task.bugTracker ?? '' },
+    { header: 'Bug Tracker', accessor: (task) => task.bugTracker ?? '' },
 ];
 
 const TasksCSVExportButton = createCSVExportButton<Task, TasksQuery>({

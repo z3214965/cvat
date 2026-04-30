@@ -25,7 +25,7 @@ export interface Props {
 
 const componentShortcuts = {
     CANCEL: {
-        name: 'Cancel',
+        name: '取消',
         description: '取消所有激活的画布模式',
         sequences: ['esc'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,

@@ -44,8 +44,8 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
 
     public async init(instance: Job | Task, parameters: Record<string, string>): Promise<void> {
         this.#instance = instance;
-        this.#targetFrame = +parameters['Target frame'];
-        this.#convertRectangleShapesToTracks = parameters['Convert rectangle shapes to tracks'] === 'true';
+        this.#targetFrame = +parameters['目标帧'];
+        this.#convertRectangleShapesToTracks = parameters['将矩形图形转换为追踪对象'] === 'true';
     }
 
     public async destroy(): Promise<void> {
@@ -295,12 +295,12 @@ export default class OpenCVTrackerMIL extends BaseCollectionAction {
 
     public get parameters(): BaseCollectionAction['parameters'] {
         return {
-            'Convert rectangle shapes to tracks': {
+            将矩形图形转换为追踪对象: {
                 type: ActionParameterType.CHECKBOX,
                 values: ['true', 'false'],
                 defaultValue: String(this.#convertRectangleShapesToTracks),
             },
-            'Target frame': {
+            目标帧: {
                 type: ActionParameterType.NUMBER,
                 values: ({ instance }) => {
                     if (instance instanceof Job) {

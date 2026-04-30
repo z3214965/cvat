@@ -106,7 +106,7 @@ function TaskItemComponent(props: TaskItemProps): JSX.Element {
     const { id } = taskInstance;
     const owner = taskInstance.owner ? taskInstance.owner.username : null;
     const updated = dayjs(taskInstance.updatedDate).fromNow();
-    const created = dayjs(taskInstance.createdDate).format('MMMM Do YYYY');
+    const created = dayjs(taskInstance.createdDate).format('YYYY-MM-DDTHH:mm:ss');
 
     const ribbonItems = ribbonPlugins
         .filter((plugin) => plugin.data.shouldBeRendered(props, { importingState }))

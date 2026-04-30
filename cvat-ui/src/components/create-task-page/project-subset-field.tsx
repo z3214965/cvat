@@ -59,6 +59,16 @@ export default function ProjectSubsetField(props: Props): JSX.Element {
         setInternalValue(value);
     }, [value]);
 
+    // 根据不同的subset返回不同的label
+    const getSubsetLabel = (subset: string): string => {
+        const labelMap: Record<string, string> = {
+            Train: '训练集',
+            Test: '测试集',
+            Validation: '校验集',
+        };
+        return labelMap[subset] || subset;
+    };
+
     return (
         <Autocomplete
             value={internalValue}
@@ -75,7 +85,7 @@ export default function ProjectSubsetField(props: Props): JSX.Element {
             options={Array.from(new Set([...(internalValue ? [internalValue] : []), ...internalSubsets])).map(
                 (subset) => ({
                     value: subset,
-                    label: subset,
+                    label: getSubsetLabel(subset),
                 }),
             )}
         />

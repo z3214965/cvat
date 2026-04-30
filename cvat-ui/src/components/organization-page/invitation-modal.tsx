@@ -53,7 +53,7 @@ function InvitationModal(props: Props): JSX.Element {
                 </Paragraph>
                 <Paragraph>
                     <Text type='secondary'>
-                            如果该电子邮件地址已注册，则该用户将被添加到组织中
+                            如果该邮箱已注册，则该用户将被添加到组织中
                     </Text>
                 </Paragraph>
                 <Form.List name='users'>
@@ -69,10 +69,10 @@ function InvitationModal(props: Props): JSX.Element {
                                             fieldKey={[field.fieldKey, 'email']}
                                             rules={[
                                                 { required: true, message: '此字段为必填项' },
-                                                { type: 'email', message: '输入不是有效的电子email' },
+                                                { type: 'email', message: '输入不是有效的邮箱' },
                                             ]}
                                         >
-                                            <Input placeholder='输入email地址' />
+                                            <Input placeholder='输入邮箱地址' />
                                         </Form.Item>
                                     </Col>
                                     <Col span={10} offset={1}>

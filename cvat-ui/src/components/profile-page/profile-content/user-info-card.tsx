@@ -86,7 +86,7 @@ function UserInfoCard(): JSX.Element {
                     </Col>
                 </Row>
                 <Form.Item
-                    label='Email'
+                    label='邮箱'
                     name='email'
                     rules={validationRules.email}
                 >

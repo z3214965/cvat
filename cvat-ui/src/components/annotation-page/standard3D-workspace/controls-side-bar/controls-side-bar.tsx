@@ -49,43 +49,43 @@ interface Props {
 
 const componentShortcuts: Record<string, KeyMapItem> = {
     PASTE_SHAPE: {
-        name: 'Paste shape',
+        name: '粘贴形状',
         description: '从内部剪贴板粘贴标注形状',
         sequences: ['ctrl+v'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_DRAW_MODE_STANDARD_3D_CONTROLS: {
-        name: 'Draw mode',
+        name: '绘制模式',
         description: '使用相同参数重复上一次绘制操作',
         sequences: ['n'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_REDRAW_MODE_STANDARD_3D_CONTROLS: {
-        name: 'Redraw shape',
+        name: '重新绘制形状',
         description: '删除选中形状并重新从头绘制',
         sequences: ['shift+n'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS: {
-        name: 'Group mode',
+        name: '编组模式',
         description: '开启/关闭标注形状编组模式',
         sequences: ['g'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     RESET_GROUP_STANDARD_3D_CONTROLS: {
-        name: 'Reset group',
-        description: '重置选中形状的编组（编组模式下）',
+        name: '重置编组',
+        description: '重置选中形状的编组(编组模式下)',
         sequences: ['shift+g'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS: {
-        name: 'Merge mode',
+        name: '合并模式',
         description: '开启/关闭形状合并模式',
         sequences: ['m'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],
     },
     SWITCH_SPLIT_MODE_STANDARD_3D_CONTROLS: {
-        name: 'Split mode',
+        name: '拆分模式',
         description: '开启/关闭形状拆分模式',
         sequences: ['alt+m'],
         scope: ShortcutScope['3D_ANNOTATION_WORKSPACE_CONTROLS'],

@@ -59,55 +59,55 @@ interface Props {
 
 const componentShortcuts = {
     NEXT_FRAME: {
-        name: 'Next frame',
+        name: '下一帧',
         description: '跳至下一帧',
         sequences: ['f'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     PREV_FRAME: {
-        name: 'Previous frame',
+        name: '上一帧',
         description: '跳至上一帧',
         sequences: ['d'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     FORWARD_FRAME: {
-        name: 'Forward frame',
-        description: '步进前进',
+        name: '前进一帧',
+        description: '前进一帧',
         sequences: ['v'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     BACKWARD_FRAME: {
-        name: 'Backward frame',
-        description: '步进后退',
+        name: '后退一帧',
+        description: '后退一帧',
         sequences: ['c'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     SEARCH_FORWARD: {
-        name: 'Search forward',
+        name: '向前查找',
         description: '查找下一个符合筛选条件的帧',
         sequences: ['right'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     SEARCH_BACKWARD: {
-        name: 'Search backward',
+        name: '向后查找',
         description: '查找上一个符合筛选条件的帧',
         sequences: ['left'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     CHAPTER_BACKWARD: {
-        name: 'Chapter backward',
+        name: '上一章节',
         description: '跳至上一章节',
         sequences: ['x'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     CHAPTER_FORWARD: {
-        name: 'Chapter forward',
+        name: '下一章节',
         description: '跳至下一章节',
         sequences: ['b'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     PLAY_PAUSE: {
-        name: 'Play/pause',
+        name: '播放/暂停',
         description: '开启/停止自动播放帧',
         sequences: ['space'],
         scope: ShortcutScope.ANNOTATION_PAGE,
@@ -256,7 +256,7 @@ function PlayerButtons(props: Props): JSX.Element {
                     onClick={onFirstFrame}
                 />
             </CVATTooltip>
-            <CVATTooltip title={`步进后退 ${backwardShortcut}`}>
+            <CVATTooltip title={`单步后退 ${backwardShortcut}`}>
                 <Icon
                     style={navIconStyle}
                     className='cvat-player-backward-button'
@@ -365,7 +365,7 @@ function PlayerButtons(props: Props): JSX.Element {
                     {nextButton}
                 </CVATTooltip>
             </Popover>
-            <CVATTooltip title={`步进前进 ${forwardShortcut}`}>
+            <CVATTooltip title={`单步前进 ${forwardShortcut}`}>
                 <Icon
                     style={navIconStyle}
                     className='cvat-player-forward-button'

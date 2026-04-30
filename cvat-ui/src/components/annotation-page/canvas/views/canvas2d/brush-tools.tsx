@@ -41,28 +41,28 @@ const DraggableArea = (
 
 const componentShortcuts = {
     ACTIVATE_BRUSH_TOOL_STANDARD_CONTROLS: {
-        name: 'Brush tool',
+        name: '画笔工具',
         description: '激活masks绘制工具栏中的画笔工具',
         sequences: ['shift+1'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,
         displayWeight: 10,
     },
     ACTIVATE_ERASER_TOOL_STANDARD_CONTROLS: {
-        name: 'Eraser tool',
+        name: '橡皮擦工具',
         description: '激活masks绘制工具栏中的橡皮擦工具',
         sequences: ['shift+2'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,
         displayWeight: 15,
     },
     ACTIVATE_POLYGON_TOOL_STANDARD_CONTROLS: {
-        name: 'Polygon tool',
+        name: '多边形工具',
         description: '激活masks绘制工具栏中的多边形工具',
         sequences: ['shift+3'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,
         displayWeight: 20,
     },
     ACTIVATE_POLYGON_REMOVE_TOOL_STANDARD_CONTROLS: {
-        name: 'Polygon remove tool',
+        name: '多边形擦除工具',
         description: '激活masks绘制工具栏中的多边形擦除工具',
         sequences: ['shift+4'],
         scope: ShortcutScope.STANDARD_WORKSPACE_CONTROLS,

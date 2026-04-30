@@ -106,7 +106,7 @@ function AdvancedConfigurationForm(props: AdvancedConfigurationProps): JSX.Eleme
                 <Col span={11}>
                     <SourceStorageField
                         instanceId={null}
-                        storageDescription='为导入资源（如标注、备份）指定源存储'
+                        storageDescription='为导入资源(如标注、备份)指定源存储'
                         locationValue={sourceStorageLocation}
                         onChangeLocationValue={onChangeSourceStorageLocation}
                     />
@@ -114,7 +114,7 @@ function AdvancedConfigurationForm(props: AdvancedConfigurationProps): JSX.Eleme
                 <Col span={11} offset={1}>
                     <TargetStorageField
                         instanceId={null}
-                        storageDescription='为导出资源（如标注、备份）指定目标存储'
+                        storageDescription='为导出资源(如标注、备份)指定目标存储'
                         locationValue={targetStorageLocation}
                         onChangeLocationValue={onChangeTargetStorageLocation}
                     />

@@ -75,13 +75,13 @@ interface DispatchToProps {
 
 const componentShortcuts = {
     SWITCH_SHORTCUTS: {
-        name: 'Show shortcuts',
+        name: '显示快捷键',
         description: '显示/隐藏快捷键列表',
         sequences: ['f1'],
         scope: ShortcutScope.GENERAL,
     },
     SWITCH_SETTINGS: {
-        name: 'Show settings',
+        name: '显示设置',
         description: '打开/关闭设置窗口',
         sequences: ['f2'],
         scope: ShortcutScope.GENERAL,
@@ -213,7 +213,7 @@ function HeaderComponent(props: Props): JSX.Element {
     aboutLinks.push([(
         <Col key='changelog'>
             <a href={CHANGELOG_URL} target='_blank' rel='noopener noreferrer'>
-                What&apos;s new?
+                更新日志
             </a>
         </Col>
     ), 0]);
@@ -369,7 +369,7 @@ function HeaderComponent(props: Props): JSX.Element {
         key: 'settings',
         icon: <SettingOutlined />,
         onClick: () => switchSettingsModalVisible(true),
-        title: `Press ${switchSettingsShortcut} to switch`,
+        title: `按 ${switchSettingsShortcut} 切换设置`,
         label: t('header.settings'),
     }, 30]);
 

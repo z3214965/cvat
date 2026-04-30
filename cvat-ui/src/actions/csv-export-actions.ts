@@ -62,10 +62,12 @@ export function exportToCSVAsync<T>(options: CSVExportOptions<T>) {
                 csvWriter.addBatch(response.results);
 
                 const loadedCount = (page - 1) * pageSize + response.results.length;
-                dispatch(bulkActions.updateBulkActionStatus({
-                    message: `Exporting ${resourceName}: ${loadedCount} of ${totalCount}`,
-                    percent: Math.round((page / totalPages) * 100),
-                }));
+                dispatch(
+                    bulkActions.updateBulkActionStatus({
+                        message: `导出${resourceName}：已加载${loadedCount}个，共${totalCount}个`,
+                        percent: Math.round((page / totalPages) * 100),
+                    }),
+                );
             }
 
             const csvContent = csvWriter.getContent();
@@ -75,15 +77,17 @@ export function exportToCSVAsync<T>(options: CSVExportOptions<T>) {
                 onSuccess(totalCount, filename);
             }
         } catch (error) {
-            dispatch(bulkActions.bulkOperationFailed({
-                error,
-                remainingItemsCount: 0,
-                retryPayload: {
-                    items: [],
-                    operation: async () => {},
-                    statusMessage: () => '',
-                },
-            }));
+            dispatch(
+                bulkActions.bulkOperationFailed({
+                    error,
+                    remainingItemsCount: 0,
+                    retryPayload: {
+                        items: [],
+                        operation: async () => {},
+                        statusMessage: () => '',
+                    },
+                }),
+            );
 
             if (onError && error instanceof Error) {
                 onError(error);

@@ -22,10 +22,10 @@ export function JobStateSelector({ value, onSelect }: Readonly<JobStateSelectorP
             onKeyDown={handleDropdownKeyDown}
             placeholder='选择一个状态'
         >
-            <Select.Option value={JobState.NEW}>{JobState.NEW}</Select.Option>
-            <Select.Option value={JobState.IN_PROGRESS}>{JobState.IN_PROGRESS}</Select.Option>
-            <Select.Option value={JobState.REJECTED}>{JobState.REJECTED}</Select.Option>
-            <Select.Option value={JobState.COMPLETED}>{JobState.COMPLETED}</Select.Option>
+            <Select.Option value={JobState.NEW}>待处理</Select.Option>
+            <Select.Option value={JobState.IN_PROGRESS}>进行中</Select.Option>
+            <Select.Option value={JobState.REJECTED}>已驳回</Select.Option>
+            <Select.Option value={JobState.COMPLETED}>已完成</Select.Option>
         </Select>
     );
 }
@@ -46,13 +46,13 @@ export function JobStageSelector({ value, onSelect }: Readonly<JobStageSelectorP
             placeholder='选择一个阶段'
         >
             <Select.Option value={JobStage.ANNOTATION}>
-                {JobStage.ANNOTATION}
+                标注
             </Select.Option>
             <Select.Option value={JobStage.VALIDATION}>
-                {JobStage.VALIDATION}
+                校验
             </Select.Option>
             <Select.Option value={JobStage.ACCEPTANCE}>
-                {JobStage.ACCEPTANCE}
+                验收
             </Select.Option>
         </Select>
     );

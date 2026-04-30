@@ -801,11 +801,11 @@ export enum ActiveControl {
 }
 
 export enum StatesOrdering {
-    ID_DESCENT = 'ID - descent',
-    ID_ASCENT = 'ID - ascent',
-    UPDATED = 'Updated time',
-    Z_ORDER = 'Z Order',
-    LABEL_NAME = 'Label name',
+    ID_DESCENT = 'ID - 降序',
+    ID_ASCENT = 'ID - 升序',
+    UPDATED = '更新时间',
+    Z_ORDER = 'Z轴顺序',
+    LABEL_NAME = '标签名',
 }
 
 export enum ContextMenuType {

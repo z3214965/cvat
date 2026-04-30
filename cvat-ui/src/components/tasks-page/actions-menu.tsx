@@ -155,8 +155,8 @@ function TaskActionsComponent(props: Readonly<Props>): JSX.Element {
                 `删除所选中的 ${tasksToDelete.length} 任务` :
                 `任务 #${taskInstance.id} 将要被删除`,
             content: isBulkMode ?
-                '所有选定任务的所有相关数据（图片、标注）都将丢失。是否继续？' :
-                '所有相关数据（图片、标注）都将丢失。是否继续？',
+                '所有选定任务的所有相关数据(图片、标注)都将丢失。是否继续？' :
+                '所有相关数据(图片、标注)都将丢失。是否继续？',
             className: 'cvat-modal-confirm-delete-task',
             onOk: () => {
                 dispatch(makeBulkOperationAsync(

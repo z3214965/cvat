@@ -52,7 +52,7 @@ interface State {
 
 const componentShortcuts = {
     CANCEL_SKELETON_EDGE: {
-        name: 'Cancel skeleton drawing',
+        name: '取消骨架绘制',
         description: '终止新骨架连线的绘制',
         sequences: ['esc'],
         scope: ShortcutScope.LABELS_EDITOR,

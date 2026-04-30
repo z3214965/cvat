@@ -103,6 +103,15 @@ function RightGroup(props: Props): JSX.Element {
         }
     }, []);
 
+    const workspaceNames: Record<Workspace, string> = {
+        [Workspace.STANDARD3D]: '标准3D',
+        [Workspace.STANDARD]: '标准',
+        [Workspace.ATTRIBUTES]: '属性标注',
+        [Workspace.SINGLE_SHAPE]: '单形状',
+        [Workspace.TAGS]: '标签标注',
+        [Workspace.REVIEW]: '审核',
+    };
+
     return (
         <Col className='cvat-annotation-header-right-group'>
             <Button
@@ -119,7 +128,7 @@ function RightGroup(props: Props): JSX.Element {
                 }}
             >
                 <Icon component={FullscreenIcon} />
-                Fullscreen
+                全屏
             </Button>
             { jobInstance.guideId !== null && (
                 <Button
@@ -147,7 +156,7 @@ function RightGroup(props: Props): JSX.Element {
                 onClick={showFilters}
             >
                 <Icon component={FilterIcon} />
-                过滤器
+                过滤
             </Button>
             <div>
                 <Select
@@ -163,14 +172,14 @@ function RightGroup(props: Props): JSX.Element {
                             }
                             return (
                                 <Select.Option disabled={ws !== Workspace.STANDARD3D} key={ws} value={ws}>
-                                    {ws}
+                                    {workspaceNames[ws]}
                                 </Select.Option>
                             );
                         }
                         if (ws !== Workspace.STANDARD3D) {
                             return (
                                 <Select.Option key={ws} value={ws}>
-                                    {ws}
+                                    {workspaceNames[ws]}
                                 </Select.Option>
                             );
                         }

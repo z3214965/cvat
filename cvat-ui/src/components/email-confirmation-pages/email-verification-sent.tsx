@@ -13,14 +13,13 @@ const { Content } = Layout;
 /**
  * Component for displaying message that email should be verified
  */
-
 export default function EmailVerificationSentPage(): JSX.Element {
     return (
         <Layout>
             <Content>
                 <Row justify='center' align='middle' id='email-verification-sent-page-container'>
                     <Col>
-                        <h1>请确认您的电子邮件</h1>
+                        <h1>请确认您的邮箱</h1>
                         <Button className='cvat-go-to-login-button' type='link' href='/auth/login'>
                             转到登录页面
                         </Button>

@@ -19,10 +19,11 @@ function MdGuideControl(props: Props): JSX.Element {
     const { instanceType, id } = props;
     const history = useHistory();
 
+    const txt = instanceType === 'project' ? '项目' : '任务';
     return (
         <Row justify='start' className='cvat-md-guide-control-wrapper'>
             <Col span={24}>
-                <Text strong className='cvat-text-color'>{`${instanceType[0].toUpperCase()}${instanceType.slice(1)} 描述`}</Text>
+                <Text strong className='cvat-text-color'>{`${txt}描述`}</Text>
                 <br />
                 <Button
                     onClick={() => {

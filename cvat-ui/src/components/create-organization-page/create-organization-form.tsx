@@ -74,7 +74,7 @@ function CreateOrganizationForm(): JSX.Element {
             <Form.Item hasFeedback name='description' label='描述'>
                 <Input.TextArea rows={3} />
             </Form.Item>
-            <Form.Item hasFeedback name='email' label='邮箱' rules={[{ type: 'email', message: '输入不是有效的电子邮件' }]}>
+            <Form.Item hasFeedback name='email' label='邮箱' rules={[{ type: 'email', message: '输入不是有效的邮箱' }]}>
                 <Input autoComplete='email' placeholder='support@organization.com' />
             </Form.Item>
             <Form.Item hasFeedback name='phoneNumber' label='电话号码' rules={[{ ...validationPatterns.validatePhoneNumber }]}>

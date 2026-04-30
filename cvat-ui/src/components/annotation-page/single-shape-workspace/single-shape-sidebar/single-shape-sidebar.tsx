@@ -174,25 +174,25 @@ const reducer = (state: State, action: ActionUnion<typeof actionCreators>): Stat
 
 const componentShortcuts = {
     SWITCH_DRAW_MODE_SINGLE_SHAPE: {
-        name: 'Draw mode',
+        name: '绘制模式',
         description: '使用相同的参数重复执行最新的绘图程序',
         sequences: ['n'],
         scope: ShortcutScope.SINGLE_SHAPE_ANNOTATION_WORKSPACE,
     },
     CANCEL_SINGLE_SHAPE: {
-        name: 'Cancel',
+        name: '取消',
         description: '取消所有当前激活的画布操作模式',
         sequences: ['esc'],
         scope: ShortcutScope.SINGLE_SHAPE_ANNOTATION_WORKSPACE,
     },
     DELETE_OBJECT_SINGLE_SHAPE: {
-        name: 'Delete object',
+        name: '删除对象',
         description: '删除激活对象。使用shift键可强制删除锁定对象',
         sequences: ['del', 'shift+del'],
         scope: ShortcutScope.SINGLE_SHAPE_ANNOTATION_WORKSPACE,
     },
     HIDE_MASK_SINGLE_SHAPE: {
-        name: 'Hide mask',
+        name: '隐藏遮罩',
         description: '隐藏当前编辑的mask',
         sequences: ['h'],
         scope: ShortcutScope.SINGLE_SHAPE_ANNOTATION_WORKSPACE,

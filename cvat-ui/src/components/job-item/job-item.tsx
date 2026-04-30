@@ -31,7 +31,7 @@ import JobActionsComponent from 'components/jobs-page/actions-menu';
 import { JobStageSelector, JobStateSelector } from './job-selectors';
 
 function formatDate(value: Dayjs): string {
-    return value.format('MMM Do YYYY HH:mm');
+    return value.format('YYYY-MM-DDTHH:mm:ss');
 }
 
 interface Props {
@@ -177,13 +177,13 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                     </Row>
                     <Row className='cvat-job-item-dates-info'>
                         <Col>
-                            <Text>创建: </Text>
+                            <Text>创建时间：</Text>
                             <Text type='secondary'>{`${formatDate(created)}`}</Text>
                         </Col>
                     </Row>
                     <Row>
                         <Col>
-                            <Text>更新: </Text>
+                            <Text>更新时间：</Text>
                             <Text type='secondary'>{`${formatDate(updated)}`}</Text>
                         </Col>
                     </Row>
@@ -194,7 +194,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                             <Row>
                                 <Col className='cvat-job-item-select'>
                                     <Row>
-                                        <Text>负责人:</Text>
+                                        <Text>负责人：</Text>
                                     </Row>
                                     <UserSelector
                                         className='cvat-job-assignee-selector'
@@ -208,7 +208,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Col className='cvat-job-item-select'>
                                     <Row justify='space-between' align='middle'>
                                         <Col>
-                                            <Text>阶段:</Text>
+                                            <Text>阶段：</Text>
                                         </Col>
                                     </Row>
                                     <JobStageSelector
@@ -221,7 +221,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Col className='cvat-job-item-select'>
                                     <Row justify='space-between' align='middle'>
                                         <Col>
-                                            <Text>状态:</Text>
+                                            <Text>状态：</Text>
                                         </Col>
                                     </Row>
                                     <JobStateSelector

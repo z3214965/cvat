@@ -19,7 +19,7 @@ import { SaveIcon } from 'icons';
 
 const componentShortcuts = {
     SAVE_JOB: {
-        name: 'Save the job',
+        name: '保存工作',
         description: '将未保存的标注更改提交到服务器',
         sequences: ['ctrl+s'],
         scope: ShortcutScope.ANNOTATION_PAGE,

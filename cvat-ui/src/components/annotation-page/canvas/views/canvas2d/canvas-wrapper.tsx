@@ -277,25 +277,25 @@ function mapStateToProps(state: CombinedState): StateToProps {
 
 const componentShortcuts = {
     SWITCH_AUTOMATIC_BORDERING: {
-        name: 'Toggle snap to contour',
+        name: '切换吸附轮廓',
         description: '开启/关闭绘制与编辑时，多边形及多段线自动吸附轮廓功能',
         sequences: [],
         scope: ShortcutScope.STANDARD_WORKSPACE,
     },
     SWITCH_SNAP_TO_POINT: {
-        name: 'Toggle snap to point',
+        name: '切换吸附点',
         description: '开启/关闭自动吸附邻近点功能',
         sequences: [],
         scope: ShortcutScope.STANDARD_WORKSPACE,
     },
     NEXT_OBJECT: {
-        name: 'Next object',
+        name: '下一个对象',
         description: '跳转至下一个对象，并在画布中居中显示',
         sequences: ['tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     PREVIOUS_OBJECT: {
-        name: 'Previous object',
+        name: '上一个对象',
         description: '跳转至上一个对象，并在画布中居中显示',
         sequences: ['shift+tab'],
         scope: ShortcutScope.ANNOTATION_PAGE,

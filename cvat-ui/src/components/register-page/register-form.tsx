@@ -175,7 +175,7 @@ function RegisterFormComponent(props: Props): JSX.Element {
                     <CVATSigningInput
                         id='email'
                         autoComplete='email'
-                        placeholder='Email'
+                        placeholder='邮箱'
                         disabled={!!predefinedEmail}
                         value={predefinedEmail}
                         onReset={() => form.setFieldsValue({ email: '', username: '' })}

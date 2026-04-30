@@ -27,6 +27,7 @@ import {
 import CVATMarkdown from 'components/common/cvat-markdown';
 import TargetStorageField from 'components/storage/target-storage-field';
 import NameTemplateTooltip from 'components/common/cvat-name-template-tooltip';
+import { getInstanceTypeText } from 'utils/conversion-txt';
 
 const core = getCore();
 
@@ -59,6 +60,8 @@ function ExportBackupModal(): JSX.Element {
     const [helpMessage, setHelpMessage] = useState('');
     const [lightweight, setLightweight] = useState(true);
     const [nameTemplate, setNameTemplate] = useState('backup_task_{{id}}');
+
+    const instanceTxt = getInstanceTypeText(instanceType);
 
     const {
         selectedIds,
@@ -164,7 +167,7 @@ function ExportBackupModal(): JSX.Element {
                         );
                     },
                     (inst: Exclude<ProjectOrTaskOrJob, Job>, idx: number, total: number) => (
-                        `导出备份 ${instanceType}#${inst.id} [${idx + 1}/${total}]`
+                        `导出备份${instanceTxt} #${inst.id} [${idx + 1}/${total}]`
                     ),
                 ));
                 closeModal();
@@ -234,10 +237,10 @@ function ExportBackupModal(): JSX.Element {
             title={
                 isBulkMode ? (
                     <Text strong>
-                        {`导出 ${selectedInstances.length} ${instanceType}s`}
+                        {`备份${selectedInstances.length}个${instanceTxt}`}
                     </Text>
                 ) : (
-                    <Text strong>{`导出 ${instanceType} #${instance?.id}`}</Text>
+                    <Text strong>{`备份${instanceTxt} #${instance?.id}`}</Text>
                 )
             }
             open={!!instance}
@@ -289,7 +292,7 @@ function ExportBackupModal(): JSX.Element {
                     switchDescription='用默认设置'
                     switchHelpMessage={helpMessage}
                     useDefaultStorage={isBulkMode ? false : useDefaultStorage}
-                    storageDescription={`为导出 ${instanceType} 指定目标存储`}
+                    storageDescription={`为导出${instanceTxt}指定目标存储`}
                     locationValue={storageLocation}
                     onChangeUseDefaultStorage={isBulkMode ? undefined : (value: boolean) => setUseDefaultStorage(value)}
                     onChangeLocationValue={(value: StorageLocation) => setStorageLocation(value)}

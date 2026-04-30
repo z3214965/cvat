@@ -147,7 +147,7 @@ function ShortcutsSettingsComponent(props: Props): JSX.Element {
             </Row>
             <Row className='cvat-shortcuts-setting'>
                 <Col span={24}>
-                    <Alert message='快捷键可以由任意组合的修饰键（alt、ctrl或shift）和末尾的一个非修饰键组成。某些键组合可能被浏览器保留，在系统中无法被覆盖。' type='warning' showIcon />
+                    <Alert message='快捷键可以由任意组合的修饰键(alt、ctrl或shift)和末尾的一个非修饰键组成。某些键组合可能被浏览器保留，在系统中无法被覆盖。' type='warning' showIcon />
                     {items ? (
                         <Collapse
                             items={items}

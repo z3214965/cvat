@@ -237,8 +237,8 @@ function ApiTokensCard(): JSX.Element {
                                         <Row>
                                             <Col>
                                                 <Text>
-                                                    个人访问令牌（PATs）是文本字符串，可用于替代用户名/电子邮件和密码进行身份验证。
-                                                    它们允许通过各种客户端（包括自定义脚本、Python SDK和CLI）与服务器API进行交互。
+                                                    个人访问令牌(PATs)是文本字符串，可用于替代用户名/电子邮件和密码进行身份验证。
+                                                    它们允许通过各种客户端(包括自定义脚本、Python SDK和CLI)与服务器API进行交互。
                                                 </Text>
                                             </Col>
                                         </Row>

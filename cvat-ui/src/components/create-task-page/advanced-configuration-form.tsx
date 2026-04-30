@@ -272,7 +272,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
     private renderSegmentSize(): JSX.Element {
         return (
             <CVATTooltip title='定义一个片段中的帧数'>
-                <Form.Item label='Segment size' name='segmentSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
+                <Form.Item label='分段大小' name='segmentSize' rules={[{ validator: isInteger({ min: 1 }) }]}>
                     <Input size='large' type='number' min={1} />
                 </Form.Item>
             </CVATTooltip>
@@ -423,7 +423,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                 instanceId={projectId}
                 locationValue={sourceStorageLocation}
                 switchDescription='Use project source storage'
-                storageDescription='Specify source storage for import resources like annotation, backups'
+                storageDescription='为标注、备份等导入资源指定来源存储位置'
                 useDefaultStorage={useProjectSourceStorage}
                 onChangeUseDefaultStorage={onChangeUseProjectSourceStorage}
                 onChangeLocationValue={onChangeSourceStorageLocation}
@@ -443,8 +443,8 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
             <TargetStorageField
                 instanceId={projectId}
                 locationValue={targetStorageLocation}
-                switchDescription='Use project target storage'
-                storageDescription='Specify target storage for export resources like annotation, backups                '
+                switchDescription='使用项目目标存储'
+                storageDescription='为标注、备份等导出资源指定目标存储位置'
                 useDefaultStorage={useProjectTargetStorage}
                 onChangeUseDefaultStorage={onChangeUseProjectTargetStorage}
                 onChangeLocationValue={onChangeTargetStorageLocation}

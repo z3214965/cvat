@@ -40,19 +40,19 @@ interface Props {
 
 const componentShortcuts = {
     UNDO: {
-        name: 'Undo action',
+        name: '撤销操作',
         description: '取消最近一次对象相关操作',
         sequences: ['ctrl+z'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     REDO: {
-        name: 'Redo action',
+        name: '重做操作',
         description: '撤销回退操作',
         sequences: ['ctrl+shift+z', 'ctrl+y'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     SWITCH_TOOLS_BLOCKER_STATE: {
-        name: 'Switch algorithm blocker',
+        name: '切换算法阻塞',
         description: '延迟执行交互工具的算法运算',
         sequences: ['tab'],
         scope: ShortcutScope.STANDARD_WORKSPACE,

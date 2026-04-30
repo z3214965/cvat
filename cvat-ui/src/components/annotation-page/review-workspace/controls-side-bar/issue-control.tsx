@@ -25,7 +25,7 @@ interface Props {
 
 const componentShortcuts = {
     OPEN_REVIEW_ISSUE: {
-        name: 'Open an issue',
+        name: '提交问题',
         description: '在审阅工作区中创建新问题',
         sequences: ['n'],
         scope: ShortcutScope.REVIEW_WORKSPACE_CONTROLS,

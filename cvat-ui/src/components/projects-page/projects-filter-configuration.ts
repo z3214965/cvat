@@ -55,9 +55,9 @@ export const config: Partial<Config> = {
             operators: ['select_equals', 'select_any_in', 'select_not_any_in'],
             fieldSettings: {
                 listValues: [
-                    { value: 'annotation', title: 'Annotation' },
-                    { value: 'validation', title: 'Validation' },
-                    { value: 'completed', title: 'Completed' },
+                    { value: 'annotation', title: '标注' },
+                    { value: 'validation', title: '校验' },
+                    { value: 'completed', title: '完成' },
                 ],
             },
         },

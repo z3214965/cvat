@@ -13,6 +13,7 @@ import { CombinedState } from 'reducers';
 import IncrementalCSVWriter, { CSVColumn, downloadCSV } from 'utils/csv-writer';
 import { exportToCSVAsync } from 'actions/csv-export-actions';
 import { filterNull, NonNullableProperties } from 'utils/filter-null';
+import { getInstanceTypeText } from 'utils/conversion-txt';
 
 interface CSVExportButtonConfig<T, Q> {
     resourceName: string;
@@ -43,8 +44,9 @@ function createCSVExportButton<T, Q>(
         const columns = useMemo(() => config.columns, []);
 
         const handleExport = useCallback(() => {
+            const resourceTxt = getInstanceTypeText(config.resourceName);
             const timestamp = new Date().toISOString().split('T')[0];
-            const filename = `cvat-${config.resourceName}-${timestamp}.csv`;
+            const filename = `cvat-${resourceTxt}-${timestamp}.csv`;
 
             if (predefinedData) {
                 const csvWriter = new IncrementalCSVWriter(columns, config.uniqueKey ?? null);
@@ -73,12 +75,12 @@ function createCSVExportButton<T, Q>(
                     return config.fetchPage(filteredQuery, page, pageSize);
                 },
                 filename,
-                resourceName: config.resourceName,
+                resourceName: resourceTxt,
                 onSuccess: (totalCount: number, exportedFilename: string) => {
                     notification.success({
                         message: '导出完成',
                         description: (
-                            `已成功将${totalCount}个${config.resourceName}导出到${exportedFilename}`
+                            `已成功将${totalCount}个${resourceTxt}导出到${exportedFilename}`
                         ),
                     });
                 },

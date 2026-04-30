@@ -40,11 +40,11 @@ const validationRules = {
     email: [
         {
             type: 'email' as RuleType,
-            message: '输入的E-mail无效！',
+            message: '输入的邮箱无效！',
         },
         {
             required: true,
-            message: '请指定一个email地址',
+            message: '请指定一个邮箱地址',
         },
     ],
 

@@ -10,7 +10,7 @@ import Card from 'antd/lib/card';
 import Descriptions from 'antd/lib/descriptions';
 import { MoreOutlined } from '@ant-design/icons';
 
-import { Job, JobType } from 'cvat-core-wrapper';
+import { Job, JobType, JobStage, JobState } from 'cvat-core-wrapper';
 import { useCardHeightHOC, useContextMenuClick } from 'utils/hooks';
 import Preview from 'components/common/preview';
 import { CombinedState } from 'reducers';
@@ -100,8 +100,23 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
             onContextMenuCapture={handleContextMenuCapture}
         >
             <Descriptions column={1} size='small'>
-                <Descriptions.Item label='Stage and state'>{`${job.stage} ${job.state}`}</Descriptions.Item>
-                <Descriptions.Item label='Frames'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
+                <Descriptions.Item label='阶段与状态'>
+                    {(() => {
+                        const stageNames: Record<JobStage, string> = {
+                            [JobStage.ANNOTATION]: '标注',
+                            [JobStage.VALIDATION]: '校验',
+                            [JobStage.ACCEPTANCE]: '验收',
+                        };
+                        const stateNames: Record<JobState, string> = {
+                            [JobState.NEW]: '待处理',
+                            [JobState.IN_PROGRESS]: '进行中',
+                            [JobState.REJECTED]: '已驳回',
+                            [JobState.COMPLETED]: '已完成',
+                        };
+                        return `${stageNames[job.stage]} ${stateNames[job.state]}`;
+                    })()}
+                </Descriptions.Item>
+                <Descriptions.Item label='帧'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
                 {job.assignee ? (
                     <Descriptions.Item label='负责人'>{job.assignee.username}</Descriptions.Item>
                 ) : (

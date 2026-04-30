@@ -267,7 +267,7 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
                     label: (
                         <span>
                             <EditOutlined />
-                            <Text>原始</Text>
+                            <Text>JSON配置</Text>
                         </span>
                     ),
                     children: <RawViewer key='raw' labels={savedAndUnsavedLabels} onSubmit={this.handleRawSubmit} />,
@@ -276,7 +276,7 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
                     label: (
                         <span>
                             <BuildOutlined />
-                            <Text>构造器</Text>
+                            <Text>图形化</Text>
                         </span>
                     ),
                     children: configuratorContent,

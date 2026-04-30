@@ -235,12 +235,12 @@ function SetupWebhookContent(props: Props): JSX.Element {
                     </Form.Item>
                     <Form.Item
                         name='secret'
-                        label='秘密'
+                        label='密钥'
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
-                        help='传输载荷时验证 SSL 证书'
+                        help='传输载荷时验证SSL证书'
                         name='enableSSL'
                         valuePropName='checked'
                     >

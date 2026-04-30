@@ -135,7 +135,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
     });
 
     const makeShapesTracksTitle = (title: string): JSX.Element => (
-        <CVATTooltip title='静态标注 / 跟踪轨迹'>
+        <CVATTooltip title='图形/追踪'>
             <Text strong>{title}</Text>
             <QuestionCircleOutlined className='cvat-info-circle-icon' />
         </CVATTooltip>
@@ -143,7 +143,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
 
     const columns = [
         {
-            title: <Text strong> 标签 </Text>,
+            title: <Text strong>标签</Text>,
             dataIndex: 'label',
             render: (text: string) => {
                 const sep = '{{cvat.skeleton.lbl.sep}}';
@@ -213,27 +213,27 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
             width: 100,
         },
         {
-            title: <Text strong> 标签 </Text>,
+            title: <Text strong>tag</Text>,
             dataIndex: 'tag',
             key: 'tag',
             width: 100,
         },
         {
-            title: <Text strong> 人工 </Text>,
+            title: <Text strong>人工</Text>,
             dataIndex: 'manually',
             key: 'manually',
             fixed: 'right',
             width: 100,
         },
         {
-            title: <Text strong> 插值 </Text>,
+            title: <Text strong>插值</Text>,
             dataIndex: 'interpolated',
             key: 'interpolated',
             fixed: 'right',
             width: 100,
         },
         {
-            title: <Text strong> 总计 </Text>,
+            title: <Text strong>总计</Text>,
             dataIndex: 'total',
             key: 'total',
             fixed: 'right',
@@ -243,7 +243,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
 
     const columns3D = [
         {
-            title: <Text strong> 标签 </Text>,
+            title: <Text strong>标签</Text>,
             dataIndex: 'label',
             key: 'label',
         },
@@ -253,7 +253,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
             key: 'cuboid',
         },
         {
-            title: <Text strong> 总计 </Text>,
+            title: <Text strong>总计</Text>,
             dataIndex: 'total',
             key: 'total',
         },
@@ -297,7 +297,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
                     <Row justify='start' className='cvat-job-info-bug-tracker'>
                         <Col>
                             <Text strong className='cvat-text'>
-                                问题跟踪
+                                问题追踪
                             </Text>
                             <a href={bugTracker}>{bugTracker}</a>
                         </Col>

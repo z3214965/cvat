@@ -94,7 +94,7 @@ export default function LabelsListComponent(): JSX.Element {
             <div className='cvat-objects-sidebar-issues-list-header'>
                 <Row justify='start' align='middle'>
                     <Col>
-                        <Text>{`条目数量: ${frameIssues.length}`}</Text>
+                        <Text>{`数量: ${frameIssues.length}`}</Text>
                     </Col>
                     <Col offset={1}>
                         <CVATTooltip title='找到出现问题的前一帧'>

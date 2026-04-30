@@ -127,7 +127,7 @@ export default function ManifestsManager(props: Props): JSX.Element {
             <Row justify='start'>
                 <Col>
                     <Button onClick={onAddManifestItem} className='cvat-add-manifest-button'>
-                        Add manifest
+                        添加清单
                         <PlusCircleOutlined />
                     </Button>
                 </Col>

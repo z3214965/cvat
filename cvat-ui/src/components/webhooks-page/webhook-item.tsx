@@ -58,7 +58,7 @@ function WebhookItem(props: Readonly<WebhookItemProps>): JSX.Element | null {
     } = webhookInstance;
 
     const updated = dayjs(updatedDate).fromNow();
-    const created = dayjs(createdDate).format('MMMM Do YYYY');
+    const created = dayjs(createdDate).format('YYYY-MM-DDTHH:mm:ss');
     const username = owner ? owner.username : null;
 
     const { lastStatus } = webhookInstance;
@@ -120,7 +120,7 @@ function WebhookItem(props: Readonly<WebhookItemProps>): JSX.Element | null {
                 </Paragraph>
                 {username && (
                     <>
-                        <Text type='secondary'>{`由 ${username} 于 ${created} 创建`}</Text>
+                        <Text type='secondary'>{`由 ${username} 创建于 ${created}`}</Text>
                         <br />
                     </>
                 )}

@@ -170,7 +170,7 @@ export default function UserSelector(props: Readonly<Props>): JSX.Element {
             options={[
                 ...(!searchPhrase || 'reset assignee'.includes(searchPhrase.toLowerCase()) ? [{
                     value: 'RESET_ASSIGNEE',
-                    label: '重置负责人',
+                    label: '重置',
                 }] : []),
                 ...users.map((user) => ({
                     value: user.id.toString(),

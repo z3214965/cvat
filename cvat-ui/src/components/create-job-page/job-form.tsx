@@ -149,7 +149,7 @@ function JobForm(props: Props): JSX.Element {
                                 className='cvat-select-job-type'
                             >
                                 <Select.Option value={JobType.GROUND_TRUTH}>
-                                    真值
+                                    Ground truth
                                 </Select.Option>
                             </Select>
                         </Form.Item>

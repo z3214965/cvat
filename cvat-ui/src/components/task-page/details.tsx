@@ -130,7 +130,7 @@ class DetailsComponent extends React.PureComponent<Props, State> {
         const { consensusEnabled } = this.state;
         const owner = taskInstance.owner ? taskInstance.owner.username : null;
         const assignee = taskInstance.assignee ? taskInstance.assignee : null;
-        const created = dayjs(taskInstance.createdDate).format('MMMM Do YYYY');
+        const created = dayjs(taskInstance.createdDate).format('YYYY-MM-DDTHH:mm:ss');
         const assigneeSelect = (
             <UserSelector
                 value={assignee}
@@ -149,7 +149,7 @@ class DetailsComponent extends React.PureComponent<Props, State> {
                         {owner && (
                             <div>
                                 <Text type='secondary'>
-                                    {`任务 #${taskInstance.id} 由 ${owner} 于 ${created} 创建`}
+                                    {`任务 #${taskInstance.id} 由 ${owner} 创建于 ${created}`}
                                 </Text>
                             </div>
                         )}

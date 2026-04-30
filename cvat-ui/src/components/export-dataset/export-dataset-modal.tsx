@@ -23,6 +23,7 @@ import TargetStorageField from 'components/storage/target-storage-field';
 import CVATMarkdown from 'components/common/cvat-markdown';
 import NameTemplateTooltip from 'components/common/cvat-name-template-tooltip';
 import { shallowEqual } from 'utils/redux';
+import { getInstanceTypeText } from 'utils/conversion-txt';
 import { CombinedState } from 'reducers';
 import { exportActions, exportDatasetAsync } from 'actions/export-actions';
 import { makeBulkOperationAsync } from 'actions/bulk-actions';
@@ -64,6 +65,7 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
     const [helpMessage, setHelpMessage] = useState('');
     const dispatch = useDispatch();
     const history = useHistory();
+    const instanceTxt = getInstanceTypeText(instanceType);
 
     const {
         selectedIds,
@@ -185,16 +187,16 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                         );
                     },
                     (inst: ProjectOrTaskOrJob, idx: number, total: number) => (
-                        `导出数据集用于 ${instanceType}#${inst.id} [${idx + 1}/${total}]`
+                        `导出数据集用于 ${instanceTxt} #${inst.id} [${idx + 1}/${total}]`
                     ),
                 ));
                 closeModal();
                 const resource = values.saveImages ? '数据集' : '标注';
                 const description =
-                    `批量 ${resource.toLowerCase()} 导出已开始。 ` +
-                    '你可以在[here](/requests)查看进度并下载文件。';
+                    `批量${resource.toLowerCase()}导出已开始。 ` +
+                    '你可以在[此处](/requests)查看进度并下载文件。';
                 Notification.info({
-                    message: `批量 ${resource.toLowerCase()} 导出已开始`,
+                    message: `批量${resource.toLowerCase()}导出已开始`,
                     description: (
                         <CVATMarkdown history={history}>{description}</CVATMarkdown>
                     ),
@@ -218,10 +220,9 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
             );
             closeModal();
             const resource = values.saveImages ? '数据集' : '标注';
-            const description = `已为 ${instanceType} 启动了 ${resource} 导出。 ` +
-            '你可以在[here](/requests)查看进度并下载文件。';
+            const description = `已为${instanceTxt}启动了${resource}导出。你可以在[此处](/requests)查看进度并下载文件。`;
             Notification.info({
-                message: `${resource} export started`,
+                message: `${resource}导出开始`,
                 description: (
                     <CVATMarkdown history={history}>{description}</CVATMarkdown>
                 ),
@@ -259,10 +260,10 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
             title={
                 isBulkMode ? (
                     <Text strong>
-                        {`Export ${selectedInstances.length} ${instanceType}s as datasets`}
+                        {`导出${selectedInstances.length}个${instanceTxt}作为数据集`}
                     </Text>
                 ) : (
-                    <Text strong>{`将 ${instanceType} 导出为数据集`}</Text>
+                    <Text strong>{`将${instanceTxt}导出为数据集`}</Text>
                 )
             }
             open={!!instance}

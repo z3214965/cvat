@@ -30,6 +30,7 @@ import {
 } from 'cvat-core-wrapper';
 import StorageField from 'components/storage/storage-field';
 import { createAction, ActionUnion } from 'utils/redux';
+import { getInstanceTypeText, getResourceText } from 'utils/conversion-txt';
 
 const { confirm } = Modal;
 
@@ -321,6 +322,9 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
         resource,
     } = state;
 
+    const instanceTxt = getInstanceTypeText(instanceType);
+    const resourceTxt = getResourceText(resource);
+
     useEffect(() => {
         if (instanceT === 'project') {
             dispatch(reducerActions.setResource('dataset'));
@@ -468,10 +472,10 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                     uploadParams.convMaskToPoly,
                 ));
             const resToPrint = uploadParams.resource.charAt(0).toUpperCase() + uploadParams.resource.slice(1);
-            const description = `已开始为 ${instanceType} 导入 ${resToPrint}。` +
-            ' 你可以查看进度[here](/requests).';
+            const description = `已开始为${instanceTxt}导入${resToPrint}。` +
+            ' 你可以查看进度[此处](/requests).';
             Notification.info({
-                message: `${resToPrint} 导入已开始`,
+                message: `${resToPrint}导入已开始`,
                 description: (
                     <CVATMarkdown history={history}>{description}</CVATMarkdown>
                 ),
@@ -483,7 +487,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
     const confirmUpload = (): void => {
         confirm({
             title: '当前标注将会丢失',
-            content: `您即将向 ${instanceType} 上传新的标注。是否继续？`,
+            content: `您即将向${instanceTxt}上传新的标注。是否继续？`,
             className: `cvat-modal-content-load-${instanceType.split(' ')[0]}-annotation`,
             onOk: () => {
                 onUpload();
@@ -518,14 +522,14 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
             title={(
                 <>
                     <Text strong>
-                        {`导入 ${resource} 到 ${instanceType}`}
+                        {`导入${resourceTxt}到${instanceTxt}`}
                     </Text>
                     {
                         instance instanceof core.classes.Project && (
                             <CVATTooltip
                                 title={
                                     instance && !instance.labels.length ?
-                                        '标签将从数据集中导入' :
+                                        '从数据集中导入标签' :
                                         '将使用来自项目的标签'
                                 }
                             >
@@ -558,7 +562,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                     hasFeedback
                 >
                     <Select
-                        placeholder={`选择 ${resource} 格式`}
+                        placeholder={`选择${resourceTxt}格式`}
                         className='cvat-modal-import-select'
                         virtual={false}
                         onChange={(format: string) => {

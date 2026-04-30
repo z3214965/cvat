@@ -69,23 +69,23 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
                     rules={[
                         {
                             type: 'email',
-                            message: '输入的不是有效的E-mail!',
+                            message: '输入的不是有效的邮箱！',
                         },
                         {
                             required: true,
-                            message: '请指定一个email地址',
+                            message: '请指定一个邮箱地址',
                         },
                     ]}
                 >
                     <CVATSigningInput
                         autoComplete='email'
-                        placeholder='Email'
+                        placeholder='邮箱'
                         onReset={() => form.setFieldsValue({ email: '' })}
                     />
                 </Form.Item>
                 <Row>
                     <Col className='cvat-password-reset-tip'>
-                        <Text> 我们会将链接发送到您的email </Text>
+                        <Text>我们会将链接发送到您的邮箱</Text>
                     </Col>
                 </Row>
                 <Form.Item>

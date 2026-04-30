@@ -28,7 +28,7 @@ export const config: Partial<Config> = {
             fieldSettings: {
                 listValues: [
                     { value: 'annotation', title: '标注' },
-                    { value: 'validation', title: '验证' },
+                    { value: 'validation', title: '校验' },
                     { value: 'completed', title: '完成' },
                 ],
             },

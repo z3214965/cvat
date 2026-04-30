@@ -35,7 +35,7 @@ import { subKeyMap } from 'utils/component-subkeymap';
 
 const componentShortcuts = {
     SWITCH_COLOR_BY_APPEARANCE: {
-        name: 'Switch objects appearance setting "Color by"',
+        name: '切换对象外观配色规则「按颜色分类」',
         description: '对象的颜色模式可以按对象、标签或组来设置',
         sequences: [],
         scope: ShortcutScope.ANNOTATION_PAGE,
@@ -163,6 +163,11 @@ function AppearanceBlock(props: Props): JSX.Element {
         [ColorBy.INSTANCE]: ColorBy.GROUP,
         [ColorBy.GROUP]: ColorBy.LABEL,
     };
+    const colorByLabels: Record<string, string> = {
+        Instance: '对象',
+        Group: '组',
+        Label: '标签',
+    };
 
     const handlers: Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void> = {
         SWITCH_COLOR_BY_APPEARANCE: (event: KeyboardEvent | undefined) => {
@@ -186,14 +191,14 @@ function AppearanceBlock(props: Props): JSX.Element {
                 children: (
                     <div className='cvat-objects-appearance-content cvat-appearance-block'>
                         <GlobalHotKeys keyMap={subKeyMap(componentShortcuts, keyMap)} handlers={handlers} />
-                        <Text type='secondary'>按颜色</Text>
+                        <Text type='secondary'>着色依据</Text>
                         <Radio.Group
                             className='cvat-appearance-color-by-radio-group'
                             value={colorBy}
                             onChange={(event: RadioChangeEvent) => changeShapesColorBy(event.target.value)}
                         >
                             {Object.keys(nextColorBy).map((val) => (
-                                <Radio.Button value={val} key={val}>{val}</Radio.Button>
+                                <Radio.Button value={val} key={val}>{colorByLabels[val]}</Radio.Button>
                             ))}
                         </Radio.Group>
                         <Text type='secondary'>透明度</Text>

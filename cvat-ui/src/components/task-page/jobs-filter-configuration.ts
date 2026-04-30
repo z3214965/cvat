@@ -14,9 +14,9 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
             fieldSettings: {
                 listValues: [
-                    { value: 'new', title: '新建' },
+                    { value: 'new', title: '待处理' },
                     { value: 'in progress', title: '进行中' },
-                    { value: 'rejected', title: '拒绝' },
+                    { value: 'rejected', title: '已驳回' },
                     { value: 'completed', title: '完成' },
                 ],
             },
@@ -29,8 +29,8 @@ export const config: Partial<Config> = {
             fieldSettings: {
                 listValues: [
                     { value: 'annotation', title: '标注' },
-                    { value: 'validation', title: '验证' },
-                    { value: 'acceptance', title: '接受' },
+                    { value: 'validation', title: '校验' },
+                    { value: 'acceptance', title: '验收' },
                 ],
             },
         },

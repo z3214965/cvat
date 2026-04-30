@@ -30,6 +30,7 @@ import { ConsensusActionTypes } from 'actions/consensus-actions';
 import { BulkActionsTypes } from 'actions/bulk-actions';
 import { getInstanceType } from 'actions/common';
 import { ResourceUpdateTypes } from 'utils/enums';
+import { getInstanceTypeText, getResourceText } from 'utils/conversion-txt';
 
 import config from 'config';
 import { NotificationsState } from '.';
@@ -317,7 +318,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         auth: {
                             ...state.messages.auth,
                             registerDone: {
-                                message: `要使用您的账户，您需要确认电子邮件地址。 \
+                                message: `要使用您的账户，您需要确认邮箱地址。 \
                                 我们已向 ${action.payload.userEmail} 发送了一封包含确认链接的电子邮件。`,
                             },
                         },
@@ -574,11 +575,13 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ExportActionTypes.EXPORT_DATASET_SUCCESS: {
             const { instance, instanceType, resource, target } = action.payload;
-            let description = `Export ${resource} for ${instanceType} ${instance.id} is finished. `;
+            const instanceTxt = getInstanceTypeText(instanceType);
+            const resourceTxt = getResourceText(resource);
+            let description = `针对${instanceTxt} #${instance.id} 的${resourceTxt}导出已完成。`;
             if (target === StorageLocation.LOCAL) {
                 description += '你可[在此处下载](/requests)。';
             } else if (target === StorageLocation.CLOUD_STORAGE) {
-                description = `${instanceType} ${instance.id} 的 ${resource} 导出文件已上传至云存储。`;
+                description = `${instanceTxt} #${instance.id} 的${resourceTxt}导出文件已上传至云存储。`;
             }
             return {
                 ...state,

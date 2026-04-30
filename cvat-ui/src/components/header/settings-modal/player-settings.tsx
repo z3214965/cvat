@@ -65,7 +65,7 @@ export default function PlayerSettingsComponent(props: Props): JSX.Element {
     items.push([(
         <Row key='player-step' align='bottom' className='cvat-player-settings-step cvat-player-setting'>
             <Col>
-                <Text className='cvat-text-color'> 播放步进 </Text>
+                <Text className='cvat-text-color'>播放步长</Text>
                 <InputNumber
                     min={minFrameStep}
                     max={maxFrameStep}
