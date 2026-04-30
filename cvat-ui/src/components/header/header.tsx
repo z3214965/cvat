@@ -404,7 +404,7 @@ function HeaderComponent(props: Props): JSX.Element {
         <Layout.Header className='cvat-header'>
             <GlobalHotKeys keyMap={subKeyMap(componentShortcuts, keyMap)} handlers={handlers} />
             <div className='cvat-left-header'>
-                <CVATLogo />
+                {/* <CVATLogo /> */}
                 <Button
                     className={getButtonClassName('projects')}
                     type='link'

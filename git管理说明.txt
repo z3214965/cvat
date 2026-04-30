@@ -94,7 +94,7 @@ docker tag alpine:3.20 gcr.io/iguazio/alpine:3.20
 docker compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml up -d --build \
   cvat_opa cvat_db cvat_redis_inmem cvat_redis_ondisk cvat_server
 
-CVAT_VERSION=v2.62.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
+CVAT_VERSION=v2.64.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down -v
 # 查看 CVAT + Nuclio 容器状态
 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml ps
