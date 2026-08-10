@@ -18,9 +18,10 @@ git checkout -b main
 git push origin main
 
 拉取上游最新提交（不会自动合并）
-git gc
-git prune
-git fetch upstream develop
+git fetch --depth=1 upstream develop
+git reflog expire --expire=now --all
+git gc --prune=now
+git prune --注意使用
 
 # 切换到本地 develop 分支
 git checkout develop
@@ -43,7 +44,7 @@ git merge dev
 # 推送到你自己的远程 main（完成全部同步）
 git push origin main
 
--------------------------------------------------------
+--------------------废弃-----------------------------------
 
 docker save almalinux:10.1 > almalinux_10.1.tar
 docker load --input almalinux_10.1.tar
@@ -95,20 +96,16 @@ docker tag swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/iguazio/uhttpc:0.0.3-
 #注意
 /project/docker/volumes路径下nuclio-local-storage/_data的创建，否则quay.io/nuclio/dashboard:1.15.9-amd64启动不起来
 
-export CVAT_HOST=39.105.209.194
-export CVAT_POSTGRES_PASSWORD=diorszhang1987.
-
 #开发环境
 docker compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml up -d --build \
   cvat_opa cvat_db cvat_redis_inmem cvat_redis_ondisk cvat_server
 
-CVAT_VERSION=v2.66.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
-docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down -v
-
+# 初始化管理员
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 admin/Superuser123456.
 temp01/Qazwsx123edc
 
+# 安装nuctl
 wget https://github.com/nuclio/nuclio/releases/download/1.15.9/nuctl-1.15.9-linux-amd64
 chmod +x nuctl-1.15.9-linux-amd64
 ln -sf $(pwd)/nuctl-1.15.9-linux-amd64 /usr/local/bin/nuctl
@@ -176,5 +173,45 @@ nuctl delete function pth-facebookresearch-sam-vit-h --force
 nuctl delete function onnx-wongkinyiu-yolov7 --force
 nuctl delete function onnx-ultralytics-yolo11 --force
 
+-------------------功能说明------------------------------
+删除github、guide、support
+普通用户，查看不到cloud storages、 models、 analytics、 admin、 organization、 about
+
+-----------------更新说明--------------------------
+1、拉取代码，合并代码
+2、拉取官方已发布的服务端，docker pull cvat/server:v2.72.0
+3、重新安装前端依赖：yarn install
+4、打包前端项目：yarn build:cvat-ui  
+5、修改docker-compose.yml中cvat_ui中image节点，日期为当前时间
+6、拷贝打包文件
+cvat-ui/react_nginx.conf、
+cvat-ui/robots.txt
+cvat-ui\dist、
+Dockerfile.ui、
+docker-compose.yml
+docker-compose.external_db.yml
+docker-compose.dev.yml
+components/*
+上传到有docker编译环境的机器上
+7、运行以下命令，创建出对应前端镜像
+docker build -f Dockerfile.ui -t cvat/ui:v20260810 .
+可选：
+docker save cvat/ui:v20260810 > cvat_ui_v20260810.tar
+docker load --input cvat_ui_v20260810.tar
+8、停止当前服务
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down -v
+9、启动服务
+export CVAT_HOST=39.105.209.194
+export CVAT_POSTGRES_PASSWORD=diorszhang1987.
+export CVAT_VERSION=v2.72.0
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
+10、访问地址
+http://192.168.1.17:8080  /  http://39.105.209.194:4414
+admin/Superuser123456.
+temp01/Qazwsx123edc
 
 
+
+docker save quay.io/nuclio/dashboard:1.16.3-amd64 > quay.io_nuclio_dashboard:1.16.3-amd64.tar
+docker load --input nginx-unprivileged:1.31.2-alpine3.23-slim.tar
