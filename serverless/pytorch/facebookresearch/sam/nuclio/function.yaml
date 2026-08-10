@@ -1,0 +1,83 @@
+# Copyright (C) CVAT.ai Corporation
+#
+# SPDX-License-Identifier: MIT
+
+metadata:
+  name: pth-facebookresearch-sam-vit-h
+  namespace: cvat
+  annotations:
+    name: sam1
+    version: 2
+    type: interactor
+    spec:
+    min_pos_points: 0
+    min_neg_points: 0
+    startswith_box_optional: true
+    animated_gif: https://raw.githubusercontent.com/cvat-ai/cvat/develop/site/content/en/images/hrnet_example.gif
+    help_message: 该交互工具支持通过至少一个正向点和任意数量负向点，生成物体的掩码
+
+spec:
+  description: 使用Segment-Anything(sam1)进行交互式对象分割
+  runtime: 'python:3.10'
+  handler: main:handler
+  eventTimeout: 180s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/sam
+
+  noBaseImagePull: true # 强制禁用拉取基础镜像
+
+  build:
+    image: cvat.pth.facebookresearch.sam.vit_h
+    baseImage: ubuntu:22.04
+
+    directives:
+      preCopy:
+        # disable interactive frontend
+        - kind: ENV
+          value: DEBIAN_FRONTEND=noninteractive
+        # set workdir
+        - kind: WORKDIR
+          value: /opt/nuclio/sam
+        # ========== 换成阿里云Ubuntu源 ==========
+        - kind: RUN
+          value: sed -i 's@archive.ubuntu.com@mirrors.aliyun.com@g' /etc/apt/sources.list
+        # ========== install basic deps ==========
+        # Ubuntu 20.04 python3.8、 Ubuntu 22.04 python3.10、 Ubuntu 24.04 python3.12
+        - kind: RUN
+          value: apt-get update && apt-get -y install curl git python3 python3-pip python-is-python3 ffmpeg libsm6 libxext6 unzip && rm -rf /var/lib/apt/lists/*
+        # ========== install sam1 deps ==========
+        - kind: RUN
+          value: pip3 install --no-cache-dir torch torchvision torchaudio pycocotools matplotlib onnxruntime onnx -i https://pypi.tuna.tsinghua.edu.cn/simple --default-timeout=1000
+        # ========== install sam1 code ==========
+        # 方式一
+        # - kind: RUN
+        #   value: pip3 install git+https://github.com/facebookresearch/segment-anything.git --no-cache-dir
+        # 方式二
+        - kind: RUN
+          value: curl -O http://47.96.137.124:4200/diludata/3dtiles/segment-anything-main.zip
+        - kind: RUN
+          value: unzip -q segment-anything-main.zip && cd segment-anything-main && pip3 install . -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache-dir
+        # ========== download sam1 weights ==========
+        # 在线下载
+        # - kind: RUN
+        #   value: curl -O https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
+        #   value: curl -o /opt/nuclio/sam/sam_vit_h_4b8939.pth http://47.96.137.124:4200/diludata/3dtiles/sam_vit_h_4b8939.pth
+        # 离线拷贝
+        # 已通过--volume挂载/project/cvat/code/software/sam1/sam_vit_h_4b8939.pth
+
+  triggers:
+    myHttpTrigger:
+      numWorkers: 2
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 10000
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+        port: 32771
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

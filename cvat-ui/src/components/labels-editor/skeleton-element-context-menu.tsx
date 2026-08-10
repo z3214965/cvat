@@ -1,0 +1,118 @@
+// Copyright (C) 2020-2022 Intel Corporation
+// Copyright (C) CVAT.ai Corporation
+//
+// SPDX-License-Identifier: MIT
+
+import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import Button from 'antd/lib/button';
+import Modal from 'antd/lib/modal';
+
+import LabelForm from './label-form';
+import { fromSVGCoord, LabelOptColor } from './common';
+
+interface ContextMenuProps {
+    elementID: number;
+    labels: Record<number, LabelOptColor>;
+    container: SVGSVGElement;
+    disabled?: boolean;
+    onConfigureLabel(elementID: number, data: LabelOptColor | null): void;
+    onDelete(element: SVGElement): void;
+}
+
+function WrappedSkeletonElementLabelForm(props: ContextMenuProps & { hideConfigurator: () => void }): JSX.Element {
+    const {
+        elementID, labels, onConfigureLabel, hideConfigurator,
+    } = props;
+
+    const elementLabel = labels[elementID];
+
+    return (
+        <Modal
+            open
+            width={700}
+            closable={false}
+            destroyOnClose
+            footer={null}
+        >
+            <LabelForm
+                label={elementLabel}
+                labelNames={Object
+                    .values(labels).map((label: LabelOptColor) => label.name)
+                    .filter((name: string) => name !== elementLabel.name)}
+                onSubmit={(data) => {
+                    onConfigureLabel(elementID, data);
+                    hideConfigurator();
+                }}
+                onCancel={() => {
+                    onConfigureLabel(elementID, null);
+                    hideConfigurator();
+                }}
+            />
+        </Modal>
+    );
+}
+
+function SkeletonElementContextMenu(props: ContextMenuProps): JSX.Element {
+    const {
+        container, disabled, elementID, onDelete,
+    } = props;
+    const [configuratorVisible, setConfiguratorVisible] = useState(false);
+
+    const targetPoint = container.querySelector(`[data-element-id="${elementID}"]`);
+    if (!targetPoint) {
+        throw new Error('未找到目标SVG点');
+    }
+
+    const cx = targetPoint.getAttribute('cx');
+    const cy = targetPoint.getAttribute('cy');
+
+    if (!cx || !cy) {
+        throw new Error('圆圈属性 "cx", "cy" 未定义');
+    }
+
+    const [x, y] = fromSVGCoord(container, [+cx, +cy]);
+    return ReactDOM.createPortal((
+        <>
+            {configuratorVisible && (
+                <WrappedSkeletonElementLabelForm
+                    {...props}
+                    hideConfigurator={() => {
+                        setConfiguratorVisible(false);
+                    }}
+                />
+            )}
+            {!configuratorVisible && (
+                <div
+                    className='cvat-skeleton-configurator-context-menu'
+                    style={{ top: y, left: x }}
+                >
+                    <Button
+                        type='link'
+                        onClick={() => {
+                            setConfiguratorVisible(true);
+                        }}
+                        icon={<EditOutlined />}
+                        key='configure_label'
+                    >
+                        配置
+                    </Button>
+                    <Button
+                        type='link'
+                        onClick={() => {
+                            onDelete(targetPoint as SVGElement);
+                        }}
+                        disabled={disabled}
+                        icon={<DeleteOutlined />}
+                        key='delete'
+                    >
+                        删除
+                    </Button>
+                </div>
+            )}
+        </>
+    ), window.document.body);
+}
+
+export default React.memo(SkeletonElementContextMenu);

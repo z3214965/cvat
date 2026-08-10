@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "allowJs": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "src",
+    "types": [],
+    "lib": ["dom", "esnext"],
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["src/ts/*.ts"]
+}

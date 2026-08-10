@@ -1,0 +1,320 @@
+// Copyright (C) CVAT.ai Corporation
+//
+// SPDX-License-Identifier: MIT
+
+import './styles.scss';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { shallowEqual } from 'utils/redux';
+import { useHistory } from 'react-router';
+import Modal from 'antd/lib/modal';
+import Notification from 'antd/lib/notification';
+import Text from 'antd/lib/typography/Text';
+import Input from 'antd/lib/input';
+import Form from 'antd/lib/form';
+import Space from 'antd/lib/space';
+import Switch from 'antd/lib/switch';
+import Tooltip from 'antd/lib/tooltip';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { CombinedState } from 'reducers';
+import { exportActions, exportBackupAsync } from 'actions/export-actions';
+import { makeBulkOperationAsync } from 'actions/bulk-actions';
+import {
+    getCore, Job, ProjectOrTaskOrJob, Storage, StorageData, StorageLocation,
+    Project, Task,
+} from 'cvat-core-wrapper';
+
+import CVATMarkdown from 'components/common/cvat-markdown';
+import TargetStorageField from 'components/storage/target-storage-field';
+import NameTemplateTooltip from 'components/common/cvat-name-template-tooltip';
+import { getInstanceTypeText } from 'utils/conversion-txt';
+
+const core = getCore();
+
+type FormValues = {
+    customName: string | undefined;
+    targetStorage: StorageData;
+    useProjectTargetStorage: boolean;
+    lightweight: boolean;
+};
+
+const initialValues: FormValues = {
+    customName: undefined,
+    targetStorage: {
+        location: StorageLocation.LOCAL,
+        cloudStorageId: undefined,
+    },
+    useProjectTargetStorage: true,
+    lightweight: true,
+};
+
+function ExportBackupModal(): JSX.Element {
+    const dispatch = useDispatch();
+    const history = useHistory();
+    const [form] = Form.useForm();
+    const [instanceType, setInstanceType] = useState('');
+    const [useDefaultStorage, setUseDefaultStorage] = useState(true);
+    const [storageLocation, setStorageLocation] = useState(StorageLocation.LOCAL);
+    const [defaultStorageLocation, setDefaultStorageLocation] = useState(StorageLocation.LOCAL);
+    const [defaultStorageCloudId, setDefaultStorageCloudId] = useState<number | undefined>(undefined);
+    const [helpMessage, setHelpMessage] = useState('');
+    const [lightweight, setLightweight] = useState(true);
+    const [nameTemplate, setNameTemplate] = useState('backup_task_{{id}}');
+
+    const instanceTxt = getInstanceTypeText(instanceType);
+
+    const {
+        selectedIds,
+        allTasks,
+        allProjects,
+        instance,
+    } = useSelector((state: CombinedState) => {
+        const instanceT = state.export.instanceType;
+        const result = {
+            allTasks: state.tasks.current,
+            allProjects: state.projects.current,
+            selectedIds: null as null | number[],
+            instance: null as (Project | Task | null),
+        };
+
+        if (instanceT === 'project') {
+            result.selectedIds = state.projects.selected;
+            result.instance = state.export.projects?.backup?.modalInstance ?? null;
+        }
+
+        if (instanceT === 'task') {
+            result.selectedIds = state.tasks.selected;
+            result.instance = state.export.tasks?.backup?.modalInstance ?? null;
+        }
+
+        return result;
+    }, shallowEqual);
+
+    const isBulkMode = selectedIds && selectedIds.length > 1;
+    const [selectedInstances, setSelectedInstances] = useState<Exclude<ProjectOrTaskOrJob, Job>[]>([]);
+    useEffect(() => {
+        if (isBulkMode) {
+            let filtered: Exclude<ProjectOrTaskOrJob, Job>[] = [];
+            if (instanceType === 'task') {
+                filtered = allTasks.filter((t) => selectedIds.includes(t.id));
+            } else if (instanceType === 'project') {
+                filtered = allProjects.filter((p) => selectedIds.includes(p.id));
+            }
+            setSelectedInstances(filtered);
+        } else if (instance) {
+            setSelectedInstances([instance]);
+        } else {
+            setSelectedInstances([]);
+        }
+    }, [isBulkMode, instanceType, allTasks, allProjects, instance]);
+
+    useEffect(() => {
+        let newInstanceType = '';
+        if (instance && instance instanceof core.classes.Project) {
+            newInstanceType = 'project';
+        } else if (instance && instance instanceof core.classes.Task) {
+            newInstanceType = 'task';
+        }
+        setNameTemplate(`backup_${newInstanceType}_{{id}}`);
+        setInstanceType(newInstanceType);
+    }, [instance]);
+
+    useEffect(() => {
+        if (instance) {
+            setDefaultStorageLocation(instance.targetStorage.location);
+            setDefaultStorageCloudId(instance.targetStorage.cloudStorageId ?? undefined);
+        }
+    }, [instance]);
+
+    useEffect(() => {
+        const loc = defaultStorageLocation ? defaultStorageLocation.split('_')[0] : 'local';
+        const cloudId = defaultStorageCloudId !== undefined && defaultStorageCloudId !== null ? `№${defaultStorageCloudId}` : '';
+        setHelpMessage(`导出备份到 ${loc} 存储 ${cloudId}`);
+    }, [defaultStorageLocation, defaultStorageCloudId]);
+
+    const closeModal = (): void => {
+        setUseDefaultStorage(true);
+        setStorageLocation(StorageLocation.LOCAL);
+        setLightweight(true);
+        form.resetFields();
+        if (instance) {
+            dispatch(exportActions.closeExportBackupModal(instance));
+        }
+    };
+
+    const handleExport = useCallback(
+        (values: FormValues): void => {
+            if (isBulkMode) {
+                dispatch(makeBulkOperationAsync<Exclude<ProjectOrTaskOrJob, Job>>(
+                    selectedInstances,
+                    async (inst: Exclude<ProjectOrTaskOrJob, Job>, idx: number) => {
+                        let backupName = nameTemplate
+                            .replaceAll('{{id}}', String(inst.id))
+                            .replaceAll('{{name}}', inst.name ?? '')
+                            .replaceAll('{{index}}', String(idx + 1));
+                        if (!backupName.endsWith('.zip')) backupName += '.zip';
+                        dispatch(
+                            exportBackupAsync(
+                                inst,
+                                new Storage({
+                                    location: values.targetStorage?.location,
+                                    cloudStorageId: values.targetStorage?.cloudStorageId,
+                                }),
+                                false,
+                                backupName,
+                                lightweight,
+                            ),
+                        );
+                    },
+                    (inst: Exclude<ProjectOrTaskOrJob, Job>, idx: number, total: number) => (
+                        `导出备份${instanceTxt} #${inst.id} [${idx + 1}/${total}]`
+                    ),
+                ));
+                closeModal();
+                const description = '批量备份导出已开始。您可以在[here](/requests)查看进度。';
+                Notification.info({
+                    message: '批量备份导出已开始',
+                    description: (
+                        <CVATMarkdown history={history}>{description}</CVATMarkdown>
+                    ),
+                    className: 'cvat-notification-notice-export-backup-start',
+                });
+            } else if (instance) {
+                const customName = values.customName ? `${values.customName}.zip` : '';
+                let cloudStorageId: number | undefined;
+                if (useDefaultStorage) {
+                    cloudStorageId = defaultStorageCloudId ?? undefined;
+                } else {
+                    cloudStorageId = values.targetStorage?.cloudStorageId;
+                }
+                dispatch(
+                    exportBackupAsync(
+                        instance,
+                        new Storage({
+                            location: useDefaultStorage ? defaultStorageLocation : values.targetStorage?.location,
+                            cloudStorageId,
+                        }),
+                        useDefaultStorage,
+                        customName,
+                        lightweight,
+                    ),
+                );
+                closeModal();
+
+                const description = isBulkMode ?
+                    '批量备份导出已开始。您可以在[here](/requests)查看进度。' :
+                    '备份导出已开始。您可以在[here](/requests)查看进度。';
+                Notification.info({
+                    message: isBulkMode ? '批量备份导出已开始' : '备份导出已开始',
+                    description: (
+                        <CVATMarkdown history={history}>{description}</CVATMarkdown>
+                    ),
+                    className: 'cvat-notification-notice-export-backup-start',
+                });
+            }
+        },
+        [
+            instance,
+            isBulkMode,
+            selectedInstances,
+            nameTemplate,
+            useDefaultStorage,
+            defaultStorageLocation,
+            defaultStorageCloudId,
+            lightweight,
+        ],
+    );
+
+    const exampleName = (isBulkMode && selectedInstances.length > 0 && selectedInstances[0]) ?
+        nameTemplate
+            .replaceAll('{{id}}', String(selectedInstances[0].id))
+            .replaceAll('{{name}}', selectedInstances[0].name ?? '')
+            .replaceAll('{{index}}', '1') :
+        `backup_${instanceType}_1.zip`;
+
+    return (
+        <Modal
+            title={
+                isBulkMode ? (
+                    <Text strong>
+                        {`备份${selectedInstances.length}个${instanceTxt}`}
+                    </Text>
+                ) : (
+                    <Text strong>{`备份${instanceTxt} #${instance?.id}`}</Text>
+                )
+            }
+            open={!!instance}
+            onCancel={closeModal}
+            onOk={() => form.submit()}
+            className={`cvat-modal-export-${instanceType.split(' ')[0]}`}
+            destroyOnClose
+        >
+            <Form
+                form={form}
+                layout='vertical'
+                initialValues={initialValues}
+                onFinish={handleExport}
+            >
+                {isBulkMode ? (
+                    <Form.Item label={<Text strong>Name template</Text>} required>
+                        <Input
+                            value={nameTemplate}
+                            onChange={(e) => setNameTemplate(e.target.value)}
+                            placeholder='backup_{{id}}'
+                            suffix='.zip'
+                            className='cvat-modal-export-filename-input'
+                        />
+                        <Text type='secondary'>
+                            <Tooltip
+                                title={(
+                                    <NameTemplateTooltip
+                                        example={exampleName}
+                                    />
+                                )}
+                            >
+                                在生成备份名称时，会使用一个模板。
+                                {' '}
+                                <QuestionCircleOutlined />
+                            </Tooltip>
+                        </Text>
+                    </Form.Item>
+                ) : (
+                    <Form.Item label={<Text strong>自定义名称</Text>} name='customName'>
+                        <Input
+                            placeholder='备份文件的自定义名称'
+                            suffix='.zip'
+                            className='cvat-modal-export-filename-input'
+                        />
+                    </Form.Item>
+                )}
+                <TargetStorageField
+                    instanceId={instance ? instance.id : null}
+                    switchDescription='用默认设置'
+                    switchHelpMessage={helpMessage}
+                    useDefaultStorage={isBulkMode ? false : useDefaultStorage}
+                    storageDescription={`为导出${instanceTxt}指定目标存储`}
+                    locationValue={storageLocation}
+                    onChangeUseDefaultStorage={isBulkMode ? undefined : (value: boolean) => setUseDefaultStorage(value)}
+                    onChangeLocationValue={(value: StorageLocation) => setStorageLocation(value)}
+                    disableSwitch={isBulkMode}
+                />
+                <Form.Item
+                    className='cvat-settings-switch-lightweight'
+                >
+                    <Space>
+                        <Switch
+                            checked={lightweight}
+                            onChange={setLightweight}
+                        />
+                        <Text strong>尽可能使用轻量级备份</Text>
+                        <Tooltip title='如果任务使用了云存储中的媒体，则可以仅备份任务本身而不包括媒体。从轻量级备份中恢复的任务必须手动连接到云存储。'>
+                            <QuestionCircleOutlined />
+                        </Tooltip>
+                    </Space>
+                </Form.Item>
+            </Form>
+        </Modal>
+    );
+}
+
+export default React.memo(ExportBackupModal);

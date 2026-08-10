@@ -1,0 +1,180 @@
+git clone --depth 1 https://github.com/z3214965/cvat.git
+
+# 让 Git 忽略文件的「可执行权限」变化，只关心文件内容。
+git config core.fileMode false
+
+git remote -v
+
+git remote set-url origin git@github.com:z3214965/cvat.git
+
+git remote add upstream https://github.com/cvat-ai/cvat.git
+
+git checkout -b dev
+git add .
+git commit -m "首次提交"
+git push origin dev
+
+git checkout -b main
+git push origin main
+
+拉取上游最新提交（不会自动合并）
+git gc
+git prune
+git fetch upstream develop
+
+# 切换到本地 develop 分支
+git checkout develop
+# 把 upstream/develop 合并到本地 develop（真正更新）
+git merge upstream/develop
+# 推送到你自己的远程仓库（可选，建议执行）
+git push origin develop
+
+# 切换到你的开发分支 dev
+git checkout dev
+# 把刚更新好的 upstream/develop 合并到 dev
+git merge upstream/develop
+# 推送到你自己的远程 dev
+git push origin dev
+
+# 切换到主分支 main
+git checkout main
+# 把最新的 dev 合并到 main
+git merge dev
+# 推送到你自己的远程 main（完成全部同步）
+git push origin main
+
+-------------------------------------------------------
+
+docker save almalinux:10.1 > almalinux_10.1.tar
+docker load --input almalinux_10.1.tar
+docker run -d --privileged --name cvat \
+  -p 4414:8080 \
+  -v /dlService/project/cvat:/cvat \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  almalinux:10.1 tail -f /dev/null
+
+docker build -f Dockerfile.ui -t cvat/ui:v20260527 .
+docker save cvat/ui:v20260527 > cvat_ui_v20260527.tar
+docker load --input cvat_ui_v20260527.tar
+
+docker save gcr.io/iguazio/python:3.10 > gcr.io_iguazio_python_3.10.tar
+docker load --input gcr.io_iguazio_python_3.10.tar
+
+---------------------废弃----------------------------------
+
+dnf install zip unzip -y
+
+unzip cvat.zip -d cvat
+
+export CVAT_HOST=39.105.209.194
+export CVAT_HOST=192.168.1.17
+export CVAT_HOST=47.96.137.124
+export CVAT_POSTGRES_PASSWORD=diorszhang1987.
+
+CVAT_VERSION=v2.64.0 docker-compose up -d  /  docker-compose down -v
+
+CVAT_VERSION=v2.64.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml up -d /  docker-compose -f docker-compose.yml -f docker-compose.external_db.yml down -v
+
+docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+admin/superuser123456789
+temp01/Qazwsx123edc
+
+
+http://192.168.1.17:8080  /  http://39.105.209.194:4414
+
+
+
+----------------------------------------------------------------
+docker pull alpine:3.20
+docker tag alpine:3.20 gcr.io/iguazio/alpine:3.20
+
+docker pull swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/iguazio/alpine:3.14
+docker tag swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/iguazio/uhttpc:0.0.3-amd64 gcr.io/iguazio/uhttpc:0.0.3-amd64
+
+#注意
+/project/docker/volumes路径下nuclio-local-storage/_data的创建，否则quay.io/nuclio/dashboard:1.15.9-amd64启动不起来
+
+export CVAT_HOST=39.105.209.194
+export CVAT_POSTGRES_PASSWORD=diorszhang1987.
+
+#开发环境
+docker compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml up -d --build \
+  cvat_opa cvat_db cvat_redis_inmem cvat_redis_ondisk cvat_server
+
+CVAT_VERSION=v2.66.0 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml down -v
+
+docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
+admin/Superuser123456.
+temp01/Qazwsx123edc
+
+wget https://github.com/nuclio/nuclio/releases/download/1.15.9/nuctl-1.15.9-linux-amd64
+chmod +x nuctl-1.15.9-linux-amd64
+ln -sf $(pwd)/nuctl-1.15.9-linux-amd64 /usr/local/bin/nuctl
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+cp buildx-v0.33.0.linux-amd64 /usr/local/lib/docker/cli-plugins/docker-buildx
+chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+docker buildx version
+
+chmod +x ./serverless/deploy_cpu.sh
+chmod +x ./serverless/deploy_cpu.sh
+./serverless/deploy_cpu.sh serverless/pytorch/facebookresearch/sam/nuclio
+./serverless/deploy_cpu.sh serverless/onnx/WongKinYiu/yolov7/nuclio
+./serverless/deploy_cpu.sh serverless/onnx/ultralytics/yolo11/nuclio
+
+# 说明
+https://modelscope.cn/models/yatengLG/ISAT_with_segment_anything_checkpoints/summary
+https://github.com/facebookresearch/segment-anything / https://gitee.com/mirrors/segment-anything
+
+# 下载sam依赖
+pip3 download -d ./whl \
+  --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+  --extra-index-url https://download.pytorch.org/whl/cpu \
+  --trusted-host pypi.tuna.tsinghua.edu.cn \
+  --trusted-host download.pytorch.org \
+  --default-timeout=3600 --retries 5 \
+  torch torchvision torchaudio pycocotools matplotlib onnxruntime onnx opencv-python
+  
+http://47.96.137.124:4200/diludata/3dtiles/sam_vit_h_4b8939.pth
+
+http://47.96.137.124:4200/diludata/3dtiles/segment-anything-main.zip
+
+-----------------------------------------------------------------
+
+conda create -n cvat python=3.10
+
+conda activate cvat
+
+conda env remove -n cvat
+
+conda deactivate
+
+# 安装vim
+docker exec -u root -it c3bc0a9e4e2e /bin/bash -c "apt update && apt install vim -y"
+
+docker images --format "{{.Repository}}:{{.Tag}}" | grep -v "<none>" | xargs docker save -o cvat_2.66.0.tar
+docker load -i cvat_2.66.0.tar
+
+docker images --format "{{.Repository}}:{{.Tag}}" | grep -v '<none>' | while read image; do
+  # 将 / 和 : 替换为 _ ，生成合法文件名
+  filename=$(echo "$image" | sed 's/[\/:]/_/g')
+  docker save -o "${filename}.tar" "$image"
+  echo "✓ 已导出: $image → ${filename}.tar"
+done
+for f in *.tar; do docker load -i "$f"; done
+
+# 强制删除所有镜像
+docker rmi -f $(docker images -q)
+
+# 清理所有构建缓存（彻底）
+docker builder prune -a -f
+
+nuctl get functions
+nuctl delete function pth-facebookresearch-sam-vit-h --force
+nuctl delete function onnx-wongkinyiu-yolov7 --force
+nuctl delete function onnx-ultralytics-yolo11 --force
+
+
+

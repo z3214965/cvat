@@ -1,0 +1,196 @@
+// Copyright (C) 2020-2022 Intel Corporation
+// Copyright (C) CVAT.ai Corporation
+//
+// SPDX-License-Identifier: MIT
+
+import React, { useEffect, useCallback } from 'react';
+import { Col } from 'antd/lib/grid';
+import Icon, { InfoCircleOutlined } from '@ant-design/icons';
+import Select from 'antd/lib/select';
+import Button from 'antd/lib/button';
+import Modal from 'antd/lib/modal';
+import notification from 'antd/lib/notification';
+
+import { FilterIcon, FullscreenIcon, GuideIcon } from 'icons';
+import config from 'config';
+import {
+    DimensionType, Job, JobStage, JobState,
+} from 'cvat-core-wrapper';
+import { Workspace } from 'reducers';
+
+import MDEditor from '@uiw/react-md-editor';
+import rehypeSanitize from 'rehype-sanitize';
+
+interface Props {
+    showStatistics(): void;
+    showFilters(): void;
+    changeWorkspace(workspace: Workspace): void;
+    jobInstance: Job;
+    workspace: Workspace;
+    annotationFilters: object[];
+    initialOpenGuide: boolean;
+}
+
+function RightGroup(props: Props): JSX.Element {
+    const {
+        showStatistics,
+        changeWorkspace,
+        showFilters,
+        workspace,
+        jobInstance,
+        annotationFilters,
+        initialOpenGuide,
+    } = props;
+
+    const filters = annotationFilters.length;
+
+    const openGuide = useCallback(() => {
+        const PADDING = Math.min(window.screen.availHeight, window.screen.availWidth) * 0.4;
+        jobInstance.guide().then((guide) => {
+            if (guide) {
+                Modal.info({
+                    icon: null,
+                    width: window.screen.availWidth - PADDING,
+                    className: 'cvat-annotation-view-markdown-guide-modal',
+                    content: (
+                        <MDEditor
+                            visibleDragbar={false}
+                            data-color-mode='light'
+                            height={window.screen.availHeight - PADDING}
+                            preview='preview'
+                            hideToolbar
+                            value={guide.markdown}
+                            previewOptions={{ rehypePlugins: [[rehypeSanitize]] }}
+                        />
+                    ),
+                });
+            }
+        }).catch((error: unknown) => {
+            notification.error({
+                message: '无法接收标注指南',
+                description: error instanceof Error ? error.message : '未知错误',
+            });
+        });
+    }, [jobInstance]);
+
+    useEffect(() => {
+        if (Number.isInteger(jobInstance?.guideId)) {
+            if (initialOpenGuide) {
+                openGuide();
+            } else if (
+                jobInstance?.stage === JobStage.ANNOTATION &&
+                jobInstance?.state === JobState.NEW
+            ) {
+                let seenGuides = [];
+                try {
+                    seenGuides = JSON.parse(localStorage.getItem('seenGuides') || '[]');
+                    if (!Array.isArray(seenGuides) || seenGuides.some((el) => !Number.isInteger(el))) {
+                        throw new Error('本地存储数据结构异常');
+                    }
+                } catch (_error: unknown) {
+                    seenGuides = [];
+                }
+
+                if (!seenGuides.includes(jobInstance.guideId)) {
+                    // open guide if the user have not seen it yet
+                    openGuide();
+                    const updatedSeenGuides = Array
+                        .from(new Set([
+                            jobInstance.guideId,
+                            ...seenGuides.slice(0, config.LOCAL_STORAGE_SEEN_GUIDES_MEMORY_LIMIT - 1),
+                        ]));
+                    localStorage.setItem('seenGuides', JSON.stringify(updatedSeenGuides));
+                }
+            }
+        }
+    }, []);
+
+    const workspaceNames: Record<Workspace, string> = {
+        [Workspace.STANDARD3D]: '标准3D',
+        [Workspace.STANDARD]: '标准',
+        [Workspace.ATTRIBUTES]: '属性标注',
+        [Workspace.SINGLE_SHAPE]: '单形状',
+        [Workspace.TAGS]: '标签标注',
+        [Workspace.REVIEW]: '审核',
+    };
+
+    return (
+        <Col className='cvat-annotation-header-right-group'>
+            <Button
+                type='link'
+                className='cvat-annotation-header-fullscreen-button cvat-annotation-header-button'
+                onClick={(): void => {
+                    if (window.document.fullscreenEnabled) {
+                        if (window.document.fullscreenElement) {
+                            window.document.exitFullscreen();
+                        } else {
+                            window.document.documentElement.requestFullscreen();
+                        }
+                    }
+                }}
+            >
+                <Icon component={FullscreenIcon} />
+                全屏
+            </Button>
+            { jobInstance.guideId !== null && (
+                <Button
+                    type='link'
+                    className='cvat-annotation-header-guide-button cvat-annotation-header-button'
+                    onClick={openGuide}
+                >
+                    <Icon component={GuideIcon} />
+                    指南
+                </Button>
+            )}
+            <Button
+                type='link'
+                className='cvat-annotation-header-info-button cvat-annotation-header-button'
+                onClick={showStatistics}
+            >
+                <InfoCircleOutlined />
+                信息
+            </Button>
+            <Button
+                type='link'
+                className={`cvat-annotation-header-filters-button cvat-annotation-header-button ${filters ?
+                    'filters-armed' : ''
+                }`}
+                onClick={showFilters}
+            >
+                <Icon component={FilterIcon} />
+                过滤
+            </Button>
+            <div>
+                <Select
+                    popupClassName='cvat-workspace-selector-dropdown'
+                    className='cvat-workspace-selector'
+                    onChange={changeWorkspace}
+                    value={workspace}
+                >
+                    {Object.values(Workspace).map((ws) => {
+                        if (jobInstance.dimension === DimensionType.DIMENSION_3D) {
+                            if (ws === Workspace.STANDARD) {
+                                return null;
+                            }
+                            return (
+                                <Select.Option disabled={ws !== Workspace.STANDARD3D} key={ws} value={ws}>
+                                    {workspaceNames[ws]}
+                                </Select.Option>
+                            );
+                        }
+                        if (ws !== Workspace.STANDARD3D) {
+                            return (
+                                <Select.Option key={ws} value={ws}>
+                                    {workspaceNames[ws]}
+                                </Select.Option>
+                            );
+                        }
+                        return null;
+                    })}
+                </Select>
+            </div>
+        </Col>
+    );
+}
+
+export default React.memo(RightGroup);
