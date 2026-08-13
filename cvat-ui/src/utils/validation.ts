@@ -7,8 +7,7 @@ import { RuleObject } from 'antd/lib/form';
 import { ValidateErrorEntity } from 'rc-field-form/lib/interface';
 
 export const isInteger =
-    ({ min, max, filter }: { min?: number; max?: number; filter?: (intValue: number) => boolean }) =>
-    (_: RuleObject, value?: number | string): Promise<void> => {
+    ({ min, max, filter }: { min?: number; max?: number; filter?: (intValue: number) => boolean }) => (_: RuleObject, value?: number | string): Promise<void> => {
         if (typeof value === 'undefined' || value === '') {
             return Promise.resolve();
         }
@@ -34,7 +33,7 @@ export const isInteger =
     };
 
 export function formFieldsError(error: any): string[] {
-    return (error as ValidateErrorEntity).errorFields
-        ? (error as ValidateErrorEntity).errorFields.map((field) => `${field.name} : ${field.errors.join(';')}`)
-        : [error.toString()];
+    return (error as ValidateErrorEntity).errorFields ?
+        (error as ValidateErrorEntity).errorFields.map((field) => `${field.name} : ${field.errors.join(';')}`) :
+        [error.toString()];
 }

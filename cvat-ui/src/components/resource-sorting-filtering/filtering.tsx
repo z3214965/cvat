@@ -272,9 +272,7 @@ export default function ResourceFilterHOC(
                                 onClick={() => onPredefinedVisibleChange(!predefinedVisible)}
                             >
                                 筛选
-                                { appliedFilter.predefined ?
-                                    <FilterFilled /> :
-                                    <FilterOutlined />}
+                                { appliedFilter.predefined ? <FilterFilled /> : <FilterOutlined />}
                             </Button>
                         </Popover>
                     ) : null
@@ -392,9 +390,7 @@ export default function ResourceFilterHOC(
                         onClick={() => onBuilderVisibleChange(!builderVisible)}
                     >
                         过滤
-                        { appliedFilter.built || appliedFilter.recent ?
-                            <FilterFilled /> :
-                            <FilterOutlined />}
+                        { appliedFilter.built || appliedFilter.recent ? <FilterFilled /> : <FilterOutlined />}
                     </Button>
                 </Popover>
                 <Button

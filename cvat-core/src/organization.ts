@@ -5,12 +5,11 @@
 
 import {
     OrganizationMembersFilter,
-    SerializedInvitationData,
-    SerializedOrganization,
-    SerializedOrganizationContact,
-    SerializedUser,
+    SerializedInvitationData, SerializedOrganization, SerializedOrganizationContact, SerializedUser,
 } from './server-response-types';
-import { checkFilter, checkObjectType, fieldsToSnakeCase, isEnum, isInteger, isString } from './common';
+import {
+    checkFilter, checkObjectType, fieldsToSnakeCase, isEnum, isInteger, isString,
+} from './common';
 import config from './config';
 import { MembershipRole } from './enums';
 import { ArgumentError, DataError } from './exceptions';
@@ -107,7 +106,7 @@ export default class Organization {
                 get: () => data.description,
             },
             contact: {
-                get: () => ({ ...(data.contact ?? {}) }),
+                get: () => ({ ...data.contact ?? {} }),
             },
             owner: {
                 get: () => data.owner,
@@ -131,10 +130,14 @@ export default class Organization {
 
     // Method returns paginatable list of organization members
     public async members(filter: OrganizationMembersFilter = { page: 1, pageSize: 10 }): Promise<Membership[]> {
-        const result = await PluginRegistry.apiWrapper.call(this, Organization.prototype.members, {
-            ...filter,
-            org: this.slug,
-        });
+        const result = await PluginRegistry.apiWrapper.call(
+            this,
+            Organization.prototype.members,
+            {
+                ...filter,
+                org: this.slug,
+            },
+        );
         return result;
     }
 
@@ -179,7 +182,11 @@ export default class Organization {
     }
 
     public async resendInvitation(key: string): Promise<void> {
-        const result = await PluginRegistry.apiWrapper.call(this, Organization.prototype.resendInvitation, key);
+        const result = await PluginRegistry.apiWrapper.call(
+            this,
+            Organization.prototype.resendInvitation,
+            key,
+        );
         return result;
     }
 }
@@ -269,7 +276,9 @@ Object.defineProperties(Organization.prototype.save, {
     implementation: {
         writable: false,
         enumerable: false,
-        value: async function implementation(fields: Parameters<typeof Organization.prototype.save>[0]) {
+        value: async function implementation(
+            fields: Parameters<typeof Organization.prototype.save>[0],
+        ) {
             if (typeof this.id === 'number') {
                 const organizationData = {
                     ...('name' in fields ? { name: fields.name } : {}),
@@ -313,7 +322,9 @@ Object.defineProperties(Organization.prototype.members, {
     implementation: {
         writable: false,
         enumerable: false,
-        value: async function implementation(filter: Parameters<typeof Organization.prototype.members>[0]) {
+        value: async function implementation(
+            filter: Parameters<typeof Organization.prototype.members>[0],
+        ) {
             checkFilter(filter, {
                 org: isString,
                 page: isInteger,
@@ -326,24 +337,22 @@ Object.defineProperties(Organization.prototype.members, {
             const params = fieldsToSnakeCase(filter);
             const result = await serverProxy.organizations.members(params);
 
-            const memberships = await Promise.all(
-                result.results.map(async (rawMembership) => {
-                    const { invitation } = rawMembership;
-                    let rawInvitation = null;
-                    if (invitation) {
-                        try {
-                            const invitationData = await serverProxy.organizations.invitations({ key: invitation });
-                            [rawInvitation] = invitationData.results;
-                            // eslint-disable-next-line no-empty
-                        } catch (_e) {}
-                    }
+            const memberships = await Promise.all(result.results.map(async (rawMembership) => {
+                const { invitation } = rawMembership;
+                let rawInvitation = null;
+                if (invitation) {
+                    try {
+                        const invitationData = await serverProxy.organizations.invitations({ key: invitation });
+                        [rawInvitation] = invitationData.results;
+                    // eslint-disable-next-line no-empty
+                    } catch (_e) {}
+                }
 
-                    return new Membership({
-                        ...rawMembership,
-                        invitation: rawInvitation,
-                    });
-                }),
-            );
+                return new Membership({
+                    ...rawMembership,
+                    invitation: rawInvitation,
+                });
+            }));
 
             return Object.assign(memberships, { count: result.count });
         },
@@ -425,11 +434,9 @@ Object.defineProperties(Organization.prototype.leave, {
                     pageSize: 10,
                     org: this.slug,
                     filter: JSON.stringify({
-                        and: [
-                            {
-                                '==': [{ var: 'user' }, user.username],
-                            },
-                        ],
+                        and: [{
+                            '==': [{ var: 'user' }, user.username],
+                        }],
                     }),
                 });
                 const [membership] = result.results;

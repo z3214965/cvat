@@ -57,7 +57,7 @@ export class EditHandlerImpl implements EditHandler {
     private startEdit(): void {
         // get started coordinates
         const [clientX, clientY] = translateFromSVG(
-            this.canvas.node as any as SVGSVGElement,
+            (this.canvas.node as any) as SVGSVGElement,
             this.editedShape.attr('points').split(' ')[this.editData.pointID].split(','),
         );
 
@@ -81,7 +81,8 @@ export class EditHandlerImpl implements EditHandler {
         };
 
         this.canvas.on('mousemove.edit', (e: MouseEvent): void => {
-            if (e.shiftKey && ['polygon', 'polyline'].includes(this.editData.state.shapeType)) {
+            const slidingEnabled = e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey;
+            if (slidingEnabled && ['polygon', 'polyline'].includes(this.editData.state.shapeType)) {
                 if (lastDrawnPoint.x === null || lastDrawnPoint.y === null) {
                     (this.editLine as any).draw('point', e);
                 } else {
@@ -358,10 +359,8 @@ export class EditHandlerImpl implements EditHandler {
 
     private initEditing(): void {
         this.editedShape = this.canvas
-            .select(`#cvat_canvas_shape_${this.editData.state.clientID}`)
-            .first()
-            .clone()
-            .attr('stroke', this.outlinedBorders);
+            .select(`#cvat_canvas_shape_${this.editData.state.clientID}`).first()
+            .clone().attr('stroke', this.outlinedBorders);
         this.setupPoints(true);
         this.startEdit();
         this.isEditing = true;
@@ -380,8 +379,7 @@ export class EditHandlerImpl implements EditHandler {
             const points = pointsToNumberArray(stringifiedPoints)
                 .slice(0, -2)
                 .map((coord: number): number => coord - offset);
-            if (points.length >= 2 * 2) {
-                // minimumPoints * 2
+            if (points.length >= 2 * 2) { // minimumPoints * 2
                 const { state } = this.editData;
                 this.onEditDone(state, points);
             }

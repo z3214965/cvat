@@ -9,16 +9,13 @@ import CameraControls from 'camera-controls';
 import { Canvas3dController } from './canvas3dController';
 import { Listener, Master } from './master';
 import consts from './consts';
-import { Canvas3dModel, DrawData, Mode, Planes, UpdateReasons, ViewType } from './canvas3dModel';
 import {
-    createRotationHelper,
-    removeRotationHelper,
-    createResizeHelper,
-    removeResizeHelper,
-    createCuboidEdges,
-    removeCuboidEdges,
-    CuboidModel,
-    makeCornerPointsMatrix,
+    Canvas3dModel, DrawData, Mode, Planes, UpdateReasons, ViewType,
+} from './canvas3dModel';
+import {
+    createRotationHelper, removeRotationHelper,
+    createResizeHelper, removeResizeHelper,
+    createCuboidEdges, removeCuboidEdges, CuboidModel, makeCornerPointsMatrix,
 } from './cuboid';
 import { ObjectState, ObjectType } from '.';
 import { disposeScene } from './utils';
@@ -86,7 +83,11 @@ interface SideViewsZoomMemory {
     [ViewType.FRONT]: number | null;
 }
 
-const BOTTOM_VIEWS = [ViewType.TOP, ViewType.SIDE, ViewType.FRONT];
+const BOTTOM_VIEWS = [
+    ViewType.TOP,
+    ViewType.SIDE,
+    ViewType.FRONT,
+];
 
 const ALL_VIEWS = [...BOTTOM_VIEWS, ViewType.PERSPECTIVE];
 
@@ -124,13 +125,10 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     private sceneBBox: THREE.Box3;
     private sideViewsZoomMemory: Record<number, SideViewsZoomMemory>;
     private model: Canvas3dModel & Master;
-    private drawnObjects: Record<
-        number,
-        {
-            data: DrawnObjectData;
-            cuboid: CuboidModel;
-        }
-    >;
+    private drawnObjects: Record<number, {
+        data: DrawnObjectData;
+        cuboid: CuboidModel;
+    }>;
     private hoverNeedsUpdate: boolean;
 
     public focusObjectByClientId(clientID: number, animate: boolean = true): void {
@@ -155,10 +153,10 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
     private cameraSettings: {
         [key in ViewType]: {
-            position: [number, number, number];
-            lookAt: [number, number, number];
-            up: [number, number, number];
-        };
+            position: [number, number, number],
+            lookAt: [number, number, number],
+            up: [number, number, number],
+        }
     };
 
     private get selectedCuboid(): CuboidModel | null {
@@ -303,14 +301,13 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             });
 
             Object.defineProperty(view, 'getDrawnObjects', {
-                value: () =>
-                    Object.values(this.drawnObjects).map((object) => {
-                        const { clientID } = object.data;
-                        return {
-                            ...object,
-                            state: this.model.objects.find((_state: ObjectState) => _state.clientID === clientID),
-                        };
-                    }),
+                value: () => Object.values(this.drawnObjects).map((object) => {
+                    const { clientID } = object.data;
+                    return {
+                        ...object,
+                        state: this.model.objects.find((_state: ObjectState) => _state.clientID === clientID),
+                    };
+                }),
                 enumerable: false,
                 configurable: false,
                 writable: false,
@@ -415,20 +412,16 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
         canvasPerspectiveView.addEventListener('click', (e: MouseEvent): void => {
             e.preventDefault();
-            const selectionIsBlocked =
-                ![Mode.GROUP, Mode.MERGE, Mode.SPLIT, Mode.IDLE].includes(this.mode) ||
+            const selectionIsBlocked = ![Mode.GROUP, Mode.MERGE, Mode.SPLIT, Mode.IDLE].includes(this.mode) ||
                 !this.views.perspective.rayCaster ||
                 this.isPerspectiveBeingDragged;
 
             if (e.detail !== 1 || selectionIsBlocked) return;
-            const intersects = this.views.perspective.rayCaster.renderer.intersectObjects(
-                this.getAllVisibleCuboids(),
-                false,
-            );
-            const intersectionClientID = +intersects[0]?.object?.name || null;
-            const objectState = Number.isInteger(intersectionClientID)
-                ? this.model.objects.find((state: ObjectState) => state.clientID === intersectionClientID)
-                : null;
+            const intersects = this.views.perspective.rayCaster.renderer
+                .intersectObjects(this.getAllVisibleCuboids(), false);
+            const intersectionClientID = +(intersects[0]?.object?.name) || null;
+            const objectState = Number.isInteger(intersectionClientID) ? this.model.objects
+                .find((state: ObjectState) => state.clientID === intersectionClientID) : null;
 
             if (objectState) {
                 this.dispatchEvent(
@@ -443,9 +436,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             }
 
             const handleClick = (targetList: ObjectState[]): void => {
-                const objectStateIdx = targetList.findIndex(
-                    (state: ObjectState) => state.clientID === intersectionClientID,
-                );
+                const objectStateIdx = targetList
+                    .findIndex((state: ObjectState) => state.clientID === intersectionClientID);
                 if (objectStateIdx !== -1) {
                     targetList.splice(objectStateIdx, 1);
                 } else {
@@ -460,8 +452,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             } else if (objectState && this.mode === Mode.MERGE) {
                 const [latest] = this.statesToBeMerged;
                 const drawnStates = Object.keys(this.drawnObjects).map((key: string): number => +key);
-                if (
-                    !latest ||
+                if (!latest ||
                     (latest &&
                         objectState.label.id === latest.label.id &&
                         objectState.shapeType === latest.shapeType &&
@@ -521,7 +512,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             const initState = this.model.data.drawData.initialState;
             const { redraw } = this.model.data.drawData;
             if (typeof redraw === 'number') {
-                const state = this.model.objects.find((object: ObjectState): boolean => object.clientID === redraw);
+                const state = this.model.objects
+                    .find((object: ObjectState): boolean => object.clientID === redraw);
                 const { cuboid } = this.drawnObjects[redraw];
                 cuboid.perspective.visible = true;
 
@@ -545,15 +537,13 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                                 shapeType: 'cuboid',
                                 frame: this.model.data.imageID,
                                 points,
-                                ...(initState
-                                    ? {
-                                          attributes: { ...initState.attributes },
-                                          group: initState.group?.id || null,
-                                          label: initState.label,
-                                          shapeType: initState.shapeType,
-                                          objectType: initState.objectType,
-                                      }
-                                    : {}),
+                                ...(initState ? {
+                                    attributes: { ...initState.attributes },
+                                    group: initState.group?.id || null,
+                                    label: initState.label,
+                                    shapeType: initState.shapeType,
+                                    objectType: initState.objectType,
+                                } : {}),
                             },
                             duration: 0,
                         },
@@ -646,8 +636,10 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                     const adjustCoef = 1 / 100;
                     const scaleFactor = basicZoomCoef ** (-event.deltaY * adjustCoef);
                     camera.zoom = Math.min(
-                        Math.max(camera.zoom * scaleFactor, consts.SIDE_VIEWS_MIN_ZOOM),
-                        consts.SIDE_VIEWS_MAX_ZOOM,
+                        Math.max(
+                            camera.zoom * scaleFactor,
+                            consts.SIDE_VIEWS_MIN_ZOOM,
+                        ), consts.SIDE_VIEWS_MAX_ZOOM,
                     );
 
                     if (this.activatedElementID) {
@@ -728,8 +720,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         // 5) Compute required distance to fit both width and height within FOV and aspect
         const vFov = THREE.MathUtils.degToRad(camera.fov);
         const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-        const distByHeight = heightWorld / 2 / Math.tan(vFov / 2);
-        const distByWidth = widthWorld / 2 / Math.tan(hFov / 2);
+        const distByHeight = (heightWorld / 2) / Math.tan(vFov / 2);
+        const distByWidth = (widthWorld / 2) / Math.tan(hFov / 2);
         const distance = Math.max(distByHeight, distByWidth);
 
         // 6) Center of geometry box in world
@@ -758,30 +750,30 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
     private getAllVisibleCuboids(view: ViewType = ViewType.PERSPECTIVE): THREE.Mesh[] {
         return Object.values(this.drawnObjects)
-            .map(({ cuboid }) => cuboid[view])
-            .filter((mesh: THREE.Mesh) => mesh.visible);
+            .map(({ cuboid }) => cuboid[view]).filter((mesh: THREE.Mesh) => mesh.visible);
     }
 
     private updateCameraFrustumPlane(viewType?: ViewType): void {
         const setCameraFrustumPlane = (
             camera: THREE.OrthographicCamera,
-            center: THREE.Vector3,
-            dimensions: THREE.Vector3,
+            center: THREE.Vector3, dimensions: THREE.Vector3,
             view: ViewType,
         ): void => {
             const [width, length] = dimensions.toArray();
             const [cx, cy, cz] = center.toArray();
             const distanceUpToCamera = Math.sqrt(
-                (camera.position.x - cx) ** 2 + (camera.position.y - cy) ** 2 + (camera.position.z - cz) ** 2,
+                (camera.position.x - cx) ** 2 +
+                (camera.position.y - cy) ** 2 +
+                (camera.position.z - cz) ** 2,
             );
 
             const MARGIN = 0.1;
             if (view === ViewType.FRONT) {
-                const objectOffset = Math.min(1 - width / 2 / distanceUpToCamera);
+                const objectOffset = Math.min(1 - ((width / 2) / distanceUpToCamera));
                 camera.near = distanceUpToCamera * objectOffset - MARGIN;
                 camera.far = camera.near + width + MARGIN * 2;
             } else if (view === ViewType.SIDE) {
-                const objectOffset = Math.min(1, 1 - length / 2 / distanceUpToCamera);
+                const objectOffset = Math.min(1, 1 - ((length / 2) / distanceUpToCamera));
                 camera.near = distanceUpToCamera * objectOffset - MARGIN;
                 camera.far = camera.near + length + MARGIN * 2;
             } else if (view === ViewType.TOP) {
@@ -804,23 +796,19 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
         if (viewType !== ViewType.FRONT) {
             setCameraFrustumPlane(
-                this.views.front.camera as THREE.OrthographicCamera,
-                center,
-                dimensions,
-                ViewType.FRONT,
+                this.views.front.camera as THREE.OrthographicCamera, center, dimensions, ViewType.FRONT,
             );
         }
 
         if (viewType !== ViewType.TOP) {
-            setCameraFrustumPlane(this.views.top.camera as THREE.OrthographicCamera, center, dimensions, ViewType.TOP);
+            setCameraFrustumPlane(
+                this.views.top.camera as THREE.OrthographicCamera, center, dimensions, ViewType.TOP,
+            );
         }
 
         if (viewType !== ViewType.SIDE) {
             setCameraFrustumPlane(
-                this.views.side.camera as THREE.OrthographicCamera,
-                center,
-                dimensions,
-                ViewType.SIDE,
+                this.views.side.camera as THREE.OrthographicCamera, center, dimensions, ViewType.SIDE,
             );
         }
     }
@@ -832,8 +820,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
             let memoizedZoom = this.sideViewsZoomMemory[this.activatedElementID];
             const drawnState = this.drawnObjects[this.activatedElementID];
-            if (
-                memoizedZoom &&
+            if (memoizedZoom &&
                 drawnState &&
                 memoizedZoom.serverID !== null &&
                 memoizedZoom.serverID !== drawnState.data.serverID
@@ -866,23 +853,17 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 return Math.min(zoomFromHeight, zoomFromWidth);
             };
 
-            const defaultOrMemoized = (computed: number, memoized: number | null): number =>
-                memoized !== null
-                    ? memoized
-                    : Math.max(consts.SIDE_VIEWS_MIN_ZOOM, Math.min(computed, consts.SIDE_VIEWS_MAX_ZOOM));
+            const defaultOrMemoized = (
+                computed: number,
+                memoized: number | null,
+            ): number => (memoized !== null ? memoized : Math.max(
+                consts.SIDE_VIEWS_MIN_ZOOM,
+                Math.min(computed, consts.SIDE_VIEWS_MAX_ZOOM),
+            ));
 
-            const {
-                renderer: { domElement: canvasTop },
-                camera: cameraTop,
-            } = top;
-            const {
-                renderer: { domElement: canvasFront },
-                camera: cameraFront,
-            } = front;
-            const {
-                renderer: { domElement: canvasSide },
-                camera: cameraSide,
-            } = side;
+            const { renderer: { domElement: canvasTop }, camera: cameraTop } = top;
+            const { renderer: { domElement: canvasFront }, camera: cameraFront } = front;
+            const { renderer: { domElement: canvasSide }, camera: cameraSide } = side;
 
             // TOP view: X (width), Y (height)
             // considering bbox geometry always equal 1, we only need its scale
@@ -958,7 +939,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 cancelable: true,
                 detail: {
                     domain,
-                    exception: exception instanceof Error ? exception : new Error(`Unknown exception: "${exception}"`),
+                    exception: exception instanceof Error ?
+                        exception : new Error(`未知异常: "${exception}"`),
                 },
             }),
         );
@@ -1155,8 +1137,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private receiveShapeColor(state: ObjectState | DrawnObjectData): string {
-        const includedInto = (states: ObjectState[]): boolean =>
-            states.some((_state: ObjectState): boolean => _state.clientID === state.clientID);
+        const includedInto = (states: ObjectState[]): boolean => states
+            .some((_state: ObjectState): boolean => _state.clientID === state.clientID);
         const { colorBy } = this.model.data.configuration;
 
         if (this.mode === Mode.GROUP && includedInto(this.statesToBeGrouped)) {
@@ -1195,7 +1177,9 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private addCuboid(state: ObjectState): CuboidModel {
-        const { shapeOpacity, outlinedBorders, orientationVisibility } = this.model.data.configuration;
+        const {
+            shapeOpacity, outlinedBorders, orientationVisibility,
+        } = this.model.data.configuration;
         const clientID = String(state.clientID);
         const cuboid = new CuboidModel(state.occluded ? 'dashed' : 'line', outlinedBorders || '#ffffff');
         const color = this.receiveShapeColor(state);
@@ -1245,7 +1229,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 if (!data.lock) {
                     createResizeHelper(cuboid, view);
                     createRotationHelper(cuboid, view);
-                    BOTTOM_VIEWS.forEach((type) => this.updateHelperPointsSize(type));
+                    BOTTOM_VIEWS
+                        .forEach((type) => this.updateHelperPointsSize(type));
                 }
             }
 
@@ -1270,13 +1255,13 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     private updateObjects(states: ObjectState[]): void {
         const { outlinedBorders } = this.model.data.configuration;
         states.forEach((state: ObjectState) => {
-            const { clientID, points, color, label, group, occluded, outside, hidden } = state;
+            const {
+                clientID, points, color, label, group, occluded, outside, hidden,
+            } = state;
             const { cuboid, data } = this.drawnObjects[clientID];
 
-            if (
-                points.length !== data.points.length ||
-                points.some((point: number, idx: number) => point !== data.points[idx])
-            ) {
+            if (points.length !== data.points.length ||
+                points.some((point: number, idx: number) => point !== data.points[idx])) {
                 cuboid.setPosition(state.points[0], state.points[1], state.points[2]);
                 cuboid.setScale(state.points[6], state.points[7], state.points[8]);
                 cuboid.setRotation(state.points[3], state.points[4], state.points[5]);
@@ -1321,16 +1306,13 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
     private setupObjectsIncremental(states: ObjectState[]): void {
         const created = states.filter((state: ObjectState): boolean => !(state.clientID in this.drawnObjects));
-        const updated = states.filter(
-            (state: ObjectState): boolean =>
-                state.clientID in this.drawnObjects && this.drawnObjects[state.clientID].data.updated !== state.updated,
-        );
-        const deleted = Object.keys(this.drawnObjects)
-            .map((key: string): number => +key)
-            .filter(
-                (clientID: number): boolean =>
-                    states.findIndex((state: ObjectState) => state.clientID === clientID) === -1,
-            );
+        const updated = states.filter((state: ObjectState): boolean => (
+            state.clientID in this.drawnObjects && this.drawnObjects[state.clientID].data.updated !== state.updated
+        ));
+        const deleted = Object.keys(this.drawnObjects).map((key: string): number => +key)
+            .filter((clientID: number): boolean => (
+                states.findIndex((state: ObjectState) => state.clientID === clientID) === -1
+            ));
 
         this.deactivateObject();
         this.createObjects(created);
@@ -1425,64 +1407,61 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                             // in input data is incorrect
                             let cloud = null;
                             try {
-                                console.error = () => {};
+                                console.error = () => { };
                                 cloud = loader.parse(data) as THREE.Points;
                             } finally {
                                 console.error = defaultImpl;
                             }
 
-                            let { position, color, normal, intensity, label } = cloud.geometry.attributes;
+                            let {
+                                position, color, normal, intensity, label,
+                            } = cloud.geometry.attributes;
                             cloud.material.vertexColors = true;
 
-                            ({ color, position, normal, intensity, label } = position.array.reduce(
-                                (acc, _, i, array) => {
+                            ({
+                                color, position, normal, intensity, label,
+                            } = position.array.reduce((acc, _, i, array) => {
+                                if (
+                                    i % 3 === 0 &&
+                                    Number.isFinite(array[i]) &&
+                                    Number.isFinite(array[i + 1]) &&
+                                    Number.isFinite(array[i + 2])
+                                ) {
+                                    acc.position.push(array[i], array[i + 1], array[i + 2]);
+
                                     if (
-                                        i % 3 === 0 &&
-                                        Number.isFinite(array[i]) &&
-                                        Number.isFinite(array[i + 1]) &&
-                                        Number.isFinite(array[i + 2])
+                                        color &&
+                                        Number.isFinite(color.array[i]) &&
+                                        Number.isFinite(color.array[i + 1]) &&
+                                        Number.isFinite(color.array[i + 2])
                                     ) {
-                                        acc.position.push(array[i], array[i + 1], array[i + 2]);
-
-                                        if (
-                                            color &&
-                                            Number.isFinite(color.array[i]) &&
-                                            Number.isFinite(color.array[i + 1]) &&
-                                            Number.isFinite(color.array[i + 2])
-                                        ) {
-                                            acc.color.push(color.array[i], color.array[i + 1], color.array[i + 2]);
-                                        } else {
-                                            acc.color.push(255, 255, 255);
-                                        }
-
-                                        if (
-                                            normal &&
-                                            Number.isFinite(normal.array[i]) &&
-                                            Number.isFinite(normal.array[i + 1]) &&
-                                            Number.isFinite(normal.array[i + 2])
-                                        ) {
-                                            acc.normal.push(normal.array[i], normal.array[i + 1], normal.array[i + 2]);
-                                        }
-
-                                        if (intensity) {
-                                            acc.intensity.push(intensity.array[i / 3]);
-                                        }
-
-                                        if (label) {
-                                            acc.label.push(label.array[i / 3]);
-                                        }
+                                        acc.color.push(color.array[i], color.array[i + 1], color.array[i + 2]);
+                                    } else {
+                                        acc.color.push(255, 255, 255);
                                     }
 
-                                    return acc;
-                                },
-                                {
-                                    position: [],
-                                    color: [],
-                                    normal: [],
-                                    intensity: [],
-                                    label: [],
-                                },
-                            ));
+                                    if (
+                                        normal &&
+                                        Number.isFinite(normal.array[i]) &&
+                                        Number.isFinite(normal.array[i + 1]) &&
+                                        Number.isFinite(normal.array[i + 2])
+                                    ) {
+                                        acc.normal.push(normal.array[i], normal.array[i + 1], normal.array[i + 2]);
+                                    }
+
+                                    if (intensity) {
+                                        acc.intensity.push(intensity.array[i / 3]);
+                                    }
+
+                                    if (label) {
+                                        acc.label.push(label.array[i / 3]);
+                                    }
+                                }
+
+                                return acc;
+                            }, {
+                                position: [], color: [], normal: [], intensity: [], label: [],
+                            }));
 
                             if (position.length) {
                                 cloud.geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
@@ -1497,10 +1476,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                             }
 
                             if (intensity.length) {
-                                cloud.geometry.setAttribute(
-                                    'intensity',
-                                    new THREE.Float32BufferAttribute(intensity, 1),
-                                );
+                                cloud.geometry.setAttribute('intensity', new THREE.Float32BufferAttribute(intensity, 1));
                             }
 
                             if (label.length) {
@@ -1528,7 +1504,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 const newColor = this.receiveShapeColor(data);
                 cuboid.setColor(newColor);
                 cuboid.setOpacity(
-                    clientID === this.activatedElementID ? config.selectedShapeOpacity : config.shapeOpacity,
+                    ((clientID === this.activatedElementID) ? config.selectedShapeOpacity : config.shapeOpacity),
                 );
 
                 if (config.outlinedBorders) {
@@ -1780,8 +1756,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             camera: THREE.PerspectiveCamera,
             boundingBox: THREE.Box3,
         ): {
-            position: [number, number, number];
-            lookAt: [number, number, number];
+            position: [number, number, number],
+            lookAt: [number, number, number],
         } => {
             const width = boundingBox.max.x - boundingBox.min.x;
             const height = boundingBox.max.y - boundingBox.min.y;
@@ -1795,14 +1771,22 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             // Calculate distance to fit the scene: distance = (size / 2) / tan(fov / 2)
             const maxDim = Math.max(width, height, depth);
             const fovRadians = camera.fov * (Math.PI / 180);
-            const cameraDistance = maxDim / 2 / Math.tan(fovRadians / 2);
+            const cameraDistance = (maxDim / 2) / Math.tan(fovRadians / 2);
 
             // Position camera above and slightly offset from center
             const offset = 5;
 
             return {
-                position: [centerX + offset, centerY + offset, centerZ + cameraDistance + offset],
-                lookAt: [centerX, centerY, centerZ],
+                position: [
+                    centerX + offset,
+                    centerY + offset,
+                    centerZ + cameraDistance + offset,
+                ],
+                lookAt: [
+                    centerX,
+                    centerY,
+                    centerZ,
+                ],
             };
         };
 
@@ -1819,8 +1803,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         // updating correct camera settings
         points.geometry.computeBoundingBox();
         const { position, lookAt } = getCameraSettingsToFitScene(
-            this.views.perspective.camera as THREE.PerspectiveCamera,
-            points.geometry.boundingBox,
+            this.views.perspective.camera as THREE.PerspectiveCamera, points.geometry.boundingBox,
         );
 
         this.cameraSettings.perspective.position = position;
@@ -1926,10 +1909,7 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 this.cameraSettings.perspective.position[0],
                 this.cameraSettings.perspective.position[1],
                 this.cameraSettings.perspective.position[2],
-                x,
-                y,
-                z,
-                animation,
+                x, y, z, animation,
             );
 
             for (const cameraType of BOTTOM_VIEWS) {
@@ -1975,10 +1955,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     private renderRayCaster = (viewType: RenderView): void => {
         viewType.rayCaster.renderer.setFromCamera(viewType.rayCaster.mouseVector, viewType.camera);
         if (this.mode === Mode.DRAW) {
-            const [intersection] = viewType.rayCaster.renderer.intersectObjects(
-                this.views.perspective.scene.children,
-                false,
-            );
+            const [intersection] = viewType.rayCaster.renderer
+                .intersectObjects(this.views.perspective.scene.children, false);
             if (intersection) {
                 const object = this.views.perspective.scene.getObjectByName('drawTemplate');
                 const { x, y, z } = intersection.point;
@@ -1992,9 +1970,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                 const castedClientID = +clientID;
 
                 if (this.mode === Mode.SPLIT) {
-                    const objectState = Number.isInteger(castedClientID)
-                        ? this.model.objects.find((state: ObjectState) => state.clientID === castedClientID)
-                        : null;
+                    const objectState = Number.isInteger(castedClientID) ? this.model.objects
+                        .find((state: ObjectState) => state.clientID === castedClientID) : null;
                     this.stateToBeSplitted = objectState;
                     this.drawnObjects[castedClientID].cuboid.setColor(this.receiveShapeColor(objectState));
                 } else if (this.mode === Mode.IDLE && !this.isCtrlDown) {
@@ -2006,12 +1983,13 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
                     this.hoverNeedsUpdate = false;
 
                     if (activeClientID !== intersectedClientID) {
-                        const object = intersectedClientID
-                            ? this.views.perspective.scene.getObjectByName(intersectedClientID)
-                            : null;
+                        const object = intersectedClientID ?
+                            this.views.perspective.scene.getObjectByName(intersectedClientID) :
+                            null;
                         if (intersectedClientID && object === undefined) return;
 
-                        const numericClientID = typeof intersectedClientID === 'string' ? +intersectedClientID : null;
+                        const numericClientID =
+                            typeof intersectedClientID === 'string' ? +intersectedClientID : null;
 
                         this.dispatchEvent(
                             new CustomEvent('canvas.selected', {
@@ -2119,7 +2097,9 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
     }
 
     private moveObject(coordinates: THREE.Vector3): void {
-        const { perspective, top, side, front } = this.selectedCuboid;
+        const {
+            perspective, top, side, front,
+        } = this.selectedCuboid;
         let localCoordinates = coordinates;
         if (this.action.translation.status) {
             localCoordinates = coordinates
@@ -2138,12 +2118,11 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
 
     private renderResizeAction(view: ViewType, viewType: any): void {
         const cuboid = this.selectedCuboid;
-        const intersects = viewType.rayCaster.renderer.intersectObjects(
-            [viewType.scene.getObjectByName(`${view}Plane`)],
-            true,
-        );
+        const intersects = viewType.rayCaster.renderer
+            .intersectObjects([viewType.scene.getObjectByName(`${view}Plane`)], true);
 
-        if (cuboid === null || intersects.length === 0) {
+        if (
+            cuboid === null || intersects.length === 0) {
             return;
         }
 
@@ -2152,10 +2131,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             return;
         }
 
-        if (
-            Math.abs(this.action.resize.previousPosition.x - intersects[0].point.x) < Number.EPSILON ||
-            Math.abs(this.action.resize.previousPosition.y - intersects[0].point.y) < Number.EPSILON
-        ) {
+        if (Math.abs(this.action.resize.previousPosition.x - intersects[0].point.x) < Number.EPSILON ||
+            Math.abs(this.action.resize.previousPosition.y - intersects[0].point.y) < Number.EPSILON) {
             return;
         }
 
@@ -2163,15 +2140,14 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         // and the opposite point in another corner
         const currentPointNumber = +this.action.resize.helperElement.name.split('_')[1];
         const cuboidNodes = makeCornerPointsMatrix(0.5, 0.5, 0.5);
-        const crosslyingPointInternalCoordinates = new THREE.Vector3()
-            .fromArray(cuboidNodes[+currentPointNumber])
-            .multiply(new THREE.Vector3(-1, -1, -1));
-        const crosslyingHelperIndex = cuboidNodes.findIndex(
-            ([x, y, z]): boolean =>
+        const crosslyingPointInternalCoordinates = (new THREE.Vector3())
+            .fromArray(cuboidNodes[+currentPointNumber]).multiply(new THREE.Vector3(-1, -1, -1));
+        const crosslyingHelperIndex = cuboidNodes
+            .findIndex(([x, y, z]): boolean => (
                 Math.sign(crosslyingPointInternalCoordinates.x) === Math.sign(x) &&
                 Math.sign(crosslyingPointInternalCoordinates.y) === Math.sign(y) &&
-                Math.sign(crosslyingPointInternalCoordinates.z) === Math.sign(z),
-        );
+                Math.sign(crosslyingPointInternalCoordinates.z) === Math.sign(z)
+            ));
         const crosslyingHelper = cuboid.perspective.getObjectByName(`cuboidNodeHelper_${crosslyingHelperIndex}`);
         const crosslyingPointCoordinates = crosslyingHelper.getWorldPosition(new THREE.Vector3());
 
@@ -2187,31 +2163,28 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             const diffX = currentPointCoordOnPlane.x - this.action.resize.previousPosition.x;
             const diffY = currentPointCoordOnPlane.y - this.action.resize.previousPosition.y;
             currentPointInternalCoordinates
-                .fromArray(cuboidNodes[currentPointNumber])
-                .add(new THREE.Vector3(0, diffY, -diffX).divide(scale));
+                .fromArray(cuboidNodes[currentPointNumber]).add(new THREE.Vector3(0, diffY, -diffX).divide(scale));
         } else if (view === ViewType.SIDE) {
             const diffX = currentPointCoordOnPlane.x - this.action.resize.previousPosition.x;
             const diffY = currentPointCoordOnPlane.y - this.action.resize.previousPosition.y;
             currentPointInternalCoordinates
-                .fromArray(cuboidNodes[currentPointNumber])
-                .add(new THREE.Vector3(-diffX, 0, diffY).divide(scale));
+                .fromArray(cuboidNodes[currentPointNumber]).add(new THREE.Vector3(-diffX, 0, diffY).divide(scale));
         } else if (view === ViewType.TOP) {
             const diffX = currentPointCoordOnPlane.x - this.action.resize.previousPosition.x;
             const diffY = currentPointCoordOnPlane.y - this.action.resize.previousPosition.y;
             currentPointInternalCoordinates
-                .fromArray(cuboidNodes[currentPointNumber])
-                .add(new THREE.Vector3(diffX, diffY, 0).divide(scale));
+                .fromArray(cuboidNodes[currentPointNumber]).add(new THREE.Vector3(diffX, diffY, 0).divide(scale));
         }
         const perspectivePosition = cuboid.perspective.localToWorld(currentPointInternalCoordinates.clone());
 
         // small check to avoid case when points change their relative orientation
         if (
             Math.sign(crosslyingPointInternalCoordinates.x - cuboidNodes[currentPointNumber][0]) !==
-                Math.sign(crosslyingPointInternalCoordinates.x - currentPointInternalCoordinates.x) ||
+            Math.sign(crosslyingPointInternalCoordinates.x - currentPointInternalCoordinates.x) ||
             Math.sign(crosslyingPointInternalCoordinates.y - cuboidNodes[currentPointNumber][1]) !==
-                Math.sign(crosslyingPointInternalCoordinates.y - currentPointInternalCoordinates.y) ||
+            Math.sign(crosslyingPointInternalCoordinates.y - currentPointInternalCoordinates.y) ||
             Math.sign(crosslyingPointInternalCoordinates.z - cuboidNodes[currentPointNumber][2]) !==
-                Math.sign(crosslyingPointInternalCoordinates.z - currentPointInternalCoordinates.z)
+            Math.sign(crosslyingPointInternalCoordinates.z - currentPointInternalCoordinates.z)
         ) {
             return;
         }
@@ -2305,7 +2278,9 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         const { camera: frontCamera } = this.views.front;
         const { camera: topCamera } = this.views.top;
 
-        const camFrontRotate = objectFrontView.getObjectByName('camRefRot').getWorldQuaternion(new THREE.Quaternion());
+        const camFrontRotate = objectFrontView
+            .getObjectByName('camRefRot')
+            .getWorldQuaternion(new THREE.Quaternion());
         switch (view) {
             case ViewType.TOP: {
                 sideCamera.position.setFromSpherical(sphericalside);
@@ -2385,18 +2360,15 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
             default: {
                 const { top: objectTopView, side: objectSideView, front: objectFrontView } = this.selectedCuboid;
 
-                const quaternionSide = objectSideView
-                    .getObjectByName(consts.PLANE_ROTATION_HELPER)
+                const quaternionSide = objectSideView.getObjectByName(consts.PLANE_ROTATION_HELPER)
                     .getWorldQuaternion(new THREE.Quaternion());
                 const rotationSide = new THREE.Euler().setFromQuaternion(quaternionSide);
 
-                const quaternionFront = objectFrontView
-                    .getObjectByName(consts.PLANE_ROTATION_HELPER)
+                const quaternionFront = objectFrontView.getObjectByName(consts.PLANE_ROTATION_HELPER)
                     .getWorldQuaternion(new THREE.Quaternion());
                 const rotationFront = new THREE.Euler().setFromQuaternion(quaternionFront);
 
-                const quaternionTop = objectTopView
-                    .getObjectByName(consts.PLANE_ROTATION_HELPER)
+                const quaternionTop = objectTopView.getObjectByName(consts.PLANE_ROTATION_HELPER)
                     .getWorldQuaternion(new THREE.Quaternion());
                 const rotationTop = new THREE.Euler().setFromQuaternion(quaternionTop);
 
@@ -2474,9 +2446,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         if (!data || !cuboid || data.lock) return;
 
         const intersectsHelperResize = viewType.rayCaster.renderer.intersectObjects(
-            cuboid[view].parent.children.filter((child: THREE.Object3D) =>
-                child.name.startsWith(consts.RESIZE_HELPER_NAME),
-            ),
+            cuboid[view].parent.children
+                .filter((child: THREE.Object3D) => child.name.startsWith(consts.RESIZE_HELPER_NAME)),
             false,
         );
 
@@ -2497,9 +2468,8 @@ export class Canvas3dViewImpl implements Canvas3dView, Listener {
         }
 
         const intersectsHelperRotation = viewType.rayCaster.renderer.intersectObjects(
-            cuboid[view].parent.children.filter((child: THREE.Object3D) =>
-                child.name.startsWith(consts.ROTATION_HELPER_NAME),
-            ),
+            cuboid[view].parent.children
+                .filter((child: THREE.Object3D) => child.name.startsWith(consts.ROTATION_HELPER_NAME)),
             false,
         );
         if (intersectsHelperRotation.length !== 0) {

@@ -426,7 +426,7 @@ export default class LabelForm extends React.Component<Props> {
                                     className: 'cvat-modal-delete-label-attribute',
                                     icon: <ExclamationCircleOutlined />,
                                     title: `是否想要删除 "${attr.name}" 属性?`,
-                                    content: '此操作无法撤销，所有与该属性相关的标注都将被移除',
+                                    content: '此操作无法撤销，所有与该属性相关的标注都将被移除。',
                                     type: 'warning',
                                     okButtonProps: { type: 'primary', danger: true },
                                     onOk: () => {

@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { LabelType, ModelKind, RQStatus, ShapeType } from './enums';
+import {
+    LabelType, ModelKind, RQStatus, ShapeType,
+} from './enums';
 
 export interface ModelAttribute {
     name: string;
@@ -29,7 +31,7 @@ export interface MLModelLabel {
     type: LabelType;
     attributes: ModelAttribute[];
     sublabels?: MLModelLabel[];
-    svg?: string;
+    svg?: string,
 }
 
 export interface SerializedModel {

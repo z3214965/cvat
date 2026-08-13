@@ -1,10 +1,7 @@
 import { ObjectState } from 'cvat-core-wrapper';
 import { ColorBy } from 'reducers';
 
-export function getObjectStateColor(
-    state: ObjectState,
-    colorBy: ColorBy,
-): {
+export function getObjectStateColor(state: ObjectState, colorBy: ColorBy): {
     hex: string;
     rgbComponents: () => string;
 } {
@@ -34,7 +31,9 @@ export function getObjectStateColor(
         color = 'ffffff';
     }
 
-    const convert = (start: number, stop: number): string => `${parseInt(color.slice(start, stop), 16)}`;
+    const convert = (start: number, stop: number): string => (
+        `${parseInt(color.slice(start, stop), 16)}`
+    );
 
     return {
         hex: `#${color}`,

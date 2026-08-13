@@ -35,12 +35,9 @@ export default class HistogramEqualizationImplementation extends BaseImageFilter
             cv.equalizeHist(Y, equalizedY);
             Y.delete();
             channels = new cv.MatVector();
-            channels.push_back(equalizedY);
-            equalizedY.delete();
-            channels.push_back(U);
-            U.delete();
-            channels.push_back(V);
-            V.delete();
+            channels.push_back(equalizedY); equalizedY.delete();
+            channels.push_back(U); U.delete();
+            channels.push_back(V); V.delete();
             cv.merge(channels, YUVDist);
             cv.cvtColor(YUVDist, RGBDist, cv.COLOR_YUV2RGB, 0);
             cv.cvtColor(RGBDist, RGBADist, cv.COLOR_RGB2RGBA, 0);

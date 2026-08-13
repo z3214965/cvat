@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CVAT REST API
-  version: 2.72.1
+  version: 2.73.1
   description: REST API for Computer Vision Annotation Tool (CVAT)
   termsOfService: https://www.google.com/policies/terms/
   contact:
@@ -8865,10 +8865,12 @@ components:
         start:
           type: integer
           minimum: 0
+          description: Must be within the task frame bounds.
         stop:
           type: integer
           minimum: 0
           nullable: true
+          description: Exclusive interval end. May be one greater than the task stop frame.
       required:
       - label_id
       - start
@@ -8905,10 +8907,12 @@ components:
         start:
           type: integer
           minimum: 0
+          description: Must be within the task frame bounds.
         stop:
           type: integer
           minimum: 0
           nullable: true
+          description: Exclusive interval end. May be one greater than the task stop frame.
       required:
       - label_id
       - start
@@ -11317,6 +11321,7 @@ components:
           additionalProperties:
             type: string
             minLength: 1
+            maxLength: 64
       required:
       - name
     SublabelRequest:

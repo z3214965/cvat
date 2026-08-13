@@ -8,7 +8,7 @@ interface NameTemplateTooltipProps {
     example: string;
 }
 
-function NameTemplateTooltip({ example }: NameTemplateTooltipProps): JSX.Element {
+function NameTemplateTooltip({ example }: NameTemplateTooltipProps) {
     return (
         <>
             You can use the template:

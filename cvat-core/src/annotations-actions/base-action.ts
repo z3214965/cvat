@@ -15,23 +15,18 @@ export enum ActionParameterType {
 // For SELECT values should be a list of possible options
 // For NUMBER values should be a list with [min, max, step],
 // or a callback ({ instance }: { instance: Job | Task }) => [min, max, step]
-export type ActionParameters = Record<
-    string,
-    {
-        type: ActionParameterType;
-        values: string[] | (({ instance }: { instance: Job | Task }) => string[]);
-        defaultValue: string | (({ instance }: { instance: Job | Task }) => string);
-        tooltip?: {
-            type: string;
-            content:
-                | string
-                | {
-                      columns: Record<string, string>[];
-                      data: Record<string, string>[];
-                  };
-        };
-    }
->;
+export type ActionParameters = Record<string, {
+    type: ActionParameterType;
+    values: string[] | (({ instance }: { instance: Job | Task }) => string[]);
+    defaultValue: string | (({ instance }: { instance: Job | Task }) => string);
+    tooltip?: {
+        type: string,
+        content: string | {
+            columns: Record<string, string>[];
+            data: Record<string, string>[];
+        }
+    };
+}>;
 
 export abstract class BaseAction {
     public abstract init(sessionInstance: Job | Task, parameters: Record<string, string | number>): Promise<void>;
@@ -49,21 +44,22 @@ export function prepareActionParameters(declared: ActionParameters, defined: obj
         return {};
     }
 
-    return Object.entries(declared).reduce(
-        (acc, [name, { type, defaultValue }]) => {
-            if (type === ActionParameterType.NUMBER) {
-                acc[name] = +(Object.hasOwn(defined, name) ? defined[name] : defaultValue);
-            } else {
-                acc[name] = Object.hasOwn(defined, name) ? defined[name] : defaultValue;
-            }
-            return acc;
-        },
-        {} as Record<string, string | number>,
-    );
+    return Object.entries(declared).reduce((acc, [name, { type, defaultValue }]) => {
+        if (type === ActionParameterType.NUMBER) {
+            acc[name] = +(Object.hasOwn(defined, name) ? defined[name] : defaultValue);
+        } else {
+            acc[name] = (Object.hasOwn(defined, name) ? defined[name] : defaultValue);
+        }
+        return acc;
+    }, {} as Record<string, string | number>);
 }
 
 export function validateClientIDs(collection: Partial<SerializedCollection>): void {
-    [].concat(collection.shapes ?? [], collection.tracks ?? [], collection.tags ?? []).forEach((object) => {
+    [].concat(
+        collection.shapes ?? [],
+        collection.tracks ?? [],
+        collection.tags ?? [],
+    ).forEach((object) => {
         // clientID is required to correct collection filtering and committing in annotations actions logic
         if (typeof object.clientID !== 'number') {
             throw new Error('执行标注操作时ClientID未定义，但该字段为必填项');

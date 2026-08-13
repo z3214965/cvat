@@ -24,9 +24,12 @@ export enum DimensionType {
     DIMENSION_3D = '3d',
 }
 
-export function decodeContextImages(block: any, start: number, end: number): Promise<Record<string, ImageBitmap>> {
-    const decodeZipWorker =
-        (decodeContextImages as any).zipWorker || new Worker(new URL('./unzip_imgs.worker', import.meta.url));
+export function decodeContextImages(
+    block: any, start: number, end: number,
+): Promise<Record<string, ImageBitmap>> {
+    const decodeZipWorker = (decodeContextImages as any).zipWorker || new Worker(
+        new URL('./unzip_imgs.worker', import.meta.url),
+    );
     (decodeContextImages as any).zipWorker = decodeZipWorker;
     return new Promise((resolve, reject) => {
         decodeContextImages.mutex.acquire().then((release) => {
@@ -40,11 +43,9 @@ export function decodeContextImages(block: any, start: number, end: number): Pro
 
             decodeZipWorker.onmessage = async (event) => {
                 if (event.data.error) {
-                    this.zipWorker.onerror(
-                        new ErrorEvent('error', {
-                            error: event.data.error,
-                        }),
-                    );
+                    this.zipWorker.onerror(new ErrorEvent('error', {
+                        error: event.data.error,
+                    }));
                     return;
                 }
 
@@ -192,7 +193,9 @@ export class FrameDecoder {
                 // it was other chunk
                 this.requestedChunkToDecode.onReject(new RequestOutdatedError());
             }
-        } else if (this.chunkIsBeingDecoded === null || chunkIndex !== this.chunkIsBeingDecoded.chunkIndex) {
+        } else if (this.chunkIsBeingDecoded === null ||
+            chunkIndex !== this.chunkIsBeingDecoded.chunkIndex
+        ) {
             // everything was decoded or decoding other chunk is in process
             this.requestedChunkToDecode = {
                 chunkFrameNumbers,
@@ -279,7 +282,9 @@ export class FrameDecoder {
                 throw new RequestOutdatedError();
             }
 
-            const getFrameNumber = (chunkFrameIndex: number): number => chunkFrameNumbers[chunkFrameIndex];
+            const getFrameNumber = (chunkFrameIndex: number): number => (
+                chunkFrameNumbers[chunkFrameIndex]
+            );
 
             this.orderedStack = [chunkIndex, ...this.orderedStack];
             this.cleanup();
@@ -288,7 +293,9 @@ export class FrameDecoder {
             this.requestedChunkToDecode = null;
 
             if (this.blockType === BlockType.MP4VIDEO) {
-                this.videoWorker = new Worker(new URL('./3rdparty/Decoder.worker', import.meta.url));
+                this.videoWorker = new Worker(
+                    new URL('./3rdparty/Decoder.worker', import.meta.url),
+                );
                 let index = 0;
 
                 this.videoWorker.onmessage = (e) => {
@@ -305,9 +312,13 @@ export class FrameDecoder {
                     const height = Math.round(this.renderHeight / scaleFactor);
                     const width = Math.round(this.renderWidth / scaleFactor);
 
-                    createImageBitmap(
-                        FrameDecoder.cropImage(e.data.buf, e.data.width, e.data.height, width, height),
-                    ).then((bitmap) => {
+                    createImageBitmap(FrameDecoder.cropImage(
+                        e.data.buf,
+                        e.data.width,
+                        e.data.height,
+                        width,
+                        height,
+                    )).then((bitmap) => {
                         decodedFrames[frameNumber] = bitmap;
                         this.chunkIsBeingDecoded.onDecode(frameNumber, decodedFrames[frameNumber]);
 
@@ -353,16 +364,16 @@ export class FrameDecoder {
                     });
                 }
             } else {
-                this.zipWorker = this.zipWorker || new Worker(new URL('./unzip_imgs.worker', import.meta.url));
+                this.zipWorker = this.zipWorker || new Worker(
+                    new URL('./unzip_imgs.worker', import.meta.url),
+                );
                 let decodedCount = 0;
 
                 this.zipWorker.onmessage = async (event) => {
                     if (event.data.error) {
-                        this.zipWorker.onerror(
-                            new ErrorEvent('error', {
-                                error: event.data.error,
-                            }),
-                        );
+                        this.zipWorker.onerror(new ErrorEvent('error', {
+                            error: event.data.error,
+                        }));
                         return;
                     }
 
@@ -415,11 +426,13 @@ export class FrameDecoder {
     }
 
     public cachedChunks(includeInProgress = false): number[] {
-        const chunkIsBeingDecoded =
-            includeInProgress && this.chunkIsBeingDecoded ? this.chunkIsBeingDecoded.chunkIndex : null;
-        return Object.keys(this.decodedChunks)
-            .map((chunkIndex: string) => +chunkIndex)
-            .concat(...(chunkIsBeingDecoded !== null ? [chunkIsBeingDecoded] : []))
-            .sort((a, b) => a - b);
+        const chunkIsBeingDecoded = (
+            includeInProgress && this.chunkIsBeingDecoded ?
+                this.chunkIsBeingDecoded.chunkIndex :
+                null
+        );
+        return Object.keys(this.decodedChunks).map((chunkIndex: string) => +chunkIndex).concat(
+            ...(chunkIsBeingDecoded !== null ? [chunkIsBeingDecoded] : []),
+        ).sort((a, b) => a - b);
     }
 }

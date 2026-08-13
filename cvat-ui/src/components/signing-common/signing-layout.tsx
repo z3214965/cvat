@@ -10,8 +10,7 @@ import Layout from 'antd/lib/layout';
 import { Col, Row } from 'antd/lib/grid';
 import Title from 'antd/lib/typography/Title';
 import CVATLogo from 'components/common/cvat-logo';
-// import SVGSigningBackground from '../../assets/signing-background.svg';
-import signingBackground from '../../assets/signing-background.jpg';
+import SVGSigningBackground from '../../assets/signing-background.svg';
 
 interface SignInLayoutComponentProps {
     children: JSX.Element | JSX.Element[];
@@ -73,12 +72,11 @@ function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
     };
     return (
         <Layout>
-            {/* <SVGSigningBackground className='cvat-signing-background' /> */}
-            <img src={signingBackground} alt='' className='cvat-signing-background' />
+            <SVGSigningBackground className='cvat-signing-background' />
             <Header className='cvat-signing-header'>
                 <Row className='cvat-signing-header-logo-wrapper' justify='center' align='middle'>
                     <Col {...logoSizes}>
-                        {/* <CVATLogo /> */}
+                        <CVATLogo />
                     </Col>
                 </Row>
             </Header>
@@ -86,7 +84,7 @@ function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
                 <Content>
                     <Row justify='center' align='middle' style={{ height: '100%' }}>
                         <Col {...titleSizes} className='cvat-signing-title'>
-                            {/* <Title>{subtitle}</Title> */}
+                            <Title>{subtitle}</Title>
                         </Col>
                         {children}
                     </Row>

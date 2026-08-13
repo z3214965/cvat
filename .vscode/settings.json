@@ -23,7 +23,18 @@
     "editor.formatOnSave": false,
     "editor.formatOnPaste": false,
     "editor.formatOnType": false,
-    "editor.codeActionsOnSave": {},
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "never",
+        "source.fixAll.ruff": "never",
+        "source.organizeImports": "never",
+        "source.organizeImports.ruff": "never"
+    },
+    "[python]": {
+        "editor.defaultFormatter": null,
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false
+    },
+    "ruff.organizeImports": false,
     "python.analysis.exclude": [
         // VS Code defaults
         "**/node_modules",

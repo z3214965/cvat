@@ -12,18 +12,15 @@ import { BoundariesActionTypes } from 'actions/boundaries-actions';
 import { Canvas, CanvasMode, RenderData } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import {
-    DimensionType,
-    getCore,
-    JobStage,
-    Label,
-    LabelType,
-    ObjectState,
-    ObjectType,
-    ShapeType,
+    DimensionType, getCore, JobStage, Label, LabelType, ObjectState, ObjectType, ShapeType,
 } from 'cvat-core-wrapper';
-import { clamp } from 'utils/math';
-
-import { ActiveControl, AnnotationState, ContextMenuType, NavigationType, Workspace } from '.';
+import {
+    ActiveControl,
+    AnnotationState,
+    ContextMenuType,
+    NavigationType,
+    Workspace,
+} from '.';
 
 const cvat = getCore();
 
@@ -35,9 +32,9 @@ function getAnnotationsRenderData(states: ObjectState[], filters: object[]): Ren
 
 function updateActivatedStateID(newStates: ObjectState[], prevActivatedStateID: number | null): number | null {
     return prevActivatedStateID === null ||
-        newStates.some((_state: ObjectState) => _state.clientID === prevActivatedStateID)
-        ? prevActivatedStateID
-        : null;
+        newStates.some((_state: ObjectState) => _state.clientID === prevActivatedStateID) ?
+        prevActivatedStateID :
+        null;
 }
 
 function computeZRange(states: ObjectState[]): [number, number] {
@@ -166,6 +163,7 @@ const defaultState: AnnotationState = {
             min: 0,
             max: 0,
             cur: 0,
+            hiddenByFrame: new Map<number, Set<number>>([[0, new Set<number>()]]),
         },
     },
     remove: {
@@ -275,10 +273,11 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     instance: job,
                     meta: jobMeta,
                     labels: job.labels,
-                    attributes: job.labels.reduce((acc: Record<number, Label['attributes']>, label: Label) => {
-                        acc[label.id!] = label.attributes;
-                        return acc;
-                    }, {}),
+                    attributes: job.labels
+                        .reduce((acc: Record<number, Label['attributes']>, label: Label) => {
+                            acc[label.id!] = label.attributes;
+                            return acc;
+                        }, {}),
                     groundTruthInfo: {
                         validationLayout,
                         groundTruthInstance,
@@ -293,9 +292,11 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: {
                     ...state.annotations,
                     filters,
+                    initialized: false,
                     zLayer: {
                         ...state.annotations.zLayer,
-                        cur: Number.MAX_SAFE_INTEGER,
+                        cur: 0,
+                        hiddenByFrame: new Map<number, Set<number>>([[number, new Set<number>()]]),
                     },
                 },
                 player: {
@@ -320,8 +321,8 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     instance: canvas,
                 },
                 colors,
-                workspace:
-                    isReview && job.dimension === DimensionType.DIMENSION_2D ? Workspace.REVIEW : workspaceSelected,
+                workspace: isReview && job.dimension === DimensionType.DIMENSION_2D ?
+                    Workspace.REVIEW : workspaceSelected,
             };
         }
         case AnnotationActionTypes.GET_JOB_FAILED: {
@@ -382,9 +383,23 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         }
         case AnnotationActionTypes.CHANGE_FRAME_SUCCESS: {
             const { activatedStateID } = state.annotations;
-            const { number, data, filename, relatedFiles, states, history, delay, changeTime, changeFrameEvent } =
-                action.payload;
+            const {
+                number,
+                data,
+                filename,
+                relatedFiles,
+                states,
+                history,
+                delay,
+                changeTime,
+                changeFrameEvent,
+            } = action.payload;
             const [minZ, maxZ] = computeZRange(states);
+            const currentZLayer = state.annotations.initialized ? state.annotations.zLayer.cur : maxZ;
+            const hiddenByFrame = new Map(state.annotations.zLayer.hiddenByFrame);
+            if (!hiddenByFrame.has(number)) {
+                hiddenByFrame.set(number, new Set<number>());
+            }
 
             return {
                 ...state,
@@ -406,12 +421,16 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     activatedStateID: updateActivatedStateID(states, activatedStateID),
                     highlightedConflict: null,
                     states,
+                    initialized: true,
                     renderData: getAnnotationsRenderData(states, state.annotations.filters),
                     history,
                     zLayer: {
+                        ...state.annotations.zLayer,
                         min: minZ,
                         max: maxZ,
-                        cur: maxZ,
+                        // The selected layer may be empty, so only initialize it when the job first opens.
+                        cur: currentZLayer,
+                        hiddenByFrame,
                     },
                 },
             };
@@ -623,7 +642,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.UPDATE_ANNOTATIONS_SUCCESS: {
-            const { history, states: updatedStates } = action.payload;
+            const {
+                history, states: updatedStates,
+            } = action.payload;
             const { states: prevStates } = state.annotations;
             const nextStates = [...prevStates];
 
@@ -641,9 +662,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: {
                     ...state.annotations,
                     zLayer: {
+                        ...state.annotations.zLayer,
                         min: minZ,
                         max: maxZ,
-                        cur: clamp(state.annotations.zLayer.cur, minZ, maxZ),
                     },
                     states: nextStates,
                     renderData: getAnnotationsRenderData(nextStates, state.annotations.filters),
@@ -676,10 +697,10 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: { highlightedConflict, states },
             } = state;
 
-            const objectDoesNotExist =
-                activatedStateID !== null && !states.some((_state) => _state.clientID === activatedStateID);
-            const canvasIsNotReady =
-                (instance as Canvas | Canvas3d).mode() !== CanvasMode.IDLE || activeControl !== ActiveControl.CURSOR;
+            const objectDoesNotExist = activatedStateID !== null &&
+                !states.some((_state) => _state.clientID === activatedStateID);
+            const canvasIsNotReady = (instance as Canvas | Canvas3d)
+                .mode() !== CanvasMode.IDLE || activeControl !== ActiveControl.CURSOR;
 
             if (objectDoesNotExist || canvasIsNotReady || highlightedConflict) {
                 return state;
@@ -931,7 +952,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.UPDATE_CANVAS_CONTEXT_MENU: {
-            const { visible, left, top, type, pointID } = action.payload;
+            const {
+                visible, left, top, type, pointID,
+            } = action.payload;
 
             const { activatedElementID, activatedStateID } = state.annotations;
 
@@ -968,6 +991,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             const { activatedStateID } = state.annotations;
             const { states, history } = action.payload;
             const [minZ, maxZ] = computeZRange(states);
+            const currentZLayer = state.annotations.initialized ? state.annotations.zLayer.cur : maxZ;
 
             return {
                 ...state,
@@ -979,9 +1003,10 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     history,
                     initialized: true,
                     zLayer: {
+                        ...state.annotations.zLayer,
                         min: minZ,
                         max: maxZ,
-                        cur: clamp(state.annotations.zLayer.cur, minZ, maxZ),
+                        cur: currentZLayer,
                     },
                 },
             };
@@ -1008,30 +1033,82 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         }
         case AnnotationActionTypes.SWITCH_Z_LAYER: {
             const { cur } = action.payload;
-            const { max, min } = state.annotations.zLayer;
-
-            let { activatedStateID } = state.annotations;
-            if (activatedStateID !== null) {
-                const idx = state.annotations.states
-                    .map((_state: ObjectState) => _state.clientID)
-                    .indexOf(activatedStateID);
-                if (idx !== -1) {
-                    if (state.annotations.states[idx].zOrder > cur) {
-                        activatedStateID = null;
-                    }
-                } else {
-                    activatedStateID = null;
-                }
-            }
+            const frame = state.player.frame.number;
+            const hiddenByFrame = new Map(state.annotations.zLayer.hiddenByFrame);
+            const nextHidden = new Set<number>(hiddenByFrame.get(frame));
+            nextHidden.delete(cur);
+            hiddenByFrame.set(frame, nextHidden);
 
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
-                    activatedStateID,
                     zLayer: {
                         ...state.annotations.zLayer,
-                        cur: clamp(cur, min, max),
+                        cur,
+                        hiddenByFrame,
+                    },
+                },
+            };
+        }
+        case AnnotationActionTypes.SHOW_Z_LAYERS: {
+            const shownLayers = new Set<number>(action.payload.zOrders);
+            if (!shownLayers.size) {
+                return state;
+            }
+            const frame = state.player.frame.number;
+            const hiddenByFrame = new Map(state.annotations.zLayer.hiddenByFrame);
+            const nextHidden = new Set<number>(hiddenByFrame.get(frame));
+            shownLayers.forEach((zOrder: number): void => {
+                nextHidden.delete(zOrder);
+            });
+            hiddenByFrame.set(frame, nextHidden);
+
+            return {
+                ...state,
+                annotations: {
+                    ...state.annotations,
+                    zLayer: {
+                        ...state.annotations.zLayer,
+                        hiddenByFrame,
+                    },
+                },
+            };
+        }
+        case AnnotationActionTypes.TOGGLE_Z_LAYERS_VISIBILITY: {
+            const { zOrders } = action.payload;
+            if (!zOrders.length) {
+                return state;
+            }
+
+            const frame = state.player.frame.number;
+            const hiddenByFrame = new Map(state.annotations.zLayer.hiddenByFrame);
+            const currentFrameHidden = hiddenByFrame.get(frame) || new Set<number>();
+            const affectedLayers = new Set<number>(zOrders);
+            const willBeHidden = !currentFrameHidden.has(zOrders[0]);
+            const activatedState = state.annotations.states.find((objectState: ObjectState): boolean => (
+                objectState.clientID === state.annotations.activatedStateID
+            ));
+            const deactivateState = willBeHidden && activatedState && affectedLayers.has(activatedState.zOrder);
+            const nextHidden = new Set(currentFrameHidden);
+            zOrders.forEach((zOrder: number): void => {
+                if (willBeHidden) {
+                    nextHidden.add(zOrder);
+                } else {
+                    nextHidden.delete(zOrder);
+                }
+            });
+            hiddenByFrame.set(frame, nextHidden);
+
+            return {
+                ...state,
+                annotations: {
+                    ...state.annotations,
+                    activatedStateID: deactivateState ?
+                        null : state.annotations.activatedStateID,
+                    zLayer: {
+                        ...state.annotations.zLayer,
+                        hiddenByFrame,
                     },
                 },
             };
@@ -1052,9 +1129,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 },
                 canvas: {
                     ...state.canvas,
-                    activeControl: activeInteractor.kind.startsWith('opencv')
-                        ? ActiveControl.OPENCV_TOOLS
-                        : ActiveControl.AI_TOOLS,
+                    activeControl: activeInteractor.kind.startsWith('opencv') ?
+                        ActiveControl.OPENCV_TOOLS :
+                        ActiveControl.AI_TOOLS,
                 },
             };
         }
@@ -1139,15 +1216,12 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         case AnnotationActionTypes.HIGHLIGHT_CONFLICT: {
             const { conflict } = action.payload;
             if (conflict) {
-                const {
-                    annotationConflicts: [mainConflict],
-                } = conflict;
+                const { annotationConflicts: [mainConflict] } = conflict;
 
                 // object may be hidden using annotations filter
                 // it is not guaranteed to be visible
-                const conflictObject = state.annotations.states.find(
-                    (_state) => _state.serverID === mainConflict.serverID,
-                );
+                const conflictObject = state.annotations.states
+                    .find((_state) => _state.serverID === mainConflict.serverID);
 
                 return {
                     ...state,

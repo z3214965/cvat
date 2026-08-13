@@ -271,8 +271,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                 className: 'cvat-modal-unsupported-features-warning',
                 content: (
                     <Text>
-                        {`${name} v${version} 不支持所使用的 API。 `}
-                        强烈建议您更新您的浏览器。
+                        {`${name} v${version} 不支持所使用的 API。`}强烈建议您更新您的浏览器。
                     </Text>
                 ),
                 onOk: () => stopNotifications(true),

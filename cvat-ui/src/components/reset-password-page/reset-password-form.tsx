@@ -45,12 +45,12 @@ function ResetPasswordFormComponent({ fetching, onSubmit }: Props): JSX.Element 
             </Row>
             <Row>
                 <Col>
-                    <Title level={2}> 忘记密码？ </Title>
+                    <Title level={2}>忘记密码？</Title>
                 </Col>
             </Row>
             <Row>
                 <Col>
-                    <Title level={2}> 新建一个 </Title>
+                    <Title level={2}>新建一个</Title>
                 </Col>
             </Row>
             <Form

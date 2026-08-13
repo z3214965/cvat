@@ -71,8 +71,8 @@ export function checkObjectType(
     value: unknown,
     type: 'string' | 'number' | 'boolean' | 'integer' | null,
     constructor?: {
-        cls: new (...args: any[]) => unknown;
-        name: string;
+        cls: new (...args: any[]) => unknown,
+        name: string,
     },
 ): boolean {
     if (type) {

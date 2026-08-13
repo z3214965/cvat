@@ -2,9 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import IntelligentScissorsImplementation, { type IntelligentScissorsInterface } from './intelligent-scissors';
+import IntelligentScissorsImplementation, {
+    type IntelligentScissorsInterface,
+} from './intelligent-scissors';
 import HistogramEqualizationImplementation from './histogram-equalization';
-import TrackerMILImplementation, { type TrackerMILInterface } from './tracker-mil';
+import TrackerMILImplementation, {
+    type TrackerMILInterface,
+} from './tracker-mil';
 import type { ImageProcessing } from './image-processing';
 
 enum MatType {
@@ -42,7 +46,7 @@ export interface OpenCVInterface {
     };
     enums: {
         MatType: typeof MatType;
-    };
+    }
 }
 
 export function createOpenCVInterface(cv: any): OpenCVInterface {
@@ -164,7 +168,11 @@ export function createOpenCVInterface(cv: any): OpenCVInterface {
                 }
             },
 
-            simplifyPolygon: function simplifyPolygon(points: number[], threshold: number, closed: boolean): number[] {
+            simplifyPolygon: function simplifyPolygon(
+                points: number[],
+                threshold: number,
+                closed: boolean,
+            ): number[] {
                 const minPoints = closed ? 3 : 2;
                 const minValues = minPoints * 2;
 

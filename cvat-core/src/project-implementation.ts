@@ -54,14 +54,18 @@ export default function implementProject(Project: typeof ProjectClass): typeof P
                 this._updateTrigger.reset();
 
                 let serializedProject = null;
-                if (Object.keys(projectData).length || labelsToCreate.length || typeof newAssigneeId !== 'undefined') {
+                if (
+                    Object.keys(projectData).length ||
+                    labelsToCreate.length ||
+                    typeof newAssigneeId !== 'undefined'
+                ) {
                     serializedProject = await serverProxy.projects.save(this.id, {
                         ...projectData,
                         ...(typeof newAssigneeId !== 'undefined' ? { assignee_id: newAssigneeId } : {}),
                         ...(labelsToCreate.length ? { labels: labelsToCreate } : {}),
                     });
                 } else {
-                    [serializedProject] = await serverProxy.projects.get({ id: this.id });
+                    [serializedProject] = (await serverProxy.projects.get({ id: this.id }));
                 }
 
                 const labels = await serverProxy.labels.get({ project_id: serializedProject.id });
@@ -93,13 +97,17 @@ export default function implementProject(Project: typeof ProjectClass): typeof P
     });
 
     Object.defineProperty(Project.prototype.delete, 'implementation', {
-        value: function deleteImplementation(this: ProjectClass): ReturnType<typeof ProjectClass.prototype.delete> {
+        value: function deleteImplementation(
+            this: ProjectClass,
+        ): ReturnType<typeof ProjectClass.prototype.delete> {
             return serverProxy.projects.delete(this.id);
         },
     });
 
     Object.defineProperty(Project.prototype.preview, 'implementation', {
-        value: function previewImplementation(this: ProjectClass): ReturnType<typeof ProjectClass.prototype.preview> {
+        value: function previewImplementation(
+            this: ProjectClass,
+        ): ReturnType<typeof ProjectClass.prototype.preview> {
             if (this.id === null) {
                 return Promise.resolve('');
             }
@@ -167,7 +175,9 @@ export default function implementProject(Project: typeof ProjectClass): typeof P
     });
 
     Object.defineProperty(Project.prototype.guide, 'implementation', {
-        value: async function guideImplementation(this: ProjectClass): ReturnType<typeof ProjectClass.prototype.guide> {
+        value: async function guideImplementation(
+            this: ProjectClass,
+        ): ReturnType<typeof ProjectClass.prototype.guide> {
             if (this.guideId === null) {
                 return null;
             }

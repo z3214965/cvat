@@ -651,9 +651,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                     const node1 = svg.querySelector(`[data-node-from="${dataNodeFrom}"]`);
                     const node2 = svg.querySelector(`[data-node-to="${dataNodeTo}"]`);
                     if (!node1 || !node2) {
-                        throw new Error(
-                            `边的起始节点 ${dataNodeFrom} 或结束节点 ${dataNodeTo} 未指向任何有效节点`,
-                        );
+                        throw new Error(`边的起始节点 ${dataNodeFrom} 或结束节点 ${dataNodeTo} 未指向任何有效节点`);
                     }
                 }
             }
@@ -664,9 +662,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
         }
 
         if (elements !== sublabels.length) {
-            throw new Error(
-                `骨架配置器状态不一致。子标签数量 ${sublabels.length} 与元素数量 ${elements} 不匹配`,
-            );
+            throw new Error(`骨架配置器状态不一致。子标签数量 ${sublabels.length} 与元素数量 ${elements} 不匹配`);
         }
 
         const svgText = Array.from(svg.children)
@@ -750,10 +746,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                             showUploadList={false}
                             beforeUpload={(file: RcFile) => {
                                 if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                                    notification.error({
-                                        message:
-                                            `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`,
-                                    });
+                                    notification.error({message: `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`});
                                 }
                                 this.setState({ image: file }, () => {
                                     this.setCanvasBackground();
@@ -886,9 +879,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                         this.labels = {};
                                         this.setupSkeleton(svg, labels as Record<string, LabelOptColor>);
                                     } catch (_: unknown) {
-                                        notification.error({
-                                            message: '错误的骨架结构',
-                                        });
+                                        notification.error({ message: '错误的骨架结构' });
                                     }
                                 });
 

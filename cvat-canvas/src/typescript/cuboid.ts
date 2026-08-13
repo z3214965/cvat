@@ -21,7 +21,7 @@ export function intersection(p1: Point, p2: Point, p3: Point, p4: Point): Point 
         return null;
     }
 
-    const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+    const denominator = ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
 
     // Lines are parallel
     if (Math.abs(denominator) < Number.EPSILON) {
@@ -346,10 +346,8 @@ function setupCuboidPoints(points: Point[]): any[] {
     let p3;
     let p4;
 
-    const height =
-        Math.abs(points[0].x - points[1].x) < Math.abs(points[1].x - points[2].x)
-            ? Math.abs(points[1].y - points[0].y)
-            : Math.abs(points[1].y - points[2].y);
+    const height = Math.abs(points[0].x - points[1].x) < Math.abs(points[1].x - points[2].x) ?
+        Math.abs(points[1].y - points[0].y) : Math.abs(points[1].y - points[2].y);
 
     // separate into left and right point
     // we pick the first and third point because we know assume they will be on

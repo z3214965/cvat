@@ -146,8 +146,10 @@ SVG.Element.prototype.resize = function constructor(...args: any): any {
             if (
                 event.button === 0 &&
                 // ignore shift key for cuboids (change perspective) and rectangles (precise rotation)
-                (!event.shiftKey || this.el.parent().hasClass('cvat_canvas_shape_cuboid') || this.el.type === 'rect') &&
-                !event.altKey
+                (!event.shiftKey || (
+                    this.el.parent().hasClass('cvat_canvas_shape_cuboid')
+                    || this.el.type  === 'rect')
+                ) && !event.altKey
             ) {
                 return handler.constructor.prototype.resize.call(this, e);
             }

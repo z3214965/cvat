@@ -118,8 +118,7 @@ function OrganizationTopBar(props: Readonly<Props>): JSX.Element {
             content: (
                 <div className='cvat-remove-organization-submit'>
                     <Text type='warning'>
-                        移除该组织,
-                        在下方输入其简称
+                        移除该组织, 在下方输入其简称
                     </Text>
                     <Input
                         onChange={
@@ -183,7 +182,7 @@ function OrganizationTopBar(props: Readonly<Props>): JSX.Element {
                                         items: [
                                             {
                                                 key: MenuActions.SET_WEBHOOKS,
-                                                label: <Link to='/organization/webhooks'>设置 webhooks</Link>,
+                                                label: <Link to='/organization/webhooks'>设置webhooks</Link>,
                                             },
                                             ...(owner && userID === owner.id ? [{
                                                 type: 'divider' as const,

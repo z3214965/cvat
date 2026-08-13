@@ -4,26 +4,14 @@
 // SPDX-License-Identifier: MIT
 
 import {
-    DrawData,
-    MergeData,
-    SplitData,
-    GroupData,
-    JoinData,
-    SliceData,
-    MasksEditData,
+    DrawData, MergeData, SplitData, GroupData,
+    JoinData, SliceData, MasksEditData,
     InteractionData as _InteractionData,
     InteractionResult as _InteractionResult,
-    CanvasModel,
-    CanvasModelImpl,
-    RectDrawingMethod,
-    CuboidDrawingMethod,
-    Configuration,
-    Geometry,
-    Mode,
-    HighlightSeverity as _HighlightSeverity,
-    CanvasHint as _CanvasHint,
-    PolyEditData,
-    RenderData as _RenderData,
+    CanvasModel, CanvasModelImpl, RectDrawingMethod,
+    CuboidDrawingMethod, Configuration, Geometry, Mode,
+    HighlightSeverity as _HighlightSeverity, CanvasHint as _CanvasHint,
+    PolyEditData, RenderData as _RenderData,
 } from './canvasModel';
 import { Master } from './master';
 import { CanvasController, CanvasControllerImpl } from './canvasController';
@@ -61,6 +49,8 @@ interface Canvas {
     zoomCanvas(enable: boolean): void;
 
     mode(): Mode;
+    undo(): boolean;
+    redo(): boolean;
     cancel(): void;
     configure(configuration: Configuration): void;
     isAbleToChangeFrame(): boolean;
@@ -184,6 +174,14 @@ class CanvasImpl implements Canvas {
         return this.model.mode;
     }
 
+    public undo(): boolean {
+        return this.view.undo();
+    }
+
+    public redo(): boolean {
+        return this.view.redo();
+    }
+
     public cancel(): void {
         this.model.cancel();
     }
@@ -211,4 +209,6 @@ export type InteractionResult = _InteractionResult;
 export type HighlightSeverity = _HighlightSeverity;
 export type RenderData = _RenderData;
 
-export { CanvasImpl as Canvas, RectDrawingMethod, CuboidDrawingMethod, Mode as CanvasMode };
+export {
+    CanvasImpl as Canvas, RectDrawingMethod, CuboidDrawingMethod, Mode as CanvasMode,
+};

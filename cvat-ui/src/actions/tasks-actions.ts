@@ -6,14 +6,7 @@
 import { AnyAction } from 'redux';
 import { TasksQuery } from 'reducers';
 import {
-    getCore,
-    RQStatus,
-    Storage,
-    StorageLocation,
-    Task,
-    UpdateStatusData,
-    Request,
-    FramesMetaData,
+    getCore, RQStatus, Storage, StorageLocation, Task, UpdateStatusData, Request, FramesMetaData,
 } from 'cvat-core-wrapper';
 import { filterNull } from 'utils/filter-null';
 import { ThunkDispatch, ThunkAction } from 'utils/redux';
@@ -76,10 +69,15 @@ function getTasksFailed(error: any): AnyAction {
     return action;
 }
 
-export function getTasksAsync(query: Partial<TasksQuery>, updateQuery = true): ThunkAction {
+export function getTasksAsync(
+    query: Partial<TasksQuery>,
+    updateQuery = true,
+): ThunkAction {
     return async (dispatch: ThunkDispatch, getState): Promise<void> => {
         const requestedOn = Date.now();
-        const isRequestRelevant = (): boolean => getState().tasks.fetchingTimestamp === requestedOn;
+        const isRequestRelevant = (): boolean => (
+            getState().tasks.fetchingTimestamp === requestedOn
+        );
 
         dispatch(getTasks(query, updateQuery, requestedOn));
         const filteredQuery = filterNull(query);
@@ -217,7 +215,8 @@ export function updateTaskInState(task: Task): AnyAction {
     return action;
 }
 
-export function createTaskAsync(data: any, onProgress?: (status: string) => void): ThunkAction {
+export function createTaskAsync(data: any, onProgress?: (status: string) => void):
+ThunkAction {
     return async (dispatch): Promise<any> => {
         const description: any = {
             name: data.basic.name,

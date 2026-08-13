@@ -14,7 +14,9 @@ export interface FilterAnnotationsParams {
 }
 
 export function filterAnnotations(annotations: ObjectState[], params: FilterAnnotationsParams): ObjectState[] {
-    const { workspace, exclude, include, frame } = params;
+    const {
+        workspace, exclude, include, frame,
+    } = params;
 
     if (Array.isArray(exclude) && Array.isArray(include)) {
         throw Error('无法同时使用排除和包含过滤来筛选标注');

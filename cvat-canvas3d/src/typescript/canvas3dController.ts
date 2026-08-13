@@ -4,7 +4,10 @@
 // SPDX-License-Identifier: MIT
 
 import { ObjectState } from '.';
-import { Canvas3dModel, Mode, DrawData, ActiveElement, GroupData, MergeData, SplitData } from './canvas3dModel';
+import {
+    Canvas3dModel, Mode, DrawData, ActiveElement,
+    GroupData, MergeData, SplitData,
+} from './canvas3dModel';
 
 export interface Canvas3dController {
     readonly drawData: DrawData;

@@ -44,8 +44,8 @@ export default class Project {
             sourceStorage: Storage,
             file: File | string,
             options?: {
-                convMaskToPoly?: boolean;
-                updateStatusCallback?: (s: string, n: number) => void;
+                convMaskToPoly?: boolean,
+                updateStatusCallback?: (s: string, n: number) => void,
             },
         ) => Promise<string>;
     };
@@ -81,8 +81,7 @@ export default class Project {
 
         if (Array.isArray(initialData.labels)) {
             data.labels = initialData.labels
-                .map((labelData) => new Label(labelData))
-                .filter((label) => !label.hasParent);
+                .map((labelData) => new Label(labelData)).filter((label) => !label.hasParent);
         }
 
         data.source_storage = new Storage({

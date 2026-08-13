@@ -28,7 +28,10 @@ const defaultState: WebhooksState = {
     fetching: false,
 };
 
-export default function (state: WebhooksState = defaultState, action: AnyAction): WebhooksState {
+export default function (
+    state: WebhooksState = defaultState,
+    action: AnyAction,
+): WebhooksState {
     switch (action.type) {
         case WebhooksActionsTypes.GET_WEBHOOKS: {
             return {

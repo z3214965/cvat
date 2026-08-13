@@ -21,13 +21,14 @@ interface LayerHeaderProps {
     visible: boolean;
     collapsed: boolean;
     selectLayer(zOrder: number): void;
+    toggleLayerVisibility(zOrder: number, includeLower: boolean): void;
     toggleLayerCollapsed(zOrder: number): void;
 }
 
 // Renders layer controls and exposes the layer itself as a draggable handle target.
 function LayerHeader(props: LayerHeaderProps): JSX.Element {
     const {
-        zOrder, selected, visible, collapsed, selectLayer, toggleLayerCollapsed,
+        zOrder, selected, visible, collapsed, selectLayer, toggleLayerCollapsed, toggleLayerVisibility,
     } = props;
 
     const {
@@ -84,9 +85,13 @@ function LayerHeader(props: LayerHeaderProps): JSX.Element {
             <div className='cvat-objects-sidebar-z-layer-id'>
                 <Text strong>{zOrder}</Text>
                 <CVATTooltip title={visibilityTooltip}>
-                    <span className='cvat-objects-sidebar-z-layer-visibility-indicator'>
-                        {visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-                    </span>
+                    <Button
+                        className='cvat-objects-sidebar-z-layer-visibility-indicator'
+                        type='text'
+                        size='small'
+                        icon={visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+                        onClick={(event): void => toggleLayerVisibility(zOrder, event.shiftKey)}
+                    />
                 </CVATTooltip>
             </div>
         </div>

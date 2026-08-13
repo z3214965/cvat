@@ -27,10 +27,7 @@ export class PropagateShapes extends BaseCollectionAction {
     }
 
     public async run(input: CollectionActionInput): Promise<CollectionActionOutput> {
-        const {
-            collection,
-            frameData: { number },
-        } = input;
+        const { collection, frameData: { number } } = input;
         if (number === this.#targetFrame) {
             return {
                 created: { shapes: [], tags: [], tracks: [] },
@@ -38,13 +35,10 @@ export class PropagateShapes extends BaseCollectionAction {
             };
         }
 
-        const frameNumbers =
-            this.#instance instanceof Job ? await this.#instance.frames.frameNumbers() : range(0, this.#instance.size);
+        const frameNumbers = this.#instance instanceof Job ?
+            await this.#instance.frames.frameNumbers() : range(0, this.#instance.size);
         const propagatedShapes = propagateShapes<SerializedShape>(
-            collection.shapes,
-            number,
-            this.#targetFrame,
-            frameNumbers,
+            collection.shapes, number, this.#targetFrame, frameNumbers,
         );
 
         return {

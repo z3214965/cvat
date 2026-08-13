@@ -35,11 +35,7 @@ export default class TrackerMILImplementation implements TrackerMILInterface {
         this.name = 'TrackerMIL';
     }
 
-    private optResize(
-        width: number,
-        height: number,
-        matImage: any,
-    ): {
+    private optResize(width: number, height: number, matImage: any): {
         scale: number;
         width: number;
         height: number;
@@ -50,7 +46,11 @@ export default class TrackerMILImplementation implements TrackerMILInterface {
             const scaleFactor = Math.min(this.maxSize / height, this.maxSize / width);
             const targetWidth = Math.round(width * scaleFactor);
             const targetHeight = Math.round(height * scaleFactor);
-            this.cv.resize(matImage, resized, new this.cv.Size(targetWidth, targetHeight));
+            this.cv.resize(
+                matImage,
+                resized,
+                new this.cv.Size(targetWidth, targetHeight),
+            );
 
             return {
                 scale: scaleFactor,
@@ -78,10 +78,7 @@ export default class TrackerMILImplementation implements TrackerMILInterface {
         try {
             matImage = this.cv.matFromImageData(src);
             const {
-                width: resizedWidth,
-                height: resizedHeight,
-                scale,
-                resized,
+                width: resizedWidth, height: resizedHeight, scale, resized,
             } = this.optResize(src.width, src.height, matImage);
             this.imageScale = scale;
 

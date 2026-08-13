@@ -30,8 +30,8 @@ export default class AnnotationHistory {
     }
 
     public get(): {
-        undo: [HistoryActions, number | null][];
-        redo: [HistoryActions, number | null][];
+        undo: [HistoryActions, number | null][],
+        redo: [HistoryActions, number | null][],
     } {
         return {
             undo: this._undo.map((undo) => [undo.action, undo.frame]),

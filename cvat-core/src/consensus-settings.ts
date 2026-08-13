@@ -66,7 +66,9 @@ Object.defineProperties(ConsensusSettings.prototype.save, {
         writable: false,
         enumerable: false,
         value: async function implementation(): Promise<ConsensusSettings> {
-            const result = await serverProxy.consensus.settings.update(this.id, this.toJSON());
+            const result = await serverProxy.consensus.settings.update(
+                this.id, this.toJSON(),
+            );
             const schema = await getServerAPISchema();
             const descriptions = convertDescriptions(schema.components.schemas.ConsensusSettings.properties);
             return new ConsensusSettings({ ...result, descriptions });

@@ -34,7 +34,7 @@ module.exports = (env, argv = {}) => {
         })
         .filter(({ entrypoint }) => {
             if (!fs.existsSync(entrypoint)) {
-                console.warn(`Not found entrypoint ${entrypoint}. The plugin skipped.`);
+                console.warn(`未找到入口点 ${entrypoint}，该插件已跳过执行。`);
                 return false;
             }
             return true;
@@ -176,7 +176,11 @@ module.exports = (env, argv = {}) => {
                             options: {
                                 sourceMap: false,
                                 postcssOptions: {
-                                    plugins: [['postcss-preset-env', {}]],
+                                    plugins: [
+                                        [
+                                            'postcss-preset-env', {},
+                                        ],
+                                    ],
                                 },
                             },
                         },
@@ -231,7 +235,7 @@ module.exports = (env, argv = {}) => {
                     },
                     {
                         from: '../node_modules/onnxruntime-web/dist/*.wasm',
-                        to: 'assets/[name][ext]',
+                        to  : 'assets/[name][ext]',
                     },
                     {
                         from: '../node_modules/onnxruntime-web/dist/*.mjs',
@@ -239,18 +243,18 @@ module.exports = (env, argv = {}) => {
                     },
                     {
                         from: 'src/assets/opencv_4.8.0.js',
-                        to: 'assets/opencv_4.8.0.js',
+                        to  : 'assets/opencv_4.8.0.js',
                     },
                     {
                         from: 'src/assets/*.png',
-                        to: 'assets/[name][ext]',
+                        to  : 'assets/[name][ext]',
                     },
                     {
-                        from: 'plugins/**/assets/*.(onnx|js)',
-                        to: 'assets/[name][ext]',
+                        from: 'plugins/**/assets/*.(onnx|js|png)',
+                        to  : 'assets/[name][ext]',
                     },
                 ],
             }),
         ],
-    };
+    }
 };

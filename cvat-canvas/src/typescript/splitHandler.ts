@@ -94,8 +94,7 @@ export class SplitHandlerImpl implements SplitHandler {
                     (): void => {
                         this.splitDone = true;
                         this.onSplitDone(state, Date.now() - this.startTimestamp);
-                    },
-                    { once: true },
+                    }, { once: true },
                 );
             }
         }

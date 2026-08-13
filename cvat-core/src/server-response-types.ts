@@ -4,24 +4,11 @@
 
 import {
     ChunkType,
-    DimensionType,
-    JobStage,
-    JobState,
-    JobType,
-    MediaType,
-    ProjectStatus,
-    ShapeType,
-    StorageLocation,
-    LabelType,
-    ShareFileType,
-    Source,
-    TaskMode,
-    TaskStatus,
-    CloudStorageCredentialsType,
-    CloudStorageProviderType,
-    ObjectType,
-    DataStorageLocation,
-    RQStatus,
+    DimensionType, JobStage, JobState, JobType, MediaType, ProjectStatus,
+    ShapeType, StorageLocation, LabelType,
+    ShareFileType, Source, TaskMode, TaskStatus,
+    CloudStorageCredentialsType, CloudStorageProviderType, ObjectType,
+    DataStorageLocation, RQStatus,
 } from './enums';
 import { Camelized, CamelizedV2 } from './type-utils';
 
@@ -103,12 +90,12 @@ export interface SerializedProject {
     source_storage: SerializedStorage | null;
     target_storage: SerializedStorage | null;
     url: string;
-    tasks: { count: number; url: string };
+    tasks: { count: number; url: string; };
     task_subsets: string[];
     status: ProjectStatus;
 }
 
-export type TasksFilter = ProjectsFilter & { ordering?: string }; // TODO: Need to clarify how "ordering" is used
+export type TasksFilter = ProjectsFilter & { ordering?: string; }; // TODO: Need to clarify how "ordering" is used
 export type JobsFilter = ProjectsFilter & {
     task_id?: number;
     type?: JobType;
@@ -120,7 +107,7 @@ export interface SerializedTask {
     created_date: string;
     data: number;
     data_chunk_size: number | null;
-    data_compressed_chunk_type: ChunkType;
+    data_compressed_chunk_type: ChunkType
     data_original_chunk_type: ChunkType;
     data_cloud_storage_id: number | null;
     dimension?: DimensionType;
@@ -133,7 +120,7 @@ export interface SerializedTask {
         url: string;
         validation: number;
     };
-    labels: { count: number; url: string };
+    labels: { count: number; url: string; };
     mode?: TaskMode;
     name: string;
     organization_id: number | null;
@@ -157,7 +144,7 @@ export interface SerializedJob {
     assignee: SerializedUser | null;
     bug_tracker: string;
     data_chunk_size: number | null;
-    data_compressed_chunk_type: ChunkType;
+    data_compressed_chunk_type: ChunkType
     dimension: DimensionType;
     media_type: MediaType;
     id: number;
@@ -376,20 +363,20 @@ export interface SerializedQualityReportData {
             mismatching_attributes: number;
             mismatching_groups: number;
             covered_annotation: number;
-        };
+        }
         tasks?: {
             total: number;
             custom: number;
             not_configured: number;
             excluded: number;
             included: number;
-        };
+        }
         jobs?: {
             total: number;
             excluded: number;
             not_checkable: number;
             included: number;
-        };
+        }
     };
 }
 
@@ -539,7 +526,7 @@ export interface SerializedChapter {
 
 export interface SerializedFramesMetaData {
     chunk_size: number;
-    chapters: SerializedChapter[] | null;
+    chapters: SerializedChapter[] | null
     deleted_frames: number[];
     included_frames: number[] | null;
     frame_filter: string;
@@ -572,7 +559,7 @@ export interface SerializedAPISchema {
         license: {
             name: string;
             url: string;
-        };
+        }
     };
     paths: {
         [path: string]: any;
@@ -580,8 +567,8 @@ export interface SerializedAPISchema {
     components: {
         schemas: {
             [component: string]: any;
-        };
-    };
+        }
+    }
     externalDocs: {
         description: string;
         url: string;

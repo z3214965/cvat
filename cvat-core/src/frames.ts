@@ -5,12 +5,7 @@
 
 import _, { range, sortedIndexOf } from 'lodash';
 import {
-    FrameDecoder,
-    BlockType,
-    DimensionType,
-    ChunkQuality,
-    decodeContextImages,
-    RequestOutdatedError,
+    FrameDecoder, BlockType, DimensionType, ChunkQuality, decodeContextImages, RequestOutdatedError,
 } from 'cvat-data';
 import PluginRegistry from './plugins';
 import { MediaType } from './enums';
@@ -21,75 +16,64 @@ import { FieldUpdateTrigger } from './common';
 import config from './config';
 
 // frame storage by job id
-const frameDataCache: Record<
-    string,
-    {
-        metaFetchedTimestamp: number;
-        chunkSize: number;
-        mode: 'annotation' | 'interpolation';
-        jobStartFrame: number;
-        decodeForward: boolean;
-        forwardStep: number;
-        latestFrameDecodeRequest: number | null;
-        latestContextImagesRequest: number | null;
-        provider: FrameDecoder;
-        prefetchAnalyzer: PrefetchAnalyzer;
-        decodedBlocksCacheSize: number;
-        activeChunkRequest: Promise<void> | null;
-        activeContextRequest: Promise<Record<number, ImageBitmap>> | null;
-        segmentFrameNumbers: number[];
-        contextCache: Record<
-            number,
-            {
-                data: Record<number, ImageBitmap>;
-                timestamp: number;
-                size: number;
-            }
-        >;
-        getChunk: (chunkIndex: number, quality: ChunkQuality) => Promise<ArrayBuffer>;
-        getMeta: () => Promise<FramesMetaData>;
-    }
-> = {};
+const frameDataCache: Record<string, {
+    metaFetchedTimestamp: number;
+    chunkSize: number;
+    mode: 'annotation' | 'interpolation';
+    jobStartFrame: number;
+    decodeForward: boolean;
+    forwardStep: number;
+    latestFrameDecodeRequest: number | null;
+    latestContextImagesRequest: number | null;
+    provider: FrameDecoder;
+    prefetchAnalyzer: PrefetchAnalyzer;
+    decodedBlocksCacheSize: number;
+    activeChunkRequest: Promise<void> | null;
+    activeContextRequest: Promise<Record<number, ImageBitmap>> | null;
+    segmentFrameNumbers: number[];
+    contextCache: Record<number, {
+        data: Record<number, ImageBitmap>;
+        timestamp: number;
+        size: number;
+    }>;
+    getChunk: (chunkIndex: number, quality: ChunkQuality) => Promise<ArrayBuffer>;
+    getMeta: () => Promise<FramesMetaData>;
+}> = {};
 
 // frame meta data storage by job id
 const frameMetaCacheSync: Record<string, FramesMetaData> = {};
-const frameMetaCache: Record<string, Promise<FramesMetaData>> = new Proxy(
-    {},
-    {
-        set(target, prop, value): boolean {
-            if (typeof prop === 'string' && value instanceof Promise) {
-                const result = Reflect.set(target, prop, value);
+const frameMetaCache: Record<string, Promise<FramesMetaData>> = new Proxy({}, {
+    set(target, prop, value): boolean {
+        if (typeof prop === 'string' && value instanceof Promise) {
+            const result = Reflect.set(target, prop, value);
 
-                // automatically update synced storage each time new promise set
-                if (result) {
-                    value
-                        .then((metaData: FramesMetaData) => {
-                            if (target[prop]) {
-                                frameMetaCacheSync[prop] = metaData;
-                            }
-                        })
-                        .catch(() => {
-                            // do nothing
-                        });
-                }
-
-                return result;
-            }
-            return Reflect.set(target, prop, value);
-        },
-        deleteProperty(target, prop): boolean {
-            if (typeof prop === 'string') {
-                const result = Reflect.deleteProperty(target, prop);
-                if (result) {
-                    delete frameMetaCacheSync[prop];
-                }
-                return result;
+            // automatically update synced storage each time new promise set
+            if (result) {
+                value.then((metaData: FramesMetaData) => {
+                    if (target[prop]) {
+                        frameMetaCacheSync[prop] = metaData;
+                    }
+                }).catch(() => {
+                    // do nothing
+                });
             }
 
-            return Reflect.deleteProperty(target, prop);
-        },
+            return result;
+        }
+        return Reflect.set(target, prop, value);
     },
-);
+    deleteProperty(target, prop): boolean {
+        if (typeof prop === 'string') {
+            const result = Reflect.deleteProperty(target, prop);
+            if (result) {
+                delete frameMetaCacheSync[prop];
+            }
+            return result;
+        }
+
+        return Reflect.deleteProperty(target, prop);
+    },
+});
 
 enum DeletedFrameState {
     DELETED = 'deleted',
@@ -144,9 +128,7 @@ export class FramesMetaData {
 
     #updateTrigger: FieldUpdateTrigger;
 
-    constructor(
-        initialData: Omit<SerializedFramesMetaData, 'deleted_frames'> & { deleted_frames: Record<number, boolean> },
-    ) {
+    constructor(initialData: Omit<SerializedFramesMetaData, 'deleted_frames'> & { deleted_frames: Record<number, boolean> }) {
         const data: typeof initialData = {
             chunk_size: undefined,
             chapters: [],
@@ -169,9 +151,9 @@ export class FramesMetaData {
             if (Object.prototype.hasOwnProperty.call(data, property) && property in initialData) {
                 if (property === 'deleted_frames') {
                     const update = (frame: string, remove: boolean): void => {
-                        const [state, oppositeState] = remove
-                            ? [DeletedFrameState.DELETED, DeletedFrameState.RESTORED]
-                            : [DeletedFrameState.RESTORED, DeletedFrameState.DELETED];
+                        const [state, oppositeState] = remove ?
+                            [DeletedFrameState.DELETED, DeletedFrameState.RESTORED] :
+                            [DeletedFrameState.RESTORED, DeletedFrameState.DELETED];
                         if (this.#updateTrigger.get(`deletedFrames:${frame}:${oppositeState}`)) {
                             this.#updateTrigger.resetField(`deletedFrames:${frame}:${oppositeState}`);
                         } else {
@@ -267,11 +249,9 @@ export class FramesMetaData {
             framesInfo = frameNumbers.map(() => initialData.frames[0]);
         } else if (this.includedFrames?.length) {
             // Only simple GT jobs have includedFrames, so this condition works only for them
-            const framesNumbers = new Set(
-                this.includedFrames.map((dataFrameNumber: number) =>
-                    Math.floor((dataFrameNumber - this.startFrame) / this.frameStep),
-                ),
-            );
+            const framesNumbers = new Set(this.includedFrames.map((dataFrameNumber: number) => (
+                Math.floor((dataFrameNumber - this.startFrame) / this.frameStep)
+            )));
             // Frames must contain placeholders on positions out of includedFrames.
             // That is, we can use frames with indices corresponding to frame numbers
             framesInfo = initialData.frames.filter((frame, idx) => framesNumbers.has(idx));
@@ -367,7 +347,15 @@ export class FrameData {
     public readonly deleted: boolean;
     public readonly jobID: number;
 
-    constructor({ width, height, name, jobID, frameNumber, deleted, related_files: relatedFiles }) {
+    constructor({
+        width,
+        height,
+        name,
+        jobID,
+        frameNumber,
+        deleted,
+        related_files: relatedFiles,
+    }) {
         Object.defineProperties(
             this,
             Object.freeze({
@@ -432,15 +420,13 @@ class PrefetchAnalyzer {
         const currentDataFrameNumber = this.#getDataFrameNumber(current);
         const currentChunk = this.#meta.getFrameChunkIndex(currentDataFrameNumber);
         const { length } = this.#requestedFrames;
-        const isIncreasingOrder = this.#requestedFrames.every(
-            (val, index) => index === 0 || val > this.#requestedFrames[index - 1],
-        );
+        const isIncreasingOrder = this.#requestedFrames
+            .every((val, index) => index === 0 || val > this.#requestedFrames[index - 1]);
         if (
-            length &&
-            isIncreasingOrder &&
-            current > this.#requestedFrames[length - 1] &&
-            this.#meta.getFrameIndex(currentDataFrameNumber) % this.#meta.chunkSize >=
-                Math.ceil(this.#meta.chunkSize / 2) &&
+            length && (isIncreasingOrder && current > this.#requestedFrames[length - 1]) &&
+            (
+                this.#meta.getFrameIndex(currentDataFrameNumber) % this.#meta.chunkSize
+            ) >= Math.ceil(this.#meta.chunkSize / 2) &&
             !isChunkCached(currentChunk + 1)
         ) {
             // is increasing order including the current frame
@@ -472,14 +458,8 @@ class PrefetchAnalyzer {
 Object.defineProperty(FrameData.prototype.data, 'implementation', {
     async value(this: FrameData, onServerRequest) {
         const {
-            provider,
-            prefetchAnalyzer,
-            chunkSize,
-            jobStartFrame,
-            decodeForward,
-            forwardStep,
-            decodedBlocksCacheSize,
-            segmentFrameNumbers,
+            provider, prefetchAnalyzer, chunkSize, jobStartFrame,
+            decodeForward, forwardStep, decodedBlocksCacheSize, segmentFrameNumbers,
         } = frameDataCache[this.jobID];
         const meta = await frameDataCache[this.jobID].getMeta();
 
@@ -515,47 +495,50 @@ Object.defineProperty(FrameData.prototype.data, 'implementation', {
 
             if (frame) {
                 if (
-                    prefetchAnalyzer.shouldPrefetchNext(this.number, decodeForward, (chunk) =>
-                        provider.isChunkCached(chunk),
-                    ) &&
-                    decodedBlocksCacheSize > 1 &&
-                    !frameDataCache[this.jobID].activeChunkRequest
+                    prefetchAnalyzer.shouldPrefetchNext(
+                        this.number,
+                        decodeForward,
+                        (chunk) => provider.isChunkCached(chunk),
+                    ) && decodedBlocksCacheSize > 1 && !frameDataCache[this.jobID].activeChunkRequest
                 ) {
-                    const nextChunkIndex = findTheNextNotDecodedChunk(meta.getFrameIndex(requestedDataFrameNumber));
+                    const nextChunkIndex = findTheNextNotDecodedChunk(
+                        meta.getFrameIndex(requestedDataFrameNumber),
+                    );
                     const predecodeChunksMax = Math.floor(decodedBlocksCacheSize / 2);
-                    if (nextChunkIndex !== null && nextChunkIndex <= chunkIndex + predecodeChunksMax) {
+                    if (nextChunkIndex !== null &&
+                        nextChunkIndex <= chunkIndex + predecodeChunksMax
+                    ) {
                         frameDataCache[this.jobID].activeChunkRequest = new Promise((resolveForward) => {
                             const releasePromise = (): void => {
                                 resolveForward();
                                 frameDataCache[this.jobID].activeChunkRequest = null;
                             };
 
-                            frameDataCache[this.jobID]
-                                .getChunk(nextChunkIndex, ChunkQuality.COMPRESSED)
-                                .then((chunk: ArrayBuffer) => {
-                                    if (!(this.jobID in frameDataCache)) {
-                                        // check if frameDataCache still exist
-                                        // as it may be released during chunk request
-                                        resolveForward();
-                                        return;
-                                    }
+                            frameDataCache[this.jobID].getChunk(
+                                nextChunkIndex, ChunkQuality.COMPRESSED,
+                            ).then((chunk: ArrayBuffer) => {
+                                if (!(this.jobID in frameDataCache)) {
+                                    // check if frameDataCache still exist
+                                    // as it may be released during chunk request
+                                    resolveForward();
+                                    return;
+                                }
 
-                                    provider.cleanup(1);
-                                    provider.requestDecodeBlock(
-                                        chunk,
-                                        nextChunkIndex,
-                                        segmentFrameNumbers.slice(
-                                            nextChunkIndex * chunkSize,
-                                            (nextChunkIndex + 1) * chunkSize,
-                                        ),
-                                        () => {},
-                                        releasePromise,
-                                        releasePromise,
-                                    );
-                                })
-                                .catch(() => {
-                                    releasePromise();
-                                });
+                                provider.cleanup(1);
+                                provider.requestDecodeBlock(
+                                    chunk,
+                                    nextChunkIndex,
+                                    segmentFrameNumbers.slice(
+                                        nextChunkIndex * chunkSize,
+                                        (nextChunkIndex + 1) * chunkSize,
+                                    ),
+                                    () => {},
+                                    releasePromise,
+                                    releasePromise,
+                                );
+                            }).catch(() => {
+                                releasePromise();
+                            });
                         });
                     }
                 }
@@ -590,32 +573,37 @@ Object.defineProperty(FrameData.prototype.data, 'implementation', {
                     return;
                 }
 
-                frameDataCache[this.jobID].activeChunkRequest = new Promise<void>((resolveLoadAndDecode) => {
+                frameDataCache[this.jobID].activeChunkRequest = new Promise<void>((
+                    resolveLoadAndDecode,
+                ) => {
                     let wasResolved = false;
-                    frameDataCache[this.jobID]
-                        .getChunk(chunkIndex, ChunkQuality.COMPRESSED)
-                        .then((chunk: ArrayBuffer) => {
-                            try {
-                                if (!(this.jobID in frameDataCache)) {
-                                    // check if frameDataCache still exist
-                                    // as it may be released during chunk request
-                                    resolveLoadAndDecode();
-                                    reject(this.number);
-                                    return;
-                                }
+                    frameDataCache[this.jobID].getChunk(
+                        chunkIndex, ChunkQuality.COMPRESSED,
+                    ).then((chunk: ArrayBuffer) => {
+                        try {
+                            if (!(this.jobID in frameDataCache)) {
+                                // check if frameDataCache still exist
+                                // as it may be released during chunk request
+                                resolveLoadAndDecode();
+                                reject(this.number);
+                                return;
+                            }
 
-                                provider.requestDecodeBlock(
+                            provider
+                                .requestDecodeBlock(
                                     chunk,
                                     chunkIndex,
-                                    segmentFrameNumbers.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize),
+                                    segmentFrameNumbers.slice(
+                                        chunkIndex * chunkSize,
+                                        (chunkIndex + 1) * chunkSize,
+                                    ),
                                     (_frame: number, bitmap: ImageBitmap | Blob) => {
                                         if (decodeForward) {
                                             // resolve immediately only if is not playing
                                             return;
                                         }
 
-                                        if (
-                                            frameDataCache[this.jobID].latestFrameDecodeRequest === requestId &&
+                                        if (frameDataCache[this.jobID].latestFrameDecodeRequest === requestId &&
                                             this.number === _frame
                                         ) {
                                             wasResolved = true;
@@ -652,14 +640,13 @@ Object.defineProperty(FrameData.prototype.data, 'implementation', {
                                         }
                                     },
                                 );
-                            } catch (error) {
-                                reject(error);
-                            }
-                        })
-                        .catch((error) => {
+                        } catch (error) {
                             reject(error);
-                            resolveLoadAndDecode(error);
-                        });
+                        }
+                    }).catch((error) => {
+                        reject(error);
+                        resolveLoadAndDecode(error);
+                    });
                 });
             });
         });
@@ -711,34 +698,30 @@ export function getJobFramesMetaSync(jobID: number): FramesMetaData {
 export function getFramesMeta(type: 'job' | 'task', id: number, forceReload = false): Promise<FramesMetaData> {
     if (type === 'task') {
         // we do not cache task meta currently. So, each new call will results to the server request
-        return serverProxy.frames.getMeta('task', id).then(
-            (serialized) =>
-                new FramesMetaData({
-                    ...serialized,
-                    deleted_frames: Object.fromEntries(serialized.deleted_frames.map((_frame) => [_frame, true])),
-                }),
-        );
+        return serverProxy.frames.getMeta('task', id).then((serialized) => (
+            new FramesMetaData({
+                ...serialized,
+                deleted_frames: Object.fromEntries(serialized.deleted_frames.map((_frame) => [_frame, true])),
+            })
+        ));
     }
 
     if (!(id in frameMetaCache) || forceReload) {
         const previousCache = frameMetaCache[id];
         frameMetaCache[id] = new Promise((resolve, reject) => {
-            serverProxy.frames
-                .getMeta('job', id)
-                .then((serialized) => {
-                    // When we get new framesMetaData from server there can be some unsaved data
-                    // here we merge new meta data with cached one
-                    mergeMetaData(serialized, previousCache).then((mergedData) => {
-                        resolve(mergedData);
-                    });
-                })
-                .catch((error: unknown) => {
-                    delete frameMetaCache[id];
-                    if (previousCache instanceof Promise) {
-                        frameMetaCache[id] = previousCache;
-                    }
-                    reject(error);
+            serverProxy.frames.getMeta('job', id).then((serialized) => {
+                // When we get new framesMetaData from server there can be some unsaved data
+                // here we merge new meta data with cached one
+                mergeMetaData(serialized, previousCache).then((mergedData) => {
+                    resolve(mergedData);
                 });
+            }).catch((error: unknown) => {
+                delete frameMetaCache[id];
+                if (previousCache instanceof Promise) {
+                    frameMetaCache[id] = previousCache;
+                }
+                reject(error);
+            });
         });
     }
 
@@ -747,24 +730,21 @@ export function getFramesMeta(type: 'job' | 'task', id: number, forceReload = fa
 
 function saveMeta(meta: FramesMetaData, session: 'job' | 'task', id: number): Promise<FramesMetaData> {
     const newMeta = new Promise<FramesMetaData>((resolve, reject) => {
-        serverProxy.frames
-            .saveMeta(session, id, {
-                deleted_frames: Object.keys(meta.deletedFrames).map((frame) => +frame),
-                cloud_storage_id: meta.cloudStorageId,
-            })
-            .then((serverMeta) => {
-                const updatedMetaData = new FramesMetaData({
-                    ...serverMeta,
-                    deleted_frames: Object.fromEntries(serverMeta.deleted_frames.map((_frame) => [_frame, true])),
-                });
-                resolve(updatedMetaData);
-            })
-            .catch((error) => {
-                if (session === 'job') {
-                    frameMetaCache[id] = Promise.resolve(meta);
-                }
-                reject(error);
+        serverProxy.frames.saveMeta(session, id, {
+            deleted_frames: Object.keys(meta.deletedFrames).map((frame) => +frame),
+            cloud_storage_id: meta.cloudStorageId,
+        }).then((serverMeta) => {
+            const updatedMetaData = new FramesMetaData({
+                ...serverMeta,
+                deleted_frames: Object.fromEntries(serverMeta.deleted_frames.map((_frame) => [_frame, true])),
             });
+            resolve(updatedMetaData);
+        }).catch((error) => {
+            if (session === 'job') {
+                frameMetaCache[id] = Promise.resolve(meta);
+            }
+            reject(error);
+        });
     });
 
     if (session === 'job') {
@@ -833,41 +813,33 @@ export async function getContextImage(
                 } else if (frame in frameData.contextCache) {
                     resolve(frameData.contextCache[frame].data);
                 } else {
-                    frameData.activeContextRequest = getImageContext(frame).then((encodedImages) =>
-                        decodeContextImages(encodedImages, 0, relatedFiles),
-                    );
-                    frameData.activeContextRequest
-                        .then((images) => {
-                            const size = Object.values(images).reduce(
-                                (acc, image) => acc + image.width * image.height * 4,
-                                0,
-                            );
-                            const totalSize = Object.values(frameData.contextCache).reduce(
-                                (acc, item) => acc + item.size,
-                                0,
-                            );
-                            if (totalSize > 512 * 1024 * 1024) {
-                                const [leastTimestampFrame] = Object.entries(frameData.contextCache).sort(
-                                    ([, item1], [, item2]) => item1.timestamp - item2.timestamp,
-                                )[0];
-                                delete frameData.contextCache[leastTimestampFrame];
-                            }
+                    frameData.activeContextRequest = getImageContext(frame)
+                        .then((encodedImages) => decodeContextImages(encodedImages, 0, relatedFiles));
+                    frameData.activeContextRequest.then((images) => {
+                        const size = Object.values(images)
+                            .reduce((acc, image) => acc + image.width * image.height * 4, 0);
+                        const totalSize = Object.values(frameData.contextCache)
+                            .reduce((acc, item) => acc + item.size, 0);
+                        if (totalSize > 512 * 1024 * 1024) {
+                            const [leastTimestampFrame] = Object.entries(frameData.contextCache)
+                                .sort(([, item1], [, item2]) => item1.timestamp - item2.timestamp)[0];
+                            delete frameData.contextCache[leastTimestampFrame];
+                        }
 
-                            frameData.contextCache[frame] = {
-                                data: images,
-                                timestamp: Date.now(),
-                                size,
-                            };
+                        frameData.contextCache[frame] = {
+                            data: images,
+                            timestamp: Date.now(),
+                            size,
+                        };
 
-                            if (frameData.latestContextImagesRequest !== requestId) {
-                                reject(frame);
-                            } else {
-                                resolve(images);
-                            }
-                        })
-                        .finally(() => {
-                            frameData.activeContextRequest = null;
-                        });
+                        if (frameData.latestContextImagesRequest !== requestId) {
+                            reject(frame);
+                        } else {
+                            resolve(images);
+                        }
+                    }).finally(() => {
+                        frameData.activeContextRequest = null;
+                    });
                 }
             };
 
@@ -942,17 +914,18 @@ export async function getFrame(
 
         const mean = meta.frames.reduce((a, b) => a + b.width * b.height, 0) / meta.frames.length;
         const stdDev = Math.sqrt(
-            meta.frames.map((x) => (x.width * x.height - mean) ** 2).reduce((a, b) => a + b) / meta.frames.length,
+            meta.frames.map((x) => (x.width * x.height - mean) ** 2).reduce((a, b) => a + b) /
+            meta.frames.length,
         );
 
         // limit of decoded frames cache by 2GB
         const decodedBlocksCacheSize = Math.min(
-            Math.floor((2048 * 1024 * 1024) / ((mean + stdDev) * 4 * chunkSize)) || 1,
-            10,
+            Math.floor((2048 * 1024 * 1024) / ((mean + stdDev) * 4 * chunkSize)) || 1, 10,
         );
 
-        const dataFrameNumberGetter = (frameNumber: number): number =>
-            meta.getDataFrameNumber(frameNumber - jobStartFrame);
+        const dataFrameNumberGetter = (frameNumber: number): number => (
+            meta.getDataFrameNumber(frameNumber - jobStartFrame)
+        );
 
         frameDataCache[jobID] = {
             metaFetchedTimestamp: Date.now(),
@@ -965,7 +938,9 @@ export async function getFrame(
             provider: new FrameDecoder(
                 blockType,
                 decodedBlocksCacheSize,
-                (frameNumber: number): number => meta.getFrameChunkIndex(dataFrameNumberGetter(frameNumber)),
+                (frameNumber: number): number => (
+                    meta.getFrameChunkIndex(dataFrameNumberGetter(frameNumber))
+                ),
                 dimension,
             ),
             prefetchAnalyzer: new PrefetchAnalyzer(meta, dataFrameNumberGetter),
@@ -1033,12 +1008,8 @@ export async function restoreFrame(jobID: number, frame: number): Promise<void> 
     delete meta.deletedFrames[frame];
 }
 
-export async function patchMeta(
-    id: number,
-    meta?: FramesMetaData,
-    session: 'job' | 'task' = 'job',
-): Promise<FramesMetaData> {
-    const oldMeta = session === 'job' ? await frameMetaCache[id] : meta;
+export async function patchMeta(id: number, meta?: FramesMetaData, session: 'job' | 'task' = 'job'): Promise<FramesMetaData> {
+    const oldMeta = (session === 'job' ? await frameMetaCache[id] : meta);
     const updatedFields = oldMeta.getUpdated();
     if (Object.keys(updatedFields).length) {
         const newMeta = await saveMeta(oldMeta, session, id);
@@ -1051,7 +1022,7 @@ export async function findFrame(
     jobID: number,
     frameFrom: number,
     frameTo: number,
-    filters: { offset?: number; notDeleted: boolean; chapterMark?: boolean },
+    filters: { offset?: number, notDeleted: boolean, chapterMark?: boolean },
 ): Promise<number | null> {
     const offset = filters.offset || 1;
     const chapterMark = filters.chapterMark || false;
@@ -1067,9 +1038,8 @@ export async function findFrame(
             // meta.includedFrames contains absolute frame numbers
             const jobStartFrame = 0; // this is only true when includedFrames is set
             return (
-                meta.includedFrames.includes(meta.getDataFrameNumber(frame - jobStartFrame)) &&
-                (!filters.notDeleted || !(frame in meta.deletedFrames))
-            );
+                meta.includedFrames.includes(meta.getDataFrameNumber(frame - jobStartFrame))
+            ) && (!filters.notDeleted || !(frame in meta.deletedFrames));
         }
 
         if (filters.notDeleted) {

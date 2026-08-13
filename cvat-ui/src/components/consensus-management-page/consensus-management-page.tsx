@@ -171,7 +171,7 @@ function ConsensusManagementPage(): JSX.Element {
     }, [requestedInstanceID]);
 
     useEffect(() => {
-        const onHashChange = (): void => setActiveTab(getTabFromHash(supportedTabs));
+        const onHashChange = () => setActiveTab(getTabFromHash(supportedTabs));
         window.addEventListener('hashchange', onHashChange);
         return () => window.removeEventListener('hashchange', onHashChange);
     }, []);

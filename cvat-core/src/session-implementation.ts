@@ -6,7 +6,10 @@
 import { omit } from 'lodash';
 import config from './config';
 import { ArgumentError } from './exceptions';
-import { HistoryActions, JobStage, JobState, JobType, RQStatus } from './enums';
+import {
+    HistoryActions, JobStage, JobState, JobType,
+    RQStatus,
+} from './enums';
 import { Task as TaskClass, Job as JobClass } from './session';
 import logger from './logger';
 import serverProxy from './server-proxy';
@@ -24,19 +27,15 @@ import {
     resolvePreviewResponse,
 } from './frames';
 import Issue from './issue';
-import { SerializedTask, SerializedJobValidationLayout, SerializedTaskValidationLayout } from './server-response-types';
+import {
+    SerializedTask, SerializedJobValidationLayout, SerializedTaskValidationLayout,
+} from './server-response-types';
 import { getUpdatedLabels } from './labels';
 import { checkInEnum, checkObjectType } from './common';
 import {
-    getCollection,
-    getSaver,
-    clearAnnotations,
-    getAnnotations,
+    getCollection, getSaver, clearAnnotations, getAnnotations,
     getAllIntervals,
-    importDataset,
-    exportDataset,
-    clearCache,
-    getHistory,
+    importDataset, exportDataset, clearCache, getHistory,
 } from './annotations';
 import AnnotationGuide from './guide';
 import requestsManager from './requests-manager';
@@ -51,15 +50,9 @@ async function deleteFrameWrapper(jobID, frame): Promise<void> {
     };
 
     await redo();
-    getHistory(this).do(
-        HistoryActions.REMOVED_FRAME,
-        async () => {
-            restoreFrame(jobID, frame);
-        },
-        redo,
-        [],
-        frame,
-    );
+    getHistory(this).do(HistoryActions.REMOVED_FRAME, async () => {
+        restoreFrame(jobID, frame);
+    }, redo, [], frame);
 }
 
 async function restoreFrameWrapper(jobID, frame): Promise<void> {
@@ -68,15 +61,9 @@ async function restoreFrameWrapper(jobID, frame): Promise<void> {
     };
 
     await redo();
-    getHistory(this).do(
-        HistoryActions.RESTORED_FRAME,
-        async () => {
-            deleteFrame(jobID, frame);
-        },
-        redo,
-        [],
-        frame,
-    );
+    getHistory(this).do(HistoryActions.RESTORED_FRAME, async () => {
+        deleteFrame(jobID, frame);
+    }, redo, [], frame);
 }
 
 export function implementJob(Job: typeof JobClass): typeof JobClass {
@@ -134,9 +121,10 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.issues, 'implementation', {
-        value: function issuesImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.issues> {
-            return serverProxy.issues
-                .get({ job_id: this.id })
+        value: function issuesImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.issues> {
+            return serverProxy.issues.get({ job_id: this.id })
                 .then((issues) => issues.map((issue) => new Issue(issue)));
         },
     });
@@ -158,14 +146,18 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.close, 'implementation', {
-        value: function closeImplementation(this: JobClass) {
+        value: function closeImplementation(
+            this: JobClass,
+        ) {
             clearFrames(this.id);
             clearCache(this);
         },
     });
 
     Object.defineProperty(Job.prototype.guide, 'implementation', {
-        value: async function guideImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.guide> {
+        value: async function guideImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.guide> {
             if (this.guideId === null) {
                 return null;
             }
@@ -253,7 +245,9 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.frames.save, 'implementation', {
-        value: function saveFramesImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.frames.save> {
+        value: function saveFramesImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.frames.save> {
             return patchMeta(this.id).then((meta) => [meta]);
         },
     });
@@ -275,14 +269,16 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.frames.preview, 'implementation', {
-        value: function previewImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.frames.preview> {
+        value: function previewImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.frames.preview> {
             if (this.id === null || this.taskId === null) {
                 return Promise.resolve('');
             }
 
-            return serverProxy.jobs
-                .getPreview(this.id)
-                .then((response) => resolvePreviewResponse(response, this.mediaType));
+            return serverProxy.jobs.getPreview(this.id).then(
+                (response) => resolvePreviewResponse(response, this.mediaType),
+            );
         },
     });
 
@@ -639,7 +635,9 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.actions.get, 'implementation', {
-        value: function getActionsImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.actions.get> {
+        value: function getActionsImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.actions.get> {
             return Promise.resolve(getHistory(this).get());
         },
     });
@@ -677,7 +675,9 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
 
 export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     Object.defineProperty(Task.prototype.close, 'implementation', {
-        value: function closeImplementation(this: TaskClass) {
+        value: function closeImplementation(
+            this: TaskClass,
+        ) {
             for (const job of this.jobs) {
                 clearFrames(job.id);
                 clearCache(job);
@@ -688,7 +688,9 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.guide, 'implementation', {
-        value: async function guideImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.guide> {
+        value: async function guideImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.guide> {
             if (this.guideId === null) {
                 return null;
             }
@@ -702,7 +704,7 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
         value: async function validationLayoutImplementation(
             this: TaskClass,
         ): ReturnType<typeof TaskClass.prototype.validationLayout> {
-            const result = (await serverProxy.tasks.validationLayout(this.id)) as SerializedTaskValidationLayout;
+            const result = await serverProxy.tasks.validationLayout(this.id) as SerializedTaskValidationLayout;
             if (result.mode !== null) {
                 return new TaskValidationLayout(result);
             }
@@ -757,14 +759,18 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
                 this._updateTrigger.reset();
 
                 let serializedTask: SerializedTask = null;
-                if (Object.keys(taskData).length || labelsToCreate.length || typeof newAssigneeId !== 'undefined') {
+                if (
+                    Object.keys(taskData).length ||
+                    labelsToCreate.length ||
+                    typeof newAssigneeId !== 'undefined'
+                ) {
                     serializedTask = await serverProxy.tasks.save(this.id, {
                         ...taskData,
                         ...(typeof newAssigneeId !== 'undefined' ? { assignee_id: newAssigneeId } : {}),
                         ...(labelsToCreate.length ? { labels: labelsToCreate } : {}),
                     });
                 } else {
-                    [serializedTask] = await serverProxy.tasks.get({ id: this.id });
+                    [serializedTask] = (await serverProxy.tasks.get({ id: this.id }));
                 }
 
                 // TODO: optimize labels fetch
@@ -857,12 +863,9 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
 
             const [task] = await serverProxy.tasks.get({ id: taskID });
             const labels = await serverProxy.labels.get({ task_id: task.id });
-            const jobs = await serverProxy.jobs.get(
-                {
-                    filter: JSON.stringify({ and: [{ '==': [{ var: 'task_id' }, task.id] }] }),
-                },
-                true,
-            );
+            const jobs = await serverProxy.jobs.get({
+                filter: JSON.stringify({ and: [{ '==': [{ var: 'task_id' }, task.id] }] }),
+            }, true);
 
             return new Task({
                 ...omit(task, ['jobs', 'labels']),
@@ -890,7 +893,9 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.delete, 'implementation', {
-        value: function deleteImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.delete> {
+        value: function deleteImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.delete> {
             return serverProxy.tasks.delete(this.id);
         },
     });
@@ -904,9 +909,10 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.issues, 'implementation', {
-        value: function issuesImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.issues> {
-            return serverProxy.issues
-                .get({ task_id: this.id })
+        value: function issuesImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.issues> {
+            return serverProxy.issues.get({ task_id: this.id })
                 .then((issues) => issues.map((issue) => new Issue(issue)));
         },
     });
@@ -990,14 +996,16 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.frames.preview, 'implementation', {
-        value: function previewImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.frames.preview> {
+        value: function previewImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.frames.preview> {
             if (this.id === null) {
                 return Promise.resolve('');
             }
 
-            return serverProxy.tasks
-                .getPreview(this.id)
-                .then((response) => resolvePreviewResponse(response, this.mediaType));
+            return serverProxy.tasks.getPreview(this.id).then(
+                (response) => resolvePreviewResponse(response, this.mediaType),
+            );
         },
     });
 
@@ -1431,7 +1439,9 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.actions.get, 'implementation', {
-        value: function getActionsImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.actions.get> {
+        value: function getActionsImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.actions.get> {
             return Promise.resolve(getHistory(this).get());
         },
     });

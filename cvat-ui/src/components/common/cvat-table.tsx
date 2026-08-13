@@ -181,8 +181,7 @@ function CVATTable(props: Props): JSX.Element {
                     <Space align='center'>
                         {Array.isArray(searchDataIndex) && !!searchDataIndex.length && (
                             <CVATTooltip
-                                title={`跨字段搜索: ${searchDataIndex
-                                    .map((dataIndex) => stringifyDataIndex(dataIndex)).join(', ')}`}
+                                title={`跨字段搜索: ${searchDataIndex.map((dataIndex) => stringifyDataIndex(dataIndex)).join(', ')}`}
                             >
                                 <Input.Search
                                     className='cvat-table-search-bar'

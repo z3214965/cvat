@@ -329,8 +329,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         auth: {
                             ...state.messages.auth,
                             registerDone: {
-                                message: `要使用您的账户，您需要确认邮箱地址。 \
-                                我们已向 ${action.payload.userEmail} 发送了一封包含确认链接的电子邮件。`,
+                                message: `要使用您的账户，您需要确认邮箱地址。我们已向 ${action.payload.userEmail} 发送了一封包含确认链接的电子邮件。`,
                             },
                         },
                     },
@@ -381,8 +380,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.messages.auth,
                         requestPasswordResetDone: {
-                            message: `请查看您的电子邮件，以获取重置密码的链接。
-                            如果几分钟内未收到，请检查您的垃圾邮件文件夹。`,
+                            message: '请查看您的电子邮件，以获取重置密码的链接。如果几分钟内未收到，请检查您的垃圾邮件文件夹。',
                         },
                     },
                 },
@@ -585,7 +583,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
             };
         }
         case ExportActionTypes.EXPORT_DATASET_SUCCESS: {
-            const { instance, instanceType, resource, target } = action.payload;
+            const {
+                instance, instanceType, resource, target,
+            } = action.payload;
             const instanceTxt = getInstanceTypeText(instanceType);
             const resourceTxt = getResourceText(resource);
             let description = `针对${instanceTxt} #${instance.id} 的${resourceTxt}导出已完成。`;
@@ -680,10 +680,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
         case ImportActionTypes.IMPORT_DATASET_FAILED: {
             const { instance, resource } = action.payload;
             const message =
-                resource === 'annotation'
-                    ? '无法上传标注 ' +
-                      `[任务 #${instance?.taskId || instance.id}](/tasks/${instance?.taskId || instance.id})`
-                    : `无法将数据集导入到 [项目 #${instance.id}](/projects/${instance.id})`;
+                resource === 'annotation' ?
+                    `无法上传标注 [任务 #${instance?.taskId || instance.id}](/tasks/${instance?.taskId || instance.id})` :
+                    `无法将数据集导入到 [项目 #${instance.id}](/projects/${instance.id})`;
             return {
                 ...state,
                 errors: {
@@ -694,9 +693,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                             message,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
-                            className:
-                                'cvat-notification-notice-' +
-                                `${resource === 'annotation' ? 'load-annotation' : 'import-dataset'}-failed`,
+                            className: `cvat-notification-notice-${resource === 'annotation' ? 'load-annotation' : 'import-dataset'}-failed`,
                         },
                     },
                 },
@@ -1289,7 +1286,10 @@ export default function (state = defaultState, action: AnyAction): Notifications
         case AnnotationActionTypes.UPLOAD_JOB_ANNOTATIONS_FAILED: {
             const { job, error } = action.payload;
 
-            const { id: jobID, taskId: taskID } = job;
+            const {
+                id: jobID,
+                taskId: taskID,
+            } = job;
 
             return {
                 ...state,

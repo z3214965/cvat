@@ -22,11 +22,8 @@ export default class PluginRegistry {
         for (const plugin of pluginList) {
             const pluginDecorators = plugin.functions.filter((obj) => obj.callback === wrappedFunc)[0];
             if (pluginDecorators && pluginDecorators.enter) {
-                const options: APIWrapperEnterOptions | undefined = await pluginDecorators.enter.call(
-                    this,
-                    plugin,
-                    ...args,
-                );
+                const options: APIWrapperEnterOptions | undefined = await pluginDecorators
+                    .enter.call(this, plugin, ...args);
                 if (options instanceof Object) {
                     if ('preventMethodCallWithReturn' in options) {
                         aggregatedOptions.preventMethodCallWithReturn = options.preventMethodCallWithReturn;

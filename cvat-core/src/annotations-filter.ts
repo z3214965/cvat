@@ -25,7 +25,10 @@ interface ConvertedAttributes {
     [key: string]: ConvertedAttributeValue | ConvertedAttributes;
 }
 
-function getDimensions(points: number[], shapeType: ShapeType): Dimensions {
+function getDimensions(
+    points: number[],
+    shapeType: ShapeType,
+): Dimensions {
     let [width, height]: (number | null)[] = [null, null];
     if (!points.length) {
         return { width, height };
@@ -68,38 +71,32 @@ function convertAttributes(
     attributes: SerializedData['attributes'] | SerializedCollection['shapes'][0]['attributes'],
     attributesSpec: Record<number, Attribute>,
 ): ConvertedAttributes {
-    const entries: [number, string][] = Array.isArray(attributes)
-        ? attributes.map(({ spec_id, value }) => [spec_id, value])
-        : Object.keys(attributes).map((key) => [+key, attributes[key]]);
+    const entries: [number, string][] = Array.isArray(attributes) ?
+        attributes.map(({ spec_id, value }) => [spec_id, value]) :
+        Object.keys(attributes).map((key) => [+key, attributes[key]]);
 
-    return entries.reduce(
-        (acc, [id, value]) => {
-            const spec = attributesSpec[id];
-            const name = adjustName(spec.name);
-            if (spec.inputType === AttributeType.NUMBER) {
-                acc[name] = +value;
-            } else if (spec.inputType === AttributeType.CHECKBOX) {
-                acc[name] = value === 'true';
-            } else {
-                acc[name] = value;
-            }
+    return entries.reduce((acc, [id, value]) => {
+        const spec = attributesSpec[id];
+        const name = adjustName(spec.name);
+        if (spec.inputType === AttributeType.NUMBER) {
+            acc[name] = +value;
+        } else if (spec.inputType === AttributeType.CHECKBOX) {
+            acc[name] = value === 'true';
+        } else {
+            acc[name] = value;
+        }
 
-            return acc;
-        },
-        {} as Record<string, ConvertedAttributeValue>,
-    );
+        return acc;
+    }, {} as Record<string, ConvertedAttributeValue>);
 }
 
 function buildAttributeMap(attributes: Attribute[]): Record<number, Attribute> {
-    return attributes.reduce(
-        (acc, attribute) => {
-            if (typeof attribute.id === 'number') {
-                acc[attribute.id] = attribute;
-            }
-            return acc;
-        },
-        {} as Record<number, Attribute>,
-    );
+    return attributes.reduce((acc, attribute) => {
+        if (typeof attribute.id === 'number') {
+            acc[attribute.id] = attribute;
+        }
+        return acc;
+    }, {} as Record<number, Attribute>);
 }
 
 function buildLabelMaps(labels: Label[]): {
@@ -165,19 +162,23 @@ interface ConvertedAudioIntervalData {
 }
 
 function getRotation(shapeType: ShapeType, rotation?: number | null): number | null {
-    return shapeType === ShapeType.RECTANGLE || shapeType === ShapeType.ELLIPSE ? (rotation ?? null) : null;
+    return shapeType === ShapeType.RECTANGLE || shapeType === ShapeType.ELLIPSE ? rotation ?? null : null;
 }
 
 function isEmptyFilter(filter: object | undefined): boolean {
     return !filter || !Object.keys(filter).length;
 }
 
-function getMatchingIDs(entries: ConvertedObjectData[], objectFilter?: object, keypointFilter?: object): number[] {
+function getMatchingIDs(
+    entries: ConvertedObjectData[],
+    objectFilter?: object,
+    keypointFilter?: object,
+): number[] {
     const matchingIDs = new Set<number>();
     entries.forEach((entry) => {
         const objectMatches = isEmptyFilter(objectFilter) || jsonLogic.apply(objectFilter, entry);
-        const keypointsMatch =
-            isEmptyFilter(keypointFilter) || entry.elements.some((element) => jsonLogic.apply(keypointFilter, element));
+        const keypointsMatch = isEmptyFilter(keypointFilter) ||
+            entry.elements.some((element) => jsonLogic.apply(keypointFilter, element));
         if (typeof entry.objectID === 'number' && objectMatches && keypointsMatch) {
             matchingIDs.add(entry.objectID);
         }
@@ -227,40 +228,41 @@ export default class AnnotationsFilter {
             let rotation: number | null = null;
             if (state.objectType !== ObjectType.TAG) {
                 const points =
-                    state.shapeType === ShapeType.SKELETON
-                        ? (state.elements ?? []).map((element) => element.points ?? []).flat()
-                        : state.points;
+                    state.shapeType === ShapeType.SKELETON ?
+                        (state.elements ?? [])
+                            .map((element) => element.points ?? [])
+                            .flat() :
+                        state.points;
 
                 dimensions = getDimensions(points ?? [], state.shapeType as ShapeType);
                 rotation = getRotation(state.shapeType, state.rotation);
             }
 
             const attributes = convertAttributes(state.attributes || {}, labelAttributes);
-            const elements: ConvertedElementData[] =
-                state.shapeType === ShapeType.SKELETON && state.elements
-                    ? state.elements.map((element) => {
-                          const elementLabelAttributes = buildAttributeMap(element.label.attributes);
-                          const sublabelName = `${state.label.name} / ${element.label.name}`;
-                          const elementAttributes = convertAttributes(element.attributes || {}, elementLabelAttributes);
+            const elements: ConvertedElementData[] = state.shapeType === ShapeType.SKELETON && state.elements ?
+                state.elements.map((element) => {
+                    const elementLabelAttributes = buildAttributeMap(element.label.attributes);
+                    const sublabelName = `${state.label.name} / ${element.label.name}`;
+                    const elementAttributes = convertAttributes(element.attributes || {}, elementLabelAttributes);
 
-                          return {
-                              width: null,
-                              height: null,
-                              rotation: null,
-                              attr: {
-                                  [adjustName(sublabelName)]: elementAttributes,
-                              },
-                              label: sublabelName,
-                              objectID: element.clientID ?? null,
-                              type: null,
-                              shape: null,
-                              occluded: element.occluded ?? false,
-                              score: null,
-                              votes: null,
-                              zOrder: null,
-                          };
-                      })
-                    : [];
+                    return {
+                        width: null,
+                        height: null,
+                        rotation: null,
+                        attr: {
+                            [adjustName(sublabelName)]: elementAttributes,
+                        },
+                        label: sublabelName,
+                        objectID: element.clientID ?? null,
+                        type: null,
+                        shape: null,
+                        occluded: element.occluded ?? false,
+                        score: null,
+                        votes: null,
+                        zOrder: null,
+                    };
+                }) :
+                [];
 
             return {
                 width: dimensions.width,
@@ -297,43 +299,40 @@ export default class AnnotationsFilter {
             shapes: collection.shapes.map((shape) => {
                 const label = labelByID[shape.label_id];
                 const points =
-                    shape.type === ShapeType.SKELETON
-                        ? shape.elements.map((el) => el.points ?? []).flat()
-                        : shape.points;
+                    shape.type === ShapeType.SKELETON ?
+                        shape.elements.map((el) => el.points ?? []).flat() :
+                        shape.points;
                 const dimensions = getDimensions(points ?? [], shape.type);
                 const attributes = convertAttributes(shape.attributes, attributeByID);
 
-                const elements: ConvertedElementData[] =
-                    shape.type === ShapeType.SKELETON && shape.elements
-                        ? shape.elements.flatMap((element) => {
-                              const elementLabel = labelByID[element.label_id];
-                              if (!elementLabel) {
-                                  return [];
-                              }
+                const elements: ConvertedElementData[] = shape.type === ShapeType.SKELETON && shape.elements ?
+                    shape.elements.flatMap((element) => {
+                        const elementLabel = labelByID[element.label_id];
+                        if (!elementLabel) {
+                            return [];
+                        }
 
-                              const sublabelName = `${label.name} / ${elementLabel.name}`;
-                              const elementAttributes = convertAttributes(element.attributes, attributeByID);
+                        const sublabelName = `${label.name} / ${elementLabel.name}`;
+                        const elementAttributes = convertAttributes(element.attributes, attributeByID);
 
-                              return [
-                                  {
-                                      width: null,
-                                      height: null,
-                                      rotation: null,
-                                      attr: {
-                                          [adjustName(sublabelName)]: elementAttributes,
-                                      },
-                                      label: sublabelName,
-                                      objectID: null,
-                                      type: null,
-                                      shape: null,
-                                      occluded: element.occluded ?? false,
-                                      score: null,
-                                      votes: null,
-                                      zOrder: null,
-                                  },
-                              ];
-                          })
-                        : [];
+                        return [{
+                            width: null,
+                            height: null,
+                            rotation: null,
+                            attr: {
+                                [adjustName(sublabelName)]: elementAttributes,
+                            },
+                            label: sublabelName,
+                            objectID: null,
+                            type: null,
+                            shape: null,
+                            occluded: element.occluded ?? false,
+                            score: null,
+                            votes: null,
+                            zOrder: null,
+                        }];
+                    }) :
+                    [];
 
                 return {
                     width: dimensions.width,
@@ -392,24 +391,22 @@ export default class AnnotationsFilter {
                         const sublabelName = `${label.name} / ${elementLabel.name}`;
                         const elementAttributes = convertAttributes(element.attributes, attributeByID);
 
-                        return [
-                            {
-                                width: null,
-                                height: null,
-                                rotation: null,
-                                attr: {
-                                    [adjustName(sublabelName)]: elementAttributes,
-                                },
-                                label: sublabelName,
-                                objectID: null,
-                                type: null,
-                                shape: null,
-                                occluded: null,
-                                score: null,
-                                votes: null,
-                                zOrder: null,
+                        return [{
+                            width: null,
+                            height: null,
+                            rotation: null,
+                            attr: {
+                                [adjustName(sublabelName)]: elementAttributes,
                             },
-                        ];
+                            label: sublabelName,
+                            objectID: null,
+                            type: null,
+                            shape: null,
+                            occluded: null,
+                            score: null,
+                            votes: null,
+                            zOrder: null,
+                        }];
                     });
                 }
 
@@ -483,17 +480,14 @@ export default class AnnotationsFilter {
 
         const filter = filters[1];
         const converted = this._convertSerializedObjectStates(statesData);
-        return converted.reduce(
-            (acc, entry) => {
-                if (entry.shape === ShapeType.SKELETON && typeof entry.objectID === 'number') {
-                    acc[entry.objectID] = entry.elements
-                        .filter((element) => typeof element.objectID === 'number' && jsonLogic.apply(filter, element))
-                        .map((element) => element.objectID as number);
-                }
+        return converted.reduce((acc, entry) => {
+            if (entry.shape === ShapeType.SKELETON && typeof entry.objectID === 'number') {
+                acc[entry.objectID] = entry.elements
+                    .filter((element) => typeof element.objectID === 'number' && jsonLogic.apply(filter, element))
+                    .map((element) => element.objectID as number);
+            }
 
-                return acc;
-            },
-            {} as Record<number, number[]>,
-        );
+            return acc;
+        }, {} as Record<number, number[]>);
     }
 }

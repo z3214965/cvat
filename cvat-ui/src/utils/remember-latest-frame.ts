@@ -30,7 +30,8 @@ export function writeLatestFrame(jobID: number, frame: number): void {
     } else {
         storage = new Map([
             [jobID, frame],
-            ...Array.from(storage.entries()).slice(0, config.LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT - 1),
+            ...Array.from(storage.entries())
+                .slice(0, config.LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT - 1),
         ]);
     }
     localStorage.setItem('latestFrameStorage', JSON.stringify(Array.from(storage.entries())));

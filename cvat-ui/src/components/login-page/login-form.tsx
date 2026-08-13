@@ -103,7 +103,7 @@ function LoginFormComponent(props: Props): JSX.Element {
                 }
             </Row>
             <Col>
-                <Title level={2}> 登录 </Title>
+                <Title level={2}>登录</Title>
             </Col>
             <Form
                 className={`cvat-login-form ${credential ? 'cvat-login-form-extended' : ''}`}

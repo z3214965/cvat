@@ -69,7 +69,7 @@ function makeMessage(label: Label, labelType: State['labelType'], pointsCount: n
         <>
             <Text>标注</Text>
             <Text strong>{` ${label.name} `}</Text>
-            <Text>on the image, using</Text>
+            <Text>在图像上，使用</Text>
             <Text strong>{` ${readableShape} `}</Text>
         </>
     );

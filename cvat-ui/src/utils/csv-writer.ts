@@ -71,7 +71,9 @@ class IncrementalCSVWriter<T> {
     }
 
     private generateHeader(): string {
-        return this.columns.map((col) => col.header).join(',');
+        return this.columns
+            .map((col) => col.header)
+            .join(',');
     }
 
     private generateRow(item: T): string {
@@ -85,14 +87,19 @@ class IncrementalCSVWriter<T> {
     }
 }
 
-export function generateCSV<T>(data: T[], columns: Array<{ title: string; accessor: (item: T) => any }>): string {
+export function generateCSV<T>(
+    data: T[],
+    columns: Array<{ title: string; accessor: (item: T) => any }>,
+): string {
     const header = columns.map((col) => col.title).join(',');
 
     if (!data || data.length === 0) {
         return header;
     }
 
-    const rows = data.map((item) => columns.map((col) => escapeCSVValue(col.accessor(item))).join(','));
+    const rows = data.map((item) => columns
+        .map((col) => escapeCSVValue(col.accessor(item)))
+        .join(','));
 
     return `${header}\n${rows.join('\n')}`;
 }

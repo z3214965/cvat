@@ -114,9 +114,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                     message: '没有标签',
                     description: (
                         <span>
-                            {`${job.projectId ? '项目' : '任务'} ${
-                                job.projectId || job.taskId
-                            } 不包含任何标签。 `}
+                            {`${job.projectId ? '项目' : '任务'} ${job.projectId || job.taskId} 不包含任何标签。 `}
                             <a href={`/${job.projectId ? 'projects' : 'tasks'}/${job.projectId || job.taskId}/`}>
                                 添加
                             </a>

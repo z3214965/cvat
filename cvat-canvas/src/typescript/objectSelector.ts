@@ -15,7 +15,10 @@ export interface SelectionFilter {
 }
 
 export interface ObjectSelector {
-    enable(callback: (selected: ObjectState[]) => void, filter?: SelectionFilter): void;
+    enable(
+        callback: (selected: ObjectState[]) => void,
+        filter?: SelectionFilter,
+    ): void;
     transform(geometry: Geometry): void;
     push(state: ObjectState): void;
     disable(): void;
@@ -30,7 +33,7 @@ export class ObjectSelectorImpl implements ObjectSelector {
     private selectionRect: SVG.Rect;
     private geometry: Geometry;
     private isEnabled: boolean;
-    private mouseDownPosition: { x: number; y: number };
+    private mouseDownPosition: { x: number; y: number; };
     private selectedObjects: Record<number, ObjectState>;
     private resetAppearance: Record<number, () => void>;
     private findObjectOnClick: (event: MouseEvent) => void;
@@ -61,7 +64,7 @@ export class ObjectSelectorImpl implements ObjectSelector {
         xbr: number;
         ybr: number;
     } {
-        const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+        const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
         return {
             xtl: Math.min(this.mouseDownPosition.x, point[0]),
             ytl: Math.min(this.mouseDownPosition.y, point[1]),
@@ -102,7 +105,7 @@ export class ObjectSelectorImpl implements ObjectSelector {
     }
 
     private onMouseDown = (event: MouseEvent): void => {
-        const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+        const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
         this.mouseDownPosition = { x: point[0], y: point[1] };
         this.selectionRect = this.canvas.rect().addClass('cvat_canvas_selection_box');
         this.selectionRect.attr({ 'stroke-width': consts.BASE_STROKE_WIDTH / this.geometry.scale });
@@ -188,27 +191,29 @@ export class ObjectSelectorImpl implements ObjectSelector {
                             const imageBitmap = RLEToImageData(colorRGB[0], colorRGB[1], colorRGB[2], points);
 
                             const bbox = shape.bbox();
-                            const image = this.canvas
-                                .image()
-                                .attr({
-                                    'color-rendering': 'optimizeQuality',
-                                    'shape-rendering': 'geometricprecision',
-                                    'data-z-order': Number.MAX_SAFE_INTEGER,
-                                    'grouping-copy-for': clientID,
-                                })
-                                .move(bbox.x, bbox.y);
+                            const image = this.canvas.image().attr({
+                                'color-rendering': 'optimizeQuality',
+                                'shape-rendering': 'geometricprecision',
+                                'data-z-order': Number.MAX_SAFE_INTEGER,
+                                'grouping-copy-for': clientID,
+                            }).move(bbox.x, bbox.y);
 
-                            imageDataToDataURL(imageBitmap, right - left + 1, bottom - top + 1, (dataURL: string) => {
-                                const destroy = (): void => URL.revokeObjectURL(dataURL);
-                                if (image.parent() !== null) {
-                                    // still in DOM
-                                    image.loaded(destroy);
-                                    image.error(destroy);
-                                    image.load(dataURL);
-                                } else {
-                                    destroy();
-                                }
-                            });
+                            imageDataToDataURL(
+                                imageBitmap,
+                                right - left + 1,
+                                bottom - top + 1,
+                                (dataURL: string) => {
+                                    const destroy = (): void => URL.revokeObjectURL(dataURL);
+                                    if (image.parent() !== null) {
+                                        // still in DOM
+                                        image.loaded(destroy);
+                                        image.error(destroy);
+                                        image.load(dataURL);
+                                    } else {
+                                        destroy();
+                                    }
+                                },
+                            );
 
                             image.style('filter', 'drop-shadow(2px 4px 6px black)'); // for better visibility
                             image.attr('opacity', 0.5);

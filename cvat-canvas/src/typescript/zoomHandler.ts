@@ -31,7 +31,7 @@ export class ZoomHandlerImpl implements ZoomHandler {
 
     private onSelectStart(event: MouseEvent): void {
         if (!this.selectionRect && event.which === 1) {
-            const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+            const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
             this.startSelectionPoint = {
                 x: point[0],
                 y: point[1],
@@ -45,13 +45,15 @@ export class ZoomHandlerImpl implements ZoomHandler {
         }
     }
 
-    private getSelectionBox(event: MouseEvent): {
+    private getSelectionBox(
+        event: MouseEvent,
+    ): {
         x: number;
         y: number;
         width: number;
         height: number;
     } {
-        const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+        const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
         const stopSelectionPoint = {
             x: point[0],
             y: point[1],
@@ -94,7 +96,11 @@ export class ZoomHandlerImpl implements ZoomHandler {
         }
     }
 
-    public constructor(onZoomRegion: ZoomHandlerImpl['onZoomRegion'], canvas: SVG.Container, geometry: Geometry) {
+    public constructor(
+        onZoomRegion: ZoomHandlerImpl['onZoomRegion'],
+        canvas: SVG.Container,
+        geometry: Geometry,
+    ) {
         this.onZoomRegion = onZoomRegion;
         this.canvas = canvas;
         this.geometry = geometry;

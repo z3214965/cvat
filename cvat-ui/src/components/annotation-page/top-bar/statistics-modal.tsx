@@ -212,7 +212,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
             width: 100,
         },
         {
-            title: <Text strong>tag</Text>,
+            title: <Text strong> Tag </Text>,
             dataIndex: 'tag',
             key: 'tag',
             width: 100,

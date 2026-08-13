@@ -128,11 +128,12 @@ export function displayShapeSize(shapesContainer: SVG.Container, textContainer: 
             .fill('white')
             .addClass('cvat_canvas_text'),
         update(shape: SVG.Shape): void {
-            const rotation = shape.type === 'rect' || shape.type === 'ellipse' ? getRoundedRotation(shape) : null;
+            const rotation = shape.type === 'rect' || shape.type === 'ellipse' ?
+                getRoundedRotation(shape) : null;
             const text = composeShapeDimensions(shape.width(), shape.height(), rotation);
             const [x, y, cx, cy]: number[] = translateToSVG(
-                textContainer.node as any as SVGSVGElement,
-                translateFromSVG(shapesContainer.node as any as SVGSVGElement, [
+                (textContainer.node as any) as SVGSVGElement,
+                translateFromSVG((shapesContainer.node as any) as SVGSVGElement, [
                     shape.x(),
                     shape.y(),
                     shape.cx(),
@@ -164,7 +165,10 @@ export function rotate2DPoints(cx: number, cy: number, angle: number, points: Ar
     for (let i = 0; i < points.length; i += 2) {
         const x = points[i];
         const y = points[i + 1];
-        result.push((x - cx) * cos - (y - cy) * sin + cx, (y - cy) * cos + (x - cx) * sin + cy);
+        result.push(
+            (x - cx) * cos - (y - cy) * sin + cx,
+            (y - cy) * cos + (x - cx) * sin + cy,
+        );
     }
 
     return result;
@@ -201,10 +205,12 @@ export function parsePoints(source: string | number[]): Point[] {
     return source
         .trim()
         .split(/\s/)
-        .map((point: string): Point => {
-            const [x, y] = point.split(',').map((coord: string): number => +coord);
-            return { x, y };
-        });
+        .map(
+            (point: string): Point => {
+                const [x, y] = point.split(',').map((coord: string): number => +coord);
+                return { x, y };
+            },
+        );
 }
 
 export function readPointsFromShape(shape: SVG.Shape): number[] {
@@ -214,8 +220,7 @@ export function readPointsFromShape(shape: SVG.Shape): number[] {
         const [cx, cy] = [shape.cx(), shape.cy()];
         points = `${cx},${cy} ${cx + rx},${cy - ry}`;
     } else if (shape.type === 'rect') {
-        points =
-            `${shape.attr('x')},${shape.attr('y')} ` +
+        points = `${shape.attr('x')},${shape.attr('y')} ` +
             `${shape.attr('x') + shape.attr('width')},${shape.attr('y') + shape.attr('height')}`;
     } else if (shape.type === 'circle') {
         points = `${shape.cx()},${shape.cy()}`;
@@ -300,10 +305,7 @@ export function computeWrappingBox(points: ArrayLike<number>, margin = 0): Box &
 }
 
 export function getSkeletonEdgeCoordinates(edge: SVG.Line): {
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
+    x1: number, y1: number, x2: number, y2: number
 } {
     let x1 = 0;
     let y1 = 0;
@@ -348,10 +350,7 @@ export function getSkeletonEdgeCoordinates(edge: SVG.Line): {
     }
 
     return {
-        x1,
-        y1,
-        x2,
-        y2,
+        x1, y1, x2, y2,
     };
 }
 
@@ -361,7 +360,11 @@ export function makeSVGFromTemplate(template: SVGSVGElement): SVG.G {
     return SVGElement;
 }
 
-export function setupSkeletonEdges(skeleton: SVG.G, referenceSVG: SVG.G, visibleNodeIDs?: Set<string | number>): void {
+export function setupSkeletonEdges(
+    skeleton: SVG.G,
+    referenceSVG: SVG.G,
+    visibleNodeIDs?: Set<string | number>,
+): void {
     for (const child of referenceSVG.children()) {
         // search for all edges on template
         const dataType = child.attr('data-type');
@@ -376,23 +379,17 @@ export function setupSkeletonEdges(skeleton: SVG.G, referenceSVG: SVG.G, visible
             }
 
             // try to find the same edge on the skeleton
-            let edge = skeleton
-                .children()
-                .find(
-                    (_child: SVG.Element) =>
-                        _child.attr('data-node-from') === dataNodeFrom && _child.attr('data-node-to') === dataNodeTo,
-                ) as SVG.Line;
+            let edge = skeleton.children().find((_child: SVG.Element) => (
+                _child.attr('data-node-from') === dataNodeFrom && _child.attr('data-node-to') === dataNodeTo
+            )) as SVG.Line;
 
             // if not found, lets create it
             if (!edge) {
-                edge = skeleton
-                    .line(0, 0, 0, 0)
-                    .attr({
-                        'data-node-from': dataNodeFrom,
-                        'data-node-to': dataNodeTo,
-                        'stroke-width': 'inherit',
-                    })
-                    .addClass('cvat_canvas_skeleton_edge') as SVG.Line;
+                edge = skeleton.line(0, 0, 0, 0).attr({
+                    'data-node-from': dataNodeFrom,
+                    'data-node-to': dataNodeTo,
+                    'stroke-width': 'inherit',
+                }).addClass('cvat_canvas_skeleton_edge') as SVG.Line;
             }
 
             skeleton.node.prepend(edge.node);
@@ -409,7 +406,9 @@ export function imageDataToDataURL(
     handleResult: (dataURL: string) => void,
 ): void {
     const canvas = new OffscreenCanvas(width, height);
-    canvas.getContext('2d').putImageData(new ImageData(imageBitmap, width, height), 0, 0);
+    canvas.getContext('2d').putImageData(
+        new ImageData(imageBitmap, width, height), 0, 0,
+    );
     canvas.convertToBlob({ type: 'image/png' }).then((blob) => {
         const dataURL = URL.createObjectURL(blob);
         handleResult(dataURL);
@@ -518,8 +517,7 @@ export function findIntersection(seg1: Segment, seg2: Segment): [number, number]
 
     const x = -determinant2D(C1, B1, C2, B2) / determinant;
     const y = -determinant2D(A1, C1, A2, C2) / determinant;
-    if (
-        numberIsBetween(x1, x2, x) &&
+    if (numberIsBetween(x1, x2, x) &&
         numberIsBetween(y1, y2, y) &&
         numberIsBetween(x3, x4, x) &&
         numberIsBetween(y3, y4, y)
@@ -538,15 +536,11 @@ export function findClosestPointOnSegment(
     const [[x1, y1], [x2, y2]] = segment;
     const [x3, y3] = point;
 
-    const x =
-        (x1 * x1 * x3 - 2 * x1 * x2 * x3 + x2 * x2 * x3 + x2 * (y1 - y2) * (y1 - y3) - x1 * (y1 - y2) * (y2 - y3)) /
+    const x = (x1 * x1 * x3 - 2 * x1 * x2 * x3 + x2 * x2 * x3 + x2 *
+        (y1 - y2) * (y1 - y3) - x1 * (y1 - y2) * (y2 - y3)) /
         ((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-    const y =
-        (x2 * x2 * y1 +
-            x1 * x1 * y2 +
-            x2 * x3 * (y2 - y1) -
-            x1 * (x3 * (y2 - y1) + x2 * (y1 + y2)) +
-            (y1 - y2) * (y1 - y2) * y3) /
+    const y = (x2 * x2 * y1 + x1 * x1 * y2 + x2 * x3 * (y2 - y1) - x1 *
+        (x3 * (y2 - y1) + x2 * (y1 + y2)) + (y1 - y2) * (y1 - y2) * y3) /
         ((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
     if (numberIsBetween(x1, x2, x) && numberIsBetween(y1, y2, y)) {
@@ -570,16 +564,10 @@ export function segmentsFromPoints(points: number[], circuit = false): Segment[]
         if (idx % 2 !== 0) {
             if (idx === arr.length - 1) {
                 if (circuit) {
-                    acc.push([
-                        [arr[idx - 1], val],
-                        [arr[0], arr[1]],
-                    ]);
+                    acc.push([[arr[idx - 1], val], [arr[0], arr[1]]]);
                 }
             } else {
-                acc.push([
-                    [arr[idx - 1], val],
-                    [arr[idx + 1], arr[idx + 2]],
-                ]);
+                acc.push([[arr[idx - 1], val], [arr[idx + 1], arr[idx + 2]]]);
             }
         }
         return acc;
@@ -676,11 +664,12 @@ export function isPolygonSelfIntersecting(points: number[]): boolean {
                     const seg2End = segments[j][1];
 
                     const EPSILON = 1e-6;
-                    const isAtEndpoint =
+                    const isAtEndpoint = (
                         (Math.abs(x - seg1Start[0]) < EPSILON && Math.abs(y - seg1Start[1]) < EPSILON) ||
                         (Math.abs(x - seg1End[0]) < EPSILON && Math.abs(y - seg1End[1]) < EPSILON) ||
                         (Math.abs(x - seg2Start[0]) < EPSILON && Math.abs(y - seg2Start[1]) < EPSILON) ||
-                        (Math.abs(x - seg2End[0]) < EPSILON && Math.abs(y - seg2End[1]) < EPSILON);
+                        (Math.abs(x - seg2End[0]) < EPSILON && Math.abs(y - seg2End[1]) < EPSILON)
+                    );
 
                     if (!isAtEndpoint) {
                         return true;
@@ -724,11 +713,7 @@ function extractSnapPointsFromState(drawnState: DrawnState): Readonly<number[]> 
     }
 
     let result: Readonly<number[]>;
-    if (
-        drawnState.shapeType === 'polygon' ||
-        drawnState.shapeType === 'polyline' ||
-        drawnState.shapeType === 'points'
-    ) {
+    if (drawnState.shapeType === 'polygon' || drawnState.shapeType === 'polyline' || drawnState.shapeType === 'points') {
         result = drawnState.points;
     } else if (drawnState.shapeType === 'rectangle') {
         const [xtl, ytl, xbr, ybr] = drawnState.points;
@@ -807,7 +792,14 @@ export function applySnapToShapePoint(
 
     const [currentX, currentY] = pointsArray[pointIndex];
 
-    const snapTarget = findNearestSnapPoint(currentX, currentY, allStates, offset, snapRadius, excludeClientID);
+    const snapTarget = findNearestSnapPoint(
+        currentX,
+        currentY,
+        allStates,
+        offset,
+        snapRadius,
+        excludeClientID,
+    );
 
     if (snapTarget) {
         pointsArray[pointIndex] = [snapTarget.x, snapTarget.y];

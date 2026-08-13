@@ -27,7 +27,7 @@ export interface QualitySummary {
         mismatchingAttributes: number;
         mismatchingGroups: number;
         coveredAnnotation: number;
-    };
+    }
     tasks: {
         total: number;
         custom: number;
@@ -127,23 +127,19 @@ export default class QualityReport {
             },
             errorCount: this.#summary.error_count,
             warningCount: this.#summary.warning_count,
-            tasks: this.#summary.tasks
-                ? {
-                      total: this.#summary.tasks.total,
-                      custom: this.#summary.tasks.custom,
-                      notConfigured: this.#summary.tasks.not_configured,
-                      excluded: this.#summary.tasks.excluded,
-                      included: this.#summary.tasks.included,
-                  }
-                : null,
-            jobs: this.#summary.jobs
-                ? {
-                      total: this.#summary.jobs.total,
-                      notCheckable: this.#summary.jobs.not_checkable,
-                      excluded: this.#summary.jobs.excluded,
-                      included: this.#summary.jobs.included,
-                  }
-                : null,
+            tasks: this.#summary.tasks ? {
+                total: this.#summary.tasks.total,
+                custom: this.#summary.tasks.custom,
+                notConfigured: this.#summary.tasks.not_configured,
+                excluded: this.#summary.tasks.excluded,
+                included: this.#summary.tasks.included,
+            } : null,
+            jobs: this.#summary.jobs ? {
+                total: this.#summary.jobs.total,
+                notCheckable: this.#summary.jobs.not_checkable,
+                excluded: this.#summary.jobs.excluded,
+                included: this.#summary.jobs.included,
+            } : null,
         };
     }
 }

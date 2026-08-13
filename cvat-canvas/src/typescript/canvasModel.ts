@@ -351,14 +351,11 @@ function disableInternalSVGDrawing(data: DrawData | MasksEditData, currentData: 
     // first close stops internal drawing/editing with svg.js
     // the second one stops drawing/editing mask itself
 
-    return (
-        !data.enabled &&
-        currentData.enabled &&
+    return !data.enabled && currentData.enabled &&
         (('shapeType' in currentData && currentData.shapeType === 'mask') ||
-            ('state' in currentData && currentData.state.shapeType === 'mask')) &&
+        ('state' in currentData && currentData.state.shapeType === 'mask')) &&
         currentData.brushTool?.type?.startsWith('polygon-') &&
-        hasShapeIsBeingDrawn()
-    );
+        hasShapeIsBeingDrawn();
 }
 
 export class CanvasModelImpl extends MasterImpl implements CanvasModel {
@@ -481,7 +478,7 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
 
         if (!this.data.configuration.adaptiveZoom) {
             // old alogithm, just multiplies to 6/5 or 5/6
-            scaleFactor = basicZoomCoef ** Math.sign(-deltaY);
+            scaleFactor = basicZoomCoef ** (Math.sign(-deltaY));
         }
         const newScale: number = oldScale * scaleFactor;
         this.data.scale = Math.min(Math.max(newScale, FrameZoom.MIN), FrameZoom.MAX);
@@ -643,7 +640,10 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
 
                 this.notify(UpdateReasons.IMAGE_CHANGED);
 
-                if (prevObjects === this.data.objects && prevRenderData === this.data.renderData) {
+                if (
+                    prevObjects === this.data.objects &&
+                    prevRenderData === this.data.renderData
+                ) {
                     // check the request is relevant, other setup() may have been called while promise resolving
                     this.data.objects = objectStates;
                     this.data.renderData = renderData;
@@ -694,9 +694,9 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
     }
 
     public highlight(clientIDs: number[], severity: HighlightSeverity | null): void {
-        const elementsIDs = clientIDs.filter((id: number): boolean =>
-            this.objects.find((_state: any): boolean => _state.clientID === id),
-        );
+        const elementsIDs = clientIDs.filter((id: number): boolean => (
+            this.objects.find((_state: any): boolean => _state.clientID === id)
+        ));
 
         this.data.highlightedElements = {
             elementsIDs,
@@ -961,10 +961,7 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
             this.data.configuration.displayAllText = configuration.displayAllText;
         }
 
-        if (
-            typeof configuration.textFontSize === 'number' &&
-            configuration.textFontSize >= consts.MINIMUM_TEXT_FONT_SIZE
-        ) {
+        if (typeof configuration.textFontSize === 'number' && configuration.textFontSize >= consts.MINIMUM_TEXT_FONT_SIZE) {
             this.data.configuration.textFontSize = configuration.textFontSize;
         }
 
@@ -978,13 +975,9 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
 
         if (typeof configuration.textContent === 'string') {
             const splitted = configuration.textContent.split(',').filter((entry: string) => !!entry);
-            if (
-                splitted.every((entry: string) =>
-                    ['id', 'label', 'attributes', 'source', 'descriptions', 'dimensions', 'layer', 'zOrder'].includes(
-                        entry,
-                    ),
-                )
-            ) {
+            if (splitted.every((entry: string) => (
+                ['id', 'label', 'attributes', 'source', 'descriptions', 'dimensions', 'layer', 'zOrder'].includes(entry)
+            ))) {
                 this.data.configuration.textContent = configuration.textContent;
             }
         }
@@ -1048,15 +1041,16 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
         }
 
         if (typeof configuration.focusedObjectPadding === 'number') {
-            this.data.configuration.focusedObjectPadding = Math.max(configuration.focusedObjectPadding, 0);
+            this.data.configuration.focusedObjectPadding = Math.max(
+                configuration.focusedObjectPadding, 0,
+            );
         }
 
         this.notify(UpdateReasons.CONFIG_UPDATED);
     }
 
     public isAbleToChangeFrame(): boolean {
-        const isUnable =
-            [Mode.SLICE, Mode.DRAG, Mode.EDIT, Mode.RESIZE, Mode.INTERACT].includes(this.data.mode) ||
+        const isUnable = [Mode.SLICE, Mode.DRAG, Mode.EDIT, Mode.RESIZE, Mode.INTERACT].includes(this.data.mode) ||
             (this.data.mode === Mode.DRAW && typeof this.data.drawData.redraw === 'number');
 
         return !isUnable;

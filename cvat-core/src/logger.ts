@@ -16,7 +16,7 @@ function sleep(ms): Promise<void> {
 }
 
 function defaultUpdate(previousEvent: Event, currentPayload: JSONEventPayload): JSONEventPayload {
-    const count = Number.isInteger(previousEvent.payload.count) ? (previousEvent.payload.count as number) : 1;
+    const count = Number.isInteger(previousEvent.payload.count) ? previousEvent.payload.count as number : 1;
 
     return {
         ...previousEvent.payload,
@@ -84,16 +84,13 @@ class Logger {
                 ignore: (previousEvent: Event, currentPayload: JSONEventPayload): boolean => {
                     const { stack, message } = currentPayload;
                     const [lastCollectionEvent] = this.collection.slice(-1);
-                    return (
-                        lastCollectionEvent === previousEvent &&
+                    return lastCollectionEvent === previousEvent &&
                         stack === previousEvent.payload.stack &&
-                        message === previousEvent.payload.message
-                    );
+                        message === previousEvent.payload.message;
                 },
                 update(previousEvent: Event): JSONEventPayload {
-                    const count = Number.isInteger(previousEvent.payload.count)
-                        ? (previousEvent.payload.count as number)
-                        : 1;
+                    const count = Number.isInteger(previousEvent.payload.count) ?
+                        previousEvent.payload.count as number : 1;
                     return {
                         ...previousEvent.payload,
                         count: count + 1,
@@ -121,7 +118,11 @@ class Logger {
     }
 
     public async configure(isActiveChecker: () => boolean): Promise<void> {
-        const result = await PluginRegistry.apiWrapper.call(this, Logger.prototype.configure, isActiveChecker);
+        const result = await PluginRegistry.apiWrapper.call(
+            this,
+            Logger.prototype.configure,
+            isActiveChecker,
+        );
         return result;
     }
 

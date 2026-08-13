@@ -31,14 +31,15 @@ function collectSegmentPoints(
         return [];
     }
 
-    if (Math.abs(startPointID - endPointID) === 1 || Math.abs(startPointID - endPointID) === points.length - 1) {
+    if (
+        Math.abs(startPointID - endPointID) === 1 ||
+        Math.abs(startPointID - endPointID) === points.length - 1
+    ) {
         // adjacent points, no need to calculate anything
         return [points[endPointID]];
     }
 
-    const walk = (
-        step: number,
-    ): {
+    const walk = (step: number): {
         length: number;
         points: number[][];
     } => {
@@ -163,10 +164,10 @@ export class AutoborderHandlerImpl implements AutoborderHandler {
     private scale: number;
     private controlPointsSize: number;
     private visibleShapes: TransformedShape[];
-    private currentClick: { groupIdx: number; pointIdx: number } | null;
-    private currentPreview: { pointIdx: number; shapePoints: number[][] } | null;
+    private currentClick: { groupIdx: number; pointIdx: number; } | null;
+    private currentPreview: { pointIdx: number; shapePoints: number[][]; } | null;
     private pointsToRevertPreview: number[][] | null;
-    private listeners: Map<SVGCircleElement, { mousedown: (event: MouseEvent) => void }>;
+    private listeners: Map<SVGCircleElement, { mousedown: (event: MouseEvent) => void; }>;
     private isCtrlKeyDown: (() => boolean) | null;
 
     public constructor(container: SVGSVGElement, isCtrlKeyDown: () => boolean) {
@@ -204,10 +205,9 @@ export class AutoborderHandlerImpl implements AutoborderHandler {
     }
 
     private readCurrentShapePoints(): number[][] {
-        return (this.currentShape as any)
-            .array()
-            .valueOf()
-            .map((shapePoint: number[]): number[] => [...shapePoint]);
+        return (this.currentShape as any).array().valueOf().map(
+            (shapePoint: number[]): number[] => [...shapePoint],
+        );
     }
 
     private replaceCurrentShapePoints(points: number[][]): void {
@@ -240,56 +240,60 @@ export class AutoborderHandlerImpl implements AutoborderHandler {
         this.removeMarkers();
 
         const ns = 'http://www.w3.org/2000/svg';
-        this.pointGroups = this.visibleShapes.map((shape: TransformedShape, groupIdx: number): SVGGElement => {
-            const group = document.createElementNS(ns, 'g');
+        this.pointGroups = this.visibleShapes.map(
+            (shape: TransformedShape, groupIdx: number): SVGGElement => {
+                const group = document.createElementNS(ns, 'g');
 
-            const circles = shape.points.map((point: number[], pointIdx: number): SVGCircleElement => {
-                const [x, y] = point;
-                const circle = document.createElementNS(ns, 'circle');
-                circle.classList.add('cvat_canvas_autoborder_point');
-                circle.setAttribute('fill', shape.color);
-                circle.setAttribute('stroke', 'black');
-                circle.setAttribute('stroke-width', `${consts.POINTS_STROKE_WIDTH / this.scale}`);
-                circle.setAttribute('cx', `${x}`);
-                circle.setAttribute('cy', `${y}`);
-                circle.setAttribute('r', `${this.controlPointsSize / this.scale}`);
+                const circles = shape.points.map(
+                    (point: number[], pointIdx: number): SVGCircleElement => {
+                        const [x, y] = point;
+                        const circle = document.createElementNS(ns, 'circle');
+                        circle.classList.add('cvat_canvas_autoborder_point');
+                        circle.setAttribute('fill', shape.color);
+                        circle.setAttribute('stroke', 'black');
+                        circle.setAttribute('stroke-width', `${consts.POINTS_STROKE_WIDTH / this.scale}`);
+                        circle.setAttribute('cx', `${x}`);
+                        circle.setAttribute('cy', `${y}`);
+                        circle.setAttribute('r', `${this.controlPointsSize / this.scale}`);
 
-                const mousedown = (event: MouseEvent): void => {
-                    if (event.button !== 0) {
-                        return;
-                    }
+                        const mousedown = (event: MouseEvent): void => {
+                            if (event.button !== 0) {
+                                return;
+                            }
 
-                    if (this.isCtrlKeyDown && this.isCtrlKeyDown()) {
-                        return;
-                    }
+                            if (this.isCtrlKeyDown && this.isCtrlKeyDown()) {
+                                return;
+                            }
 
-                    event.stopPropagation();
-                    if (this.currentClick?.groupIdx !== groupIdx) {
-                        // first click on this group of points
+                            event.stopPropagation();
+                            if (this.currentClick?.groupIdx !== groupIdx) {
+                                // first click on this group of points
 
-                        // svg.draw.js initializes the internal paint handler lazily,
-                        // so the first autoborder click needs to bootstrap it first.
-                        const handler = this.currentShape.remember('_paintHandler');
-                        if (!handler || !handler.startPoint) {
-                            (this.currentShape as any).draw('point', event);
-                            (this.currentShape as any).draw('undo');
-                        }
+                                // svg.draw.js initializes the internal paint handler lazily,
+                                // so the first autoborder click needs to bootstrap it first.
+                                const handler = this.currentShape.remember('_paintHandler');
+                                if (!handler || !handler.startPoint) {
+                                    (this.currentShape as any).draw('point', event);
+                                    (this.currentShape as any).draw('undo');
+                                }
 
-                        this.container.appendChild(group); // raise in DOM over other groups
-                        const originalPoints = this.readCurrentShapePoints().slice(0, -1);
-                        this.replaceCurrentShapePoints([...originalPoints, [x, y]]);
-                        this.currentClick = { groupIdx, pointIdx };
-                    }
-                };
+                                this.container.appendChild(group); // raise in DOM over other groups
+                                const originalPoints = this.readCurrentShapePoints().slice(0, -1);
+                                this.replaceCurrentShapePoints([...originalPoints, [x, y]]);
+                                this.currentClick = { groupIdx, pointIdx };
+                            }
+                        };
 
-                circle.addEventListener('mousedown', mousedown);
-                this.listeners.set(circle, { mousedown });
-                return circle;
-            });
+                        circle.addEventListener('mousedown', mousedown);
+                        this.listeners.set(circle, { mousedown });
+                        return circle;
+                    },
+                );
 
-            group.append(...circles);
-            return group;
-        });
+                group.append(...circles);
+                return group;
+            },
+        );
 
         this.container.append(...this.pointGroups);
         this.raiseMarkers();
@@ -338,10 +342,10 @@ export class AutoborderHandlerImpl implements AutoborderHandler {
         }
 
         const { points } = this.visibleShapes[this.currentClick.groupIdx];
-        const { addedPointIndexes, direction } = collectAddedPointIndexesAndDirection(
-            points,
-            this.readCurrentShapePoints().slice(0, -1),
-        );
+        const {
+            addedPointIndexes,
+            direction,
+        } = collectAddedPointIndexesAndDirection(points, this.readCurrentShapePoints().slice(0, -1));
 
         if (addedPointIndexes.has(closestPointIdx)) {
             return;
@@ -379,73 +383,69 @@ export class AutoborderHandlerImpl implements AutoborderHandler {
             (shape: HTMLElement): boolean => !shape.classList.contains('cvat_canvas_hidden'),
         );
 
-        this.visibleShapes = shapes
-            .map((shape: HTMLElement): TransformedShape | null => {
-                const color = shape.getAttribute('fill');
-                const clientId = shape.getAttribute('clientID');
+        this.visibleShapes = shapes.map((shape: HTMLElement): TransformedShape | null => {
+            const color = shape.getAttribute('fill');
+            const clientId = shape.getAttribute('clientID');
 
-                const isSupportedType =
-                    shape.tagName === 'polyline' || shape.tagName === 'polygon' || shape.tagName === 'rect';
+            const isSupportedType =
+                shape.tagName === 'polyline' ||
+                shape.tagName === 'polygon' ||
+                shape.tagName === 'rect';
 
-                if (
-                    color === null ||
-                    clientId === null ||
-                    !isSupportedType ||
-                    (typeof this.excludedClientId === 'number' && +clientId === this.excludedClientId)
-                ) {
+            if (
+                color === null || clientId === null || !isSupportedType ||
+                (typeof this.excludedClientId === 'number' && +clientId === this.excludedClientId)
+            ) {
+                return null;
+            }
+
+            let points = '';
+            if (shape.tagName === 'polyline' || shape.tagName === 'polygon') {
+                points = shape.getAttribute('points');
+            } else if (shape.tagName === 'rect') {
+                const x = +shape.getAttribute('x');
+                const y = +shape.getAttribute('y');
+                const width = +shape.getAttribute('width');
+                const height = +shape.getAttribute('height');
+
+                if (Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(width) || Number.isNaN(height)) {
                     return null;
                 }
 
-                let points = '';
-                if (shape.tagName === 'polyline' || shape.tagName === 'polygon') {
-                    points = shape.getAttribute('points');
-                } else if (shape.tagName === 'rect') {
-                    const x = +shape.getAttribute('x');
-                    const y = +shape.getAttribute('y');
-                    const width = +shape.getAttribute('width');
-                    const height = +shape.getAttribute('height');
+                const svgElement = shape as unknown as SVGGraphicsElement;
+                const ctm = svgElement.getCTM();
 
-                    if (Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(width) || Number.isNaN(height)) {
-                        return null;
-                    }
+                const localCorners = [
+                    { x, y },
+                    { x: x + width, y },
+                    { x: x + width, y: y + height },
+                    { x, y: y + height },
+                ];
 
-                    const svgElement = shape as unknown as SVGGraphicsElement;
-                    const ctm = svgElement.getCTM();
+                if (ctm && (ctm.a !== 1 || ctm.b !== 0 || ctm.c !== 0 || ctm.d !== 1)) {
+                    const transformedCorners = localCorners.map((corner) => {
+                        const transformedX = ctm.a * corner.x + ctm.c * corner.y + ctm.e;
+                        const transformedY = ctm.b * corner.x + ctm.d * corner.y + ctm.f;
+                        return [transformedX, transformedY];
+                    });
 
-                    const localCorners = [
-                        { x, y },
-                        { x: x + width, y },
-                        { x: x + width, y: y + height },
-                        { x, y: y + height },
-                    ];
-
-                    if (ctm && (ctm.a !== 1 || ctm.b !== 0 || ctm.c !== 0 || ctm.d !== 1)) {
-                        const transformedCorners = localCorners.map((corner) => {
-                            const transformedX = ctm.a * corner.x + ctm.c * corner.y + ctm.e;
-                            const transformedY = ctm.b * corner.x + ctm.d * corner.y + ctm.f;
-                            return [transformedX, transformedY];
-                        });
-
-                        return {
-                            color,
-                            points: transformedCorners,
-                        };
-                    }
-
-                    points = `${x},${y} ${x + width},${y} ${x + width},${y + height} ${x},${y + height}`;
+                    return {
+                        color,
+                        points: transformedCorners,
+                    };
                 }
 
-                return {
-                    color,
-                    points: points
-                        .trim()
-                        .split(/\s/)
-                        .map((shapePoint: string): number[] =>
-                            shapePoint.split(',').map((coordinate: string): number => +coordinate),
-                        ),
-                };
-            })
-            .filter((state: TransformedShape | null): boolean => state !== null);
+                points = `${x},${y} ${x + width},${y} ${x + width},${y + height} ${x},${y + height}`;
+            }
+
+            return {
+                color,
+                points: points.trim().split(/\s/).map(
+                    (shapePoint: string): number[] => shapePoint.split(',')
+                        .map((coordinate: string): number => +coordinate),
+                ),
+            };
+        }).filter((state: TransformedShape | null): boolean => state !== null);
     }
 
     public updateObjects(): void {

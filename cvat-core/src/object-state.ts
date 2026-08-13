@@ -26,7 +26,7 @@ export interface SerializedData {
     hidden?: boolean;
     pinned?: boolean;
     attributes?: Record<number, string>;
-    group?: { color: string; id: number };
+    group?: { color: string; id: number; };
     color?: string;
     updated?: number;
     source?: Source;
@@ -67,7 +67,7 @@ export default class ObjectState {
     public readonly serverID: number | null;
     public readonly parentID: number | null;
     public readonly updated: number;
-    public readonly group: { color: string; id: number } | null;
+    public readonly group: { color: string; id: number; } | null;
     public readonly isGroundTruth: boolean;
     public readonly keyframes: {
         first: number | null;
@@ -135,9 +135,8 @@ export default class ObjectState {
             label: serialized.label,
             attributes: {},
             descriptions: [],
-            elements: Array.isArray(serialized.elements)
-                ? serialized.elements.map((element) => new ObjectState(element))
-                : null,
+            elements: Array.isArray(serialized.elements) ?
+                serialized.elements.map((element) => new ObjectState(element)) : null,
 
             points: null,
             rotation: null,
@@ -557,7 +556,7 @@ Object.defineProperty(ObjectState.prototype.save, 'implementation', {
             return this.__internal.save(this.frame, this);
         }
 
-        throw new Error('Could not save object state. Context is not provided.');
+        throw new Error('无法保存对象状态。未提供上下文。');
     },
     writable: false,
 });
@@ -568,7 +567,7 @@ Object.defineProperty(ObjectState.prototype.export, 'implementation', {
             return this.__internal.export(this);
         }
 
-        throw new Error('Could not export object state. Context is not provided.');
+        throw new Error('无法导出对象状态。未提供上下文。');
     },
     writable: false,
 });
@@ -583,7 +582,7 @@ Object.defineProperty(ObjectState.prototype.delete, 'implementation', {
             return this.__internal.delete(frame, force);
         }
 
-        throw new Error('Could not delete object state. Context is not provided.');
+        throw new Error('无法删除对象状态。未提供上下文。');
     },
     writable: false,
 });

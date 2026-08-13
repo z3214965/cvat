@@ -128,10 +128,7 @@ export function rotatePoint(x: number, y: number, angle: number, cx = 0, cy = 0)
     return [rotX, rotY];
 }
 
-export function computeWrappingBox(
-    points: ArrayLike<number>,
-    margin = 0,
-): {
+export function computeWrappingBox(points: ArrayLike<number>, margin = 0): {
     xtl: number;
     ytl: number;
     xbr: number;
@@ -198,15 +195,11 @@ export function validateAttributeValue(value: string, attr: Attribute): boolean 
  * Pixels outside the image bounds are ignored.
  * Returns null if the mask has no visible non-zero pixels inside the image.
  */
-function findMaskBorders(
-    rle: ArrayLike<number>,
-    width: number,
-    height: number,
-): {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
+function findMaskBorders(rle: ArrayLike<number>, width: number, height: number): {
+    top: number,
+    left: number,
+    right: number,
+    bottom: number,
 } | null {
     const currentLeft = rle[rle.length - 4];
     const currentTop = rle[rle.length - 3];
@@ -265,10 +258,7 @@ function findMaskBorders(
     }
 
     return {
-        top,
-        left,
-        right,
-        bottom,
+        top, left, right, bottom,
     };
 }
 
@@ -286,7 +276,9 @@ export function cropMask(rle: ArrayLike<number>, width: number, height: number):
         return [0, 0, 0, 0, 0];
     }
 
-    const { top, left, right, bottom } = borders;
+    const {
+        top, left, right, bottom,
+    } = borders;
 
     const maskWidth = currentRight - currentLeft + 1;
     const croppedRLE = [];
@@ -335,10 +327,7 @@ export function cropMask(rle: ArrayLike<number>, width: number, height: number):
 }
 
 export function propagateShapes<T extends SerializedShape | ObjectState>(
-    shapes: T[],
-    from: number,
-    to: number,
-    frameNumbers: number[],
+    shapes: T[], from: number, to: number, frameNumbers: number[],
 ): T[] {
     const getCopy = (shape: T): SerializedShape | SerializedData => {
         if (shape instanceof ObjectState) {
@@ -353,12 +342,8 @@ export function propagateShapes<T extends SerializedShape | ObjectState>(
                 zOrder: shape.zOrder,
                 rotation: shape.rotation,
                 frame: from,
-                elements:
-                    shape.shapeType === 'skeleton'
-                        ? shape.elements.map(
-                              (element: ObjectState): SerializedData => getCopy(element as T) as SerializedData,
-                          )
-                        : [],
+                elements: shape.shapeType === 'skeleton' ? shape.elements
+                    .map((element: ObjectState): SerializedData => getCopy(element as T) as SerializedData) : [],
                 source: shape.source,
             };
         }
@@ -371,12 +356,8 @@ export function propagateShapes<T extends SerializedShape | ObjectState>(
             z_order: shape.z_order,
             rotation: shape.rotation,
             frame: from,
-            elements:
-                shape.type === 'skeleton'
-                    ? shape.elements.map(
-                          (element: SerializedShape): SerializedShape => getCopy(element as T) as SerializedShape,
-                      )
-                    : [],
+            elements: shape.type === 'skeleton' ? shape.elements
+                .map((element: SerializedShape): SerializedShape => getCopy(element as T) as SerializedShape) : [],
             source: shape.source,
             group: 0,
             outside: shape.outside,
@@ -384,8 +365,9 @@ export function propagateShapes<T extends SerializedShape | ObjectState>(
     };
 
     const targetFrameNumbers = frameNumbers.filter(
-        (frameNumber: number) =>
-            frameNumber >= Math.min(from, to) && frameNumber <= Math.max(from, to) && frameNumber !== from,
+        (frameNumber: number) => frameNumber >= Math.min(from, to) &&
+            frameNumber <= Math.max(from, to) &&
+            frameNumber !== from,
     );
 
     const states: T[] = [];
@@ -413,7 +395,10 @@ export function propagateShapes<T extends SerializedShape | ObjectState>(
     return states;
 }
 
-export function getVisibleSkeletonElements(objectStates: ObjectState[], filters: object[]): Record<number, number[]> {
+export function getVisibleSkeletonElements(
+    objectStates: ObjectState[],
+    filters: object[],
+): Record<number, number[]> {
     const serializedStates = objectStates.map((objectState: ObjectState): SerializedData => objectState.serialize());
     return new AnnotationsFilter(null).filterSerializedSkeletonElements(serializedStates, filters);
 }

@@ -40,4 +40,6 @@ export type HighlightSeverity = _HighlightSeverity;
 export type CanvasHint = _CanvasHint;
 export type RenderData = _RenderData;
 
-export { Canvas, CanvasMode, RectDrawingMethod, CuboidDrawingMethod };
+export {
+    Canvas, CanvasMode, RectDrawingMethod, CuboidDrawingMethod,
+};

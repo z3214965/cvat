@@ -55,7 +55,11 @@ services:
     container_name: cvat_redis_inmem
     image: redis:7.2.11-alpine
     restart: always
-    command: ['redis-server', '--save', '60', '100', '--appendonly', 'yes']
+    command: [
+      "redis-server",
+      "--save", "60", "100",
+      "--appendonly", "yes",
+    ]
     volumes:
       - cvat_inmem_db:/data
     networks:
@@ -75,7 +79,9 @@ services:
       - cvat_cache_db:/var/lib/kvrocks
     networks:
       - cvat
-    command: ['--compact-cron', '0 3 * * *']
+    command: [
+      "--compact-cron", "0 3 * * *",
+      ]
 
   cvat_server:
     container_name: cvat_server
@@ -84,7 +90,8 @@ services:
     depends_on:
       <<: *backend-deps
       cvat_opa:
-        condition: service_started
+        condition:
+          service_started
     environment:
       <<: [*backend-env, *clickhouse-env]
       DJANGO_MODWSGI_EXTRA_ARGS: ''
@@ -96,11 +103,12 @@ services:
       ONE_RUNNING_JOB_IN_QUEUE_PER_USER:
     command: init run server nginx
     labels:
-      traefik.enable: 'true'
-      traefik.http.services.cvat.loadbalancer.server.port: '8080'
-      traefik.http.routers.cvat.rule: Host(`${CVAT_HOST:-localhost}`) &&
+      traefik.enable: "true"
+      traefik.http.services.cvat.loadbalancer.server.port: "8080"
+      traefik.http.routers.cvat.rule:
+        Host(`${CVAT_HOST:-localhost}`) &&
         (PathPrefix(`/api/`) || PathPrefix(`/static/`) || PathPrefix(`/admin`)
-        || PathPrefix(`/django-rq`))
+          || PathPrefix(`/django-rq`))
       traefik.http.routers.cvat.entrypoints: web
     volumes:
       - cvat_data:/home/django/data
@@ -248,8 +256,8 @@ services:
     depends_on:
       - cvat_server
     labels:
-      traefik.enable: 'true'
-      traefik.http.services.cvat-ui.loadbalancer.server.port: '8000'
+      traefik.enable: "true"
+      traefik.http.services.cvat-ui.loadbalancer.server.port: "8000"
       traefik.http.routers.cvat-ui.rule: Host(`${CVAT_HOST:-localhost}`)
       traefik.http.routers.cvat-ui.entrypoints: web
     networks:
@@ -283,7 +291,7 @@ services:
 
       TRAEFIK_LOG_FORMAT: json
       TRAEFIK_ENTRYPOINTS_web_ADDRESS: :8080
-      TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: 'false'
+      TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
       TRAEFIK_PROVIDERS_DOCKER_NETWORK: cvat
       TRAEFIK_PROVIDERS_FILE_DIRECTORY: /etc/traefik/rules
     # Uncomment to get Traefik dashboard
@@ -300,10 +308,10 @@ services:
     networks:
       - cvat
     logging:
-      driver: 'json-file'
+      driver: "json-file"
       options:
         max-size: 100m
-        max-file: '10'
+        max-file: "10"
 
   cvat_opa:
     container_name: cvat_opa
@@ -327,7 +335,7 @@ services:
   cvat_clickhouse:
     container_name: cvat_clickhouse
     image: clickhouse/clickhouse-server:23.11-alpine
-    restart: 'always'
+    restart: "always"
     environment:
       <<: *clickhouse-env
     networks:
@@ -340,7 +348,7 @@ services:
   cvat_vector:
     container_name: cvat_vector
     image: timberio/vector:0.26.0-alpine
-    user: '1000:1000' # Workaround for <https://github.com/vectordotdev/vector/issues/1599>.
+    user: "1000:1000" # Workaround for <https://github.com/vectordotdev/vector/issues/1599>.
     restart: always
     depends_on:
       - cvat_clickhouse

@@ -6,11 +6,11 @@ import ObjectState from '../object-state';
 import { ArgumentError } from '../exceptions';
 import { Job, Task } from '../session';
 import { BaseAction } from './base-action';
-import { BaseShapesAction, run as runShapesAction, call as callShapesAction } from './base-shapes-action';
 import {
-    BaseCollectionAction,
-    run as runCollectionAction,
-    call as callCollectionAction,
+    BaseShapesAction, run as runShapesAction, call as callShapesAction,
+} from './base-shapes-action';
+import {
+    BaseCollectionAction, run as runCollectionAction, call as callCollectionAction,
 } from './base-collection-action';
 
 import { RemoveFilteredShapes } from './remove-filtered-shapes';
@@ -60,11 +60,28 @@ export async function runAction(
     cancelled: () => boolean,
 ): Promise<void> {
     if (action instanceof BaseShapesAction) {
-        return runShapesAction(instance, action, actionParameters, frameFrom, frameTo, filters, onProgress, cancelled);
+        return runShapesAction(
+            instance,
+            action,
+            actionParameters,
+            frameFrom,
+            frameTo,
+            filters,
+            onProgress,
+            cancelled,
+        );
     }
 
     if (action instanceof BaseCollectionAction) {
-        return runCollectionAction(instance, action, actionParameters, frameFrom, filters, onProgress, cancelled);
+        return runCollectionAction(
+            instance,
+            action,
+            actionParameters,
+            frameFrom,
+            filters,
+            onProgress,
+            cancelled,
+        );
     }
 
     return Promise.resolve();
@@ -80,11 +97,27 @@ export async function callAction(
     cancelled: () => boolean,
 ): Promise<void> {
     if (action instanceof BaseShapesAction) {
-        return callShapesAction(instance, action, actionParameters, frame, states, onProgress, cancelled);
+        return callShapesAction(
+            instance,
+            action,
+            actionParameters,
+            frame,
+            states,
+            onProgress,
+            cancelled,
+        );
     }
 
     if (action instanceof BaseCollectionAction) {
-        return callCollectionAction(instance, action, actionParameters, frame, states, onProgress, cancelled);
+        return callCollectionAction(
+            instance,
+            action,
+            actionParameters,
+            frame,
+            states,
+            onProgress,
+            cancelled,
+        );
     }
 
     return Promise.resolve();

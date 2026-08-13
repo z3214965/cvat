@@ -37,7 +37,7 @@ export class OpenCVWrapper {
 
     private getCVInterface(): OpenCVInterface {
         if (!this.cvInterface) {
-            throw new Error('OpenCV 尚未初始化，请先调用 initialize () 方法。');
+            throw new Error('OpenCV 尚未初始化，请先调用 initialize() 方法。');
         }
         return this.cvInterface;
     }
@@ -181,7 +181,9 @@ export class OpenCVWrapper {
         return this.getCVInterface().enums;
     }
 
-    public getContoursFromStateSync = (state: { points: Int32Array; shapeType: ShapeType }): [number, number][][] => {
+    public getContoursFromStateSync = (
+        state: { points: Int32Array; shapeType: ShapeType },
+    ): [number, number][][] => {
         if (state.shapeType === ShapeType.MASK) {
             const { length } = state.points;
             const left = state.points[length - 4];
@@ -197,7 +199,9 @@ export class OpenCVWrapper {
             try {
                 const contours = this.contours.findContours(src);
                 if (contours.length) {
-                    return contours.map((contour) => contour.map((val) => [val[0] + left, val[1] + top]));
+                    return contours.map((contour) => contour.map((val) => (
+                        [val[0] + left, val[1] + top]
+                    )));
                 }
                 throw new Error('从状态中获取到空轮廓');
             } finally {
@@ -208,10 +212,9 @@ export class OpenCVWrapper {
         throw new Error(`未为 ${state.shapeType} 实现 getContour 方法`);
     };
 
-    public getContoursFromState = async (state: {
-        points: Int32Array;
-        shapeType: ShapeType;
-    }): Promise<[number, number][][]> => {
+    public getContoursFromState = async (
+        state: { points: Int32Array; shapeType: ShapeType },
+    ): Promise<[number, number][][]> => {
         if (!this.isInitialized) {
             try {
                 await this.initialize(() => {});

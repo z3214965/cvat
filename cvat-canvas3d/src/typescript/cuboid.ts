@@ -20,7 +20,7 @@ export interface ObjectArrowHelper {
 }
 
 export function makeCornerPointsMatrix(x: number, y: number, z: number): number[][] {
-    return [
+    return ([
         [1 * x, 1 * y, 1 * z],
         [1 * x, 1 * y, -1 * z],
         [1 * x, -1 * y, 1 * z],
@@ -29,7 +29,7 @@ export function makeCornerPointsMatrix(x: number, y: number, z: number): number[
         [-1 * x, 1 * y, -1 * z],
         [-1 * x, -1 * y, 1 * z],
         [-1 * x, -1 * y, -1 * z],
-    ];
+    ]);
 }
 
 export class CuboidModel {
@@ -59,13 +59,12 @@ export class CuboidModel {
         const geo = new THREE.EdgesGeometry(this.perspective.geometry);
         this.wireframe = new THREE.LineSegments(
             geo,
-            outline === 'line'
-                ? new THREE.LineBasicMaterial({ color: outlineColor, linewidth: 4 })
-                : new THREE.LineDashedMaterial({
-                      color: outlineColor,
-                      dashSize: 0.05,
-                      gapSize: 0.05,
-                  }),
+            outline === 'line' ? new THREE.LineBasicMaterial({ color: outlineColor, linewidth: 4 }) :
+                new THREE.LineDashedMaterial({
+                    color: outlineColor,
+                    dashSize: 0.05,
+                    gapSize: 0.05,
+                }),
         );
         this.wireframe.computeLineDistances();
         this.wireframe.renderOrder = 1;
@@ -148,10 +147,9 @@ export class CuboidModel {
     }
 
     public getRotationHelperPosition(viewType: ViewType): THREE.Vector3 {
-        const position =
-            viewType === ViewType.TOP
-                ? new THREE.Vector3(0, constants.ROTATION_HELPER_OFFSET, 0)
-                : new THREE.Vector3(0, 0, constants.ROTATION_HELPER_OFFSET);
+        const position = viewType === ViewType.TOP ?
+            new THREE.Vector3(0, constants.ROTATION_HELPER_OFFSET, 0) :
+            new THREE.Vector3(0, 0, constants.ROTATION_HELPER_OFFSET);
         return this[viewType].localToWorld(position);
     }
 
@@ -302,8 +300,7 @@ export function createResizeHelper(cuboid: CuboidModel, viewType: ViewType): voi
 }
 
 export function removeResizeHelper(instance: THREE.Mesh): void {
-    instance.parent.children
-        .filter((child: THREE.Object3D) => child.name.startsWith(constants.RESIZE_HELPER_NAME))
+    instance.parent.children.filter((child: THREE.Object3D) => child.name.startsWith(constants.RESIZE_HELPER_NAME))
         .forEach((helper) => {
             instance.parent.remove(helper);
             if ((helper as THREE.Sprite).material) {
@@ -316,13 +313,11 @@ export function removeResizeHelper(instance: THREE.Mesh): void {
 export function createRotationHelper(cuboid: CuboidModel, viewType: ViewType): void {
     if ([ViewType.TOP, ViewType.SIDE, ViewType.FRONT].includes(viewType)) {
         const helperPosition = cuboid.getRotationHelperPosition(viewType);
-        const rotationHelper = new THREE.Sprite(
-            new THREE.SpriteMaterial({
-                color: '#33b864',
-                opacity: 1,
-                map: getCircleTexture,
-            }),
-        );
+        const rotationHelper = new THREE.Sprite(new THREE.SpriteMaterial({
+            color: '#33b864',
+            opacity: 1,
+            map: getCircleTexture,
+        }));
         rotationHelper.renderOrder = Number.MAX_SAFE_INTEGER;
         rotationHelper.name = constants.ROTATION_HELPER_NAME;
         rotationHelper.position.copy(helperPosition);

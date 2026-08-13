@@ -13,7 +13,9 @@ const REQUESTS_COUNT = 5;
 const PROGRESS_EPS = 25;
 const REQUEST_STATUS_DELAYS = {
     [RQStatus.STARTED]: [3000, 7000, 13000],
-    [RQStatus.QUEUED]: [7000, 13000, 19000, 29000, 41000, 53000, 67000, 79000, 101000, 113000, 139000, 163000],
+    [RQStatus.QUEUED]: [7000, 13000, 19000, 29000,
+        41000, 53000, 67000, 79000,
+        101000, 113000, 139000, 163000],
 };
 
 function getRequestStatusDelays(): typeof REQUEST_STATUS_DELAYS {
@@ -27,16 +29,13 @@ function getRequestStatusDelays(): typeof REQUEST_STATUS_DELAYS {
 }
 
 class RequestsManager {
-    private listening: Record<
-        string,
-        {
-            onUpdate: ((request: Request) => void)[];
-            requestDelayIdx: number | null;
-            request: Request | null;
-            timeout: number | null;
-            promise: Promise<Request>;
-        }
-    >;
+    private listening: Record<string, {
+        onUpdate: ((request: Request) => void)[];
+        requestDelayIdx: number | null,
+        request: Request | null,
+        timeout: number | null;
+        promise: Promise<Request>;
+    }>;
 
     private requestStack: number[];
     constructor() {
@@ -46,12 +45,9 @@ class RequestsManager {
 
     async list(): Promise<PaginatedResource<Request>> {
         const result = await serverProxy.requests.list();
-        const requests = result.map(
-            (serializedRequest) =>
-                new Request({
-                    ...serializedRequest,
-                }),
-        ) as PaginatedResource<Request>;
+        const requests = result.map((serializedRequest) => new Request({
+            ...serializedRequest,
+        })) as PaginatedResource<Request>;
         requests.count = requests.length;
         return requests;
     }
@@ -103,19 +99,24 @@ class RequestsManager {
                         const { onUpdate } = this.listening[requestID];
                         if ([RQStatus.QUEUED, RQStatus.STARTED].includes(status)) {
                             onUpdate.forEach((update) => update(request));
-                            this.listening[requestID].requestDelayIdx = this.updateRequestDelayIdx(requestID, request);
-                            this.listening[requestID].request = request;
-                            this.listening[requestID].timeout = window.setTimeout(
-                                timeoutCallback,
-                                this.delayFor(requestID),
+                            this.listening[requestID].requestDelayIdx = this.updateRequestDelayIdx(
+                                requestID,
+                                request,
                             );
+                            this.listening[requestID].request = request;
+                            this.listening[requestID].timeout = window
+                                .setTimeout(timeoutCallback, this.delayFor(requestID));
                         } else {
                             delete this.listening[requestID];
                             if (status === RQStatus.FINISHED) {
-                                onUpdate.forEach((update) => update(request));
+                                onUpdate
+                                    .forEach((update) => update(request));
                                 resolve(request);
                             } else {
-                                onUpdate.forEach((update) => update(request));
+                                onUpdate
+                                    .forEach((update) => (
+                                        update(request)
+                                    ));
                                 reject(new RequestError(request.message));
                             }
                         }
@@ -195,7 +196,9 @@ class RequestsManager {
             return 0;
         }
 
-        const addRndComponent = (val: number): number => val + Math.floor(Math.random() * Math.floor(val / 2)); // NOSONAR
+        const addRndComponent = (val: number): number => (
+            val + Math.floor(Math.random() * Math.floor(val / 2)) // NOSONAR
+        );
 
         switch (request.status) {
             case RQStatus.STARTED: {

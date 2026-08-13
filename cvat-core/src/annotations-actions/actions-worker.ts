@@ -48,7 +48,11 @@ class ActionsWorkerManager {
         return shapes.map((shape) => {
             try {
                 const closed = shape.shapeType === 'polygon';
-                const simplifiedPoints = this.cvInterface!.contours.simplifyPolygon(shape.points, threshold, closed);
+                const simplifiedPoints = this.cvInterface!.contours.simplifyPolygon(
+                    shape.points,
+                    threshold,
+                    closed,
+                );
                 return {
                     ...shape,
                     points: simplifiedPoints,
@@ -75,8 +79,7 @@ if ((self as any).importScripts) {
         if (command === WorkerAction.INITIALIZE) {
             const { opencvPath } = event.data;
 
-            manager
-                .initialize(opencvPath)
+            manager.initialize(opencvPath)
                 .then(() => {
                     postMessage({} as WorkerResponse);
                 })

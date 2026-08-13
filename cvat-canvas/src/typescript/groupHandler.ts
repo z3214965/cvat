@@ -45,7 +45,10 @@ export class GroupHandlerImpl implements GroupHandler {
         }
     }
 
-    public constructor(onSelectDone: GroupHandlerImpl['onSelectDone'], selector: ObjectSelector) {
+    public constructor(
+        onSelectDone: GroupHandlerImpl['onSelectDone'],
+        selector: ObjectSelector,
+    ) {
         this.onSelectDone = onSelectDone;
         this.selector = selector;
         this.statesToBeGrouped = [];

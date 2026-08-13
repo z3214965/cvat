@@ -7,7 +7,10 @@ import { throttle } from 'lodash';
 import ObjectState from '../object-state';
 import AnnotationsFilter from '../annotations-filter';
 import { Job, Task } from '../session';
-import { SerializedCollection, SerializedShape, SerializedTag, SerializedTrack } from '../server-response-types';
+import {
+    SerializedCollection, SerializedShape,
+    SerializedTag, SerializedTrack,
+} from '../server-response-types';
 import { EventScope, ObjectType } from '../enums';
 import { getCollection } from '../annotations';
 import { BaseAction, prepareActionParameters, validateClientIDs } from './base-action';
@@ -44,15 +47,11 @@ export async function run(
     onProgress: (message: string, progress: number) => void,
     cancelled: () => boolean,
 ): Promise<void> {
-    const event = await instance.logger.log(
-        EventScope.annotationsAction,
-        {
-            from: frame,
-            to: frame,
-            name: action.name,
-        },
-        true,
-    );
+    const event = await instance.logger.log(EventScope.annotationsAction, {
+        from: frame,
+        to: frame,
+        name: action.name,
+    }, true);
 
     const wrappedOnProgress = throttle(onProgress, 100, { leading: true, trailing: true });
     const showMessageWithPause = async (message: string, progress: number, duration: number): Promise<void> => {
@@ -69,15 +68,15 @@ export async function run(
 
         await action.init(instance, prepareActionParameters(action.parameters, actionParameters));
 
-        const frameData = await Object.getPrototypeOf(instance).frames.get.implementation.call(instance, frame);
+        const frameData = await Object.getPrototypeOf(instance).frames
+            .get.implementation.call(instance, frame);
         const exportedCollection = getCollection(instance).export();
 
         // Apply action filter first
         const filteredByAction = action.applyFilter({ collection: exportedCollection, frameData });
         validateClientIDs(filteredByAction);
 
-        let mapID2Obj = []
-            .concat(filteredByAction.shapes, filteredByAction.tags, filteredByAction.tracks)
+        let mapID2Obj = [].concat(filteredByAction.shapes, filteredByAction.tags, filteredByAction.tracks)
             .reduce((acc, object) => {
                 acc[object.clientID as number] = object;
                 return acc;
@@ -87,18 +86,14 @@ export async function run(
         const annotationsFilter = new AnnotationsFilter(
             instance instanceof Job ? instance.stopFrame : instance.size - 1,
         );
-        const filteredCollectionIDs = annotationsFilter.filterSerializedCollection(
-            filteredByAction,
-            instance.labels,
-            filters,
-        );
+        const filteredCollectionIDs = annotationsFilter
+            .filterSerializedCollection(filteredByAction, instance.labels, filters);
         const filteredByUser = {
             shapes: filteredCollectionIDs.shapes.map((clientID) => mapID2Obj[clientID]),
             tags: filteredCollectionIDs.tags.map((clientID) => mapID2Obj[clientID]),
             tracks: filteredCollectionIDs.tracks.map((clientID) => mapID2Obj[clientID]),
         };
-        mapID2Obj = []
-            .concat(filteredByUser.shapes, filteredByUser.tags, filteredByUser.tracks)
+        mapID2Obj = [].concat(filteredByUser.shapes, filteredByUser.tags, filteredByUser.tracks)
             .reduce((acc, object) => {
                 acc[object.clientID as number] = object;
                 return acc;
@@ -131,38 +126,31 @@ export async function call(
     onProgress: (message: string, progress: number) => void,
     cancelled: () => boolean,
 ): Promise<void> {
-    const event = await instance.logger.log(
-        EventScope.annotationsAction,
-        {
-            from: frame,
-            to: frame,
-            name: action.name,
-        },
-        true,
-    );
+    const event = await instance.logger.log(EventScope.annotationsAction, {
+        from: frame,
+        to: frame,
+        name: action.name,
+    }, true);
 
     const throttledOnProgress = throttle(onProgress, 100, { leading: true, trailing: true });
     try {
         await action.init(instance, prepareActionParameters(action.parameters, actionParameters));
         const exportedStates = await Promise.all(states.map((state) => state.export()));
-        const exportedCollection = exportedStates.reduce<CollectionActionInput['collection']>(
-            (acc, value, idx) => {
-                if (states[idx].objectType === ObjectType.SHAPE) {
-                    acc.shapes.push(value as SerializedShape);
-                }
+        const exportedCollection = exportedStates.reduce<CollectionActionInput['collection']>((acc, value, idx) => {
+            if (states[idx].objectType === ObjectType.SHAPE) {
+                acc.shapes.push(value as SerializedShape);
+            }
 
-                if (states[idx].objectType === ObjectType.TAG) {
-                    acc.tags.push(value as SerializedTag);
-                }
+            if (states[idx].objectType === ObjectType.TAG) {
+                acc.tags.push(value as SerializedTag);
+            }
 
-                if (states[idx].objectType === ObjectType.TRACK) {
-                    acc.tracks.push(value as SerializedTrack);
-                }
+            if (states[idx].objectType === ObjectType.TRACK) {
+                acc.tracks.push(value as SerializedTrack);
+            }
 
-                return acc;
-            },
-            { shapes: [], tags: [], tracks: [] },
-        );
+            return acc;
+        }, { shapes: [], tags: [], tracks: [] });
 
         const frameData = await Object.getPrototypeOf(instance).frames.get.implementation.call(instance, frame);
         const filteredByAction = action.applyFilter({ collection: exportedCollection, frameData });
@@ -179,7 +167,11 @@ export async function call(
             },
         });
 
-        await instance.annotations.commit(processedCollection.created, processedCollection.deleted, frame);
+        await instance.annotations.commit(
+            processedCollection.created,
+            processedCollection.deleted,
+            frame,
+        );
         event.close();
     } finally {
         await action.destroy();

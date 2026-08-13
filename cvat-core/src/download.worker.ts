@@ -101,7 +101,11 @@ function mergeChunks(chunks: Uint8Array[], totalLength: number): ArrayBuffer {
     return data.buffer;
 }
 
-async function readResponse(response: Response, chunks: Uint8Array[], receivedBytes: number): Promise<number> {
+async function readResponse(
+    response: Response,
+    chunks: Uint8Array[],
+    receivedBytes: number,
+): Promise<number> {
     const reader = response.body.getReader();
     let nextReceivedBytes = receivedBytes;
 
@@ -123,10 +127,7 @@ async function readResponse(response: Response, chunks: Uint8Array[], receivedBy
     }
 }
 
-async function fetchData(
-    url: string,
-    requestConfig,
-): Promise<{
+async function fetchData(url: string, requestConfig): Promise<{
     data: ArrayBuffer;
     headers: Record<string, string>;
 }> {

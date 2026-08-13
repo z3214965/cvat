@@ -79,14 +79,12 @@ export default class QualityConflict {
         this.#frame = initialData.frame ?? null;
         this.#type = initialData.type as QualityConflictType;
         this.#severity = initialData.severity as ConflictSeverity;
-        this.#annotationConflicts = initialData.annotation_ids.map(
-            (rawData: SerializedAnnotationConflictData) =>
-                new AnnotationConflict({
-                    ...rawData,
-                    conflict_type: initialData.type,
-                    severity: initialData.severity,
-                }),
-        );
+        this.#annotationConflicts = initialData.annotation_ids
+            .map((rawData: SerializedAnnotationConflictData) => new AnnotationConflict({
+                ...rawData,
+                conflict_type: initialData.type,
+                severity: initialData.severity,
+            }));
 
         const desc = initialData.type.split('_').join(' ');
         this.#description = desc.charAt(0).toUpperCase() + desc.slice(1);

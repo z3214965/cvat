@@ -3,7 +3,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { SerializedLabel, SerializedAttribute, getCore, LabelType } from 'cvat-core-wrapper';
+import {
+    SerializedLabel, SerializedAttribute, getCore, LabelType,
+} from 'cvat-core-wrapper';
 
 export interface SkeletonConfiguration {
     type: 'skeleton';

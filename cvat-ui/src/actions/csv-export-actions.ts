@@ -77,17 +77,15 @@ export function exportToCSVAsync<T>(options: CSVExportOptions<T>) {
                 onSuccess(totalCount, filename);
             }
         } catch (error) {
-            dispatch(
-                bulkActions.bulkOperationFailed({
-                    error,
-                    remainingItemsCount: 0,
-                    retryPayload: {
-                        items: [],
-                        operation: async () => {},
-                        statusMessage: () => '',
-                    },
-                }),
-            );
+            dispatch(bulkActions.bulkOperationFailed({
+                error,
+                remainingItemsCount: 0,
+                retryPayload: {
+                    items: [],
+                    operation: async () => {},
+                    statusMessage: () => '',
+                },
+            }));
 
             if (onError && error instanceof Error) {
                 onError(error);

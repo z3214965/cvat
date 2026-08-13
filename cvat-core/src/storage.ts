@@ -50,11 +50,9 @@ export class Storage {
     toJSON(): StorageJsonData {
         return {
             location: this.location,
-            ...(this.cloudStorageId
-                ? {
-                      cloud_storage_id: this.cloudStorageId,
-                  }
-                : {}),
+            ...(this.cloudStorageId ? {
+                cloud_storage_id: this.cloudStorageId,
+            } : {}),
         };
     }
 }

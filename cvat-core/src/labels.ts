@@ -5,7 +5,9 @@
 
 import DOMPurify from 'dompurify';
 import _ from 'lodash';
-import { AttrInputType, SerializedAttribute, SerializedLabel } from './server-response-types';
+import {
+    AttrInputType, SerializedAttribute, SerializedLabel,
+} from './server-response-types';
 import { ShapeType, AttributeType, LabelType } from './enums';
 import { ArgumentError } from './exceptions';
 
@@ -132,7 +134,10 @@ export class Label {
 
         data.attributes = [];
 
-        if (Object.prototype.hasOwnProperty.call(initialData, 'attributes') && Array.isArray(initialData.attributes)) {
+        if (
+            Object.prototype.hasOwnProperty.call(initialData, 'attributes') &&
+            Array.isArray(initialData.attributes)
+        ) {
             for (const attrData of initialData.attributes) {
                 data.attributes.push(new Attribute(attrData));
             }
@@ -248,22 +253,11 @@ export class Label {
             ALLOWED_TAGS: ['svg', 'line', 'circle', 'desc'],
             ALLOWED_ATTR: [
                 // circle
-                'cx',
-                'cy',
-                'r',
-                'data-type',
-                'data-element-id',
-                'data-label-name',
-                'data-label-id',
-                'data-node-id',
+                'cx', 'cy', 'r',
+                'data-type', 'data-element-id', 'data-label-name', 'data-label-id', 'data-node-id',
                 // line
-                'x1',
-                'y1',
-                'x2',
-                'y2',
-                'data-type',
-                'data-node-from',
-                'data-node-to',
+                'x1', 'y1', 'x2', 'y2',
+                'data-type', 'data-node-from', 'data-node-to',
                 // desc
                 'data-description-type',
             ],
@@ -293,8 +287,7 @@ export function getUpdatedLabels(oldLabels: Label[], newLabels: Label[]): Label[
     const newIDs = new Set(newLabels.map((label) => label.id));
     const updatedLabels: Label[] = [];
 
-    oldLabels
-        .filter((label) => !newIDs.has(label.id))
+    oldLabels.filter((label) => !newIDs.has(label.id))
         .forEach((label) => {
             const deletedLabel = new Label(label.toJSON());
             deletedLabel.deleted = true;
@@ -313,8 +306,9 @@ export function getUpdatedLabels(oldLabels: Label[], newLabels: Label[]): Label[
         }
     });
 
-    updatedLabels.push(
-        ...newLabels.filter((label) => !Number.isInteger(label.id)).map((label) => new Label(label.toJSON())),
+    updatedLabels.push(...newLabels
+        .filter((label) => !Number.isInteger(label.id))
+        .map((label) => new Label(label.toJSON())),
     );
 
     return updatedLabels;

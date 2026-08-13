@@ -16,7 +16,9 @@ import {
     SplitData,
     MergeData,
 } from './canvas3dModel';
-import { Canvas3dView, Canvas3dViewImpl, ViewsDOM, CameraAction } from './canvas3dView';
+import {
+    Canvas3dView, Canvas3dViewImpl, ViewsDOM, CameraAction,
+} from './canvas3dView';
 import { Master } from './master';
 
 interface Canvas3d {
@@ -125,6 +127,8 @@ class Canvas3dImpl implements Canvas3d {
     }
 }
 
-export { Canvas3dImpl as Canvas3d, ViewType, MouseInteraction, CameraAction, Mode as CanvasMode };
+export {
+    Canvas3dImpl as Canvas3d, ViewType, MouseInteraction, CameraAction, Mode as CanvasMode,
+};
 
 export type { ViewsDOM };

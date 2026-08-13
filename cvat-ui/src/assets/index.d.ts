@@ -3,5 +3,5 @@
 // SPDX-License-Identifier: MIT
 
 declare module '*.svg';
-declare module '*.scss';
 declare module '*.jpg';
+declare module '*.scss';

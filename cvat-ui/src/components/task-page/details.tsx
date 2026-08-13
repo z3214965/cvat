@@ -20,6 +20,7 @@ import Preview from 'components/common/preview';
 import { cancelInferenceAsync } from 'actions/models-actions';
 import { CombinedState, ActiveInference } from 'reducers';
 import CVATTag, { TagType } from 'components/common/cvat-tag';
+import { usePlugins } from 'utils/hooks';
 import UserSelector from './user-selector';
 import BugTrackerEditor from './bug-tracker-editor';
 import CloudStorageEditor from './cloud-storage-editor';
@@ -69,6 +70,29 @@ interface State {
 }
 
 type Props = DispatchToProps & StateToProps & OwnProps;
+
+function DetailsTopBarExtras({ targetProps, targetState }: {
+    targetProps: Props;
+    targetState: State;
+}): JSX.Element {
+    // the component is used as a plugin entrypoint
+    // only implemented as a separated functional component in order to use usePlugins inside
+    const extras = usePlugins(
+        (state: CombinedState) => state.plugins.components.taskPage.details.topBar.extras,
+        targetProps,
+        targetState,
+    );
+
+    return (
+        <>
+            {extras.sort((left, right) => left.weight - right.weight).map(({
+                component: Component,
+            }, index) => (
+                <Component key={index} targetProps={targetProps} targetState={targetState} />
+            ))}
+        </>
+    );
+}
 
 class DetailsComponent extends React.PureComponent<Props, State> {
     constructor(props: Props) {

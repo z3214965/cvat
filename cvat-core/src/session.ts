@@ -5,16 +5,8 @@
 
 import { ChunkQuality } from 'cvat-data';
 import {
-    ChunkType,
-    DimensionType,
-    HistoryActions,
-    JobStage,
-    JobState,
-    JobType,
-    MediaType,
-    StorageLocation,
-    TaskMode,
-    TaskStatus,
+    ChunkType, DimensionType, HistoryActions, JobStage,
+    JobState, JobType, MediaType, StorageLocation, TaskMode, TaskStatus,
 } from './enums';
 import { Storage } from './storage';
 
@@ -23,7 +15,10 @@ import { ArgumentError, ScriptingError } from './exceptions';
 import { Label } from './labels';
 import User from './user';
 import { FieldUpdateTrigger } from './common';
-import { SerializedCollection, SerializedJob, SerializedLabel, SerializedTask } from './server-response-types';
+import {
+    SerializedCollection, SerializedJob,
+    SerializedLabel, SerializedTask,
+} from './server-response-types';
 import { type AudioIntervalState } from './annotations-objects/audio-interval-state';
 import AnnotationGuide from './guide';
 import { FrameData, FramesMetaData } from './frames';
@@ -44,7 +39,7 @@ function buildDuplicatedAPI(prototype): void {
                     useDefaultLocation: boolean,
                     sourceStorage: Storage,
                     file: File | string,
-                    options?: { convMaskToPoly?: boolean; importMode?: 'replace' | 'append' },
+                    options?: { convMaskToPoly?: boolean, importMode?: 'replace' | 'append' },
                 ) {
                     const result = await PluginRegistry.apiWrapper.call(
                         this,
@@ -64,7 +59,9 @@ function buildDuplicatedAPI(prototype): void {
                 },
 
                 async clear(options) {
-                    const result = await PluginRegistry.apiWrapper.call(this, prototype.annotations.clear, options);
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this, prototype.annotations.clear, options,
+                    );
                     return result;
                 },
 
@@ -94,7 +91,11 @@ function buildDuplicatedAPI(prototype): void {
                 },
 
                 async intervals(filters = []) {
-                    const result = await PluginRegistry.apiWrapper.call(this, prototype.annotations.intervals, filters);
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.annotations.intervals,
+                        filters,
+                    );
                     return result;
                 },
 
@@ -259,13 +260,24 @@ function buildDuplicatedAPI(prototype): void {
                     return result;
                 },
                 async delete(frame) {
-                    await PluginRegistry.apiWrapper.call(this, prototype.frames.delete, frame);
+                    await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.frames.delete,
+                        frame,
+                    );
                 },
                 async restore(frame) {
-                    await PluginRegistry.apiWrapper.call(this, prototype.frames.restore, frame);
+                    await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.frames.restore,
+                        frame,
+                    );
                 },
                 async save() {
-                    const result = await PluginRegistry.apiWrapper.call(this, prototype.frames.save);
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.frames.save,
+                    );
                     return result;
                 },
                 async cachedChunks() {
@@ -299,7 +311,11 @@ function buildDuplicatedAPI(prototype): void {
                     return result;
                 },
                 async contextImage(frameId) {
-                    const result = await PluginRegistry.apiWrapper.call(this, prototype.frames.contextImage, frameId);
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.frames.contextImage,
+                        frameId,
+                    );
                     return result;
                 },
                 async chunk(chunkIndex, quality) {
@@ -321,7 +337,11 @@ function buildDuplicatedAPI(prototype): void {
                     return result;
                 },
                 async save(meta) {
-                    const result = await PluginRegistry.apiWrapper.call(this, prototype.meta.save, meta);
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.meta.save,
+                        meta,
+                    );
                     return result;
                 },
             },
@@ -392,7 +412,9 @@ export class Session {
             to?: number;
             delTrackKeyframesOnly?: boolean;
         }) => Promise<void>;
-        save: (onUpdate?: (message: string) => void) => Promise<void>;
+        save: (
+            onUpdate?: (message: string) => void,
+        ) => Promise<void>;
         search: (
             frameFrom: number,
             frameTo: number,
@@ -410,25 +432,18 @@ export class Session {
             sourceStorage: Storage,
             file: File | string,
             options?: {
-                convMaskToPoly?: boolean;
-                importMode?: 'replace' | 'append';
-                updateStatusCallback?: (s: string, n: number) => void;
+                convMaskToPoly?: boolean,
+                importMode?: 'replace' | 'append',
+                updateStatusCallback?: (s: string, n: number) => void,
             },
         ) => Promise<string>;
-        select: (
-            objectStates: ObjectState[],
-            x: number,
-            y: number,
-        ) => Promise<{
-            state: ObjectState;
-            distance: number | null;
+        select: (objectStates: ObjectState[], x: number, y: number) => Promise<{
+            state: ObjectState,
+            distance: number | null,
         }>;
-        selectInterval: (
-            intervalStates: AudioIntervalState[],
-            position: number,
-        ) => Promise<{
-            state: AudioIntervalState | null;
-            distance: number | null;
+        selectInterval: (intervalStates: AudioIntervalState[], position: number) => Promise<{
+            state: AudioIntervalState | null,
+            distance: number | null,
         }>;
         import: (data: SerializedCollection) => Promise<void>;
         export: () => Promise<SerializedCollection>;
@@ -471,9 +486,9 @@ export class Session {
         contextImageData: (frame: number) => Promise<ArrayBuffer>;
         search: (
             filters: {
-                offset?: number;
-                notDeleted: boolean;
-                chapterMark?: boolean;
+                offset?: number,
+                notDeleted: boolean,
+                chapterMark?: boolean,
             },
             frameFrom: number,
             frameTo: number,
@@ -574,10 +589,10 @@ export class Job extends Session {
         data_chunk_size?: number;
         bug_tracker: string | null;
         mode?: TaskMode;
-        created_date?: string;
-        updated_date?: string;
-        source_storage: Storage;
-        target_storage: Storage;
+        created_date?: string,
+        updated_date?: string,
+        source_storage: Storage,
+        target_storage: Storage,
         parent_job_id: number | null;
         replicas_count: number;
     };
@@ -633,17 +648,15 @@ export class Job extends Session {
         this.#data.replicas_count = initialData.replicas_count ?? this.#data.replicas_count;
 
         if (Array.isArray(initialData.labels)) {
-            this.#data.labels = initialData.labels
-                .map((labelData) => {
-                    // can be already wrapped to the class
-                    // when create this job from Task constructor
-                    if (labelData instanceof Label) {
-                        return labelData;
-                    }
+            this.#data.labels = initialData.labels.map((labelData) => {
+                // can be already wrapped to the class
+                // when create this job from Task constructor
+                if (labelData instanceof Label) {
+                    return labelData;
+                }
 
-                    return new Label(labelData);
-                })
-                .filter((label) => !label.hasParent);
+                return new Label(labelData);
+            }).filter((label) => !label.hasParent);
         }
 
         // to avoid code duplication set mutable field in the dedicated method
@@ -864,10 +877,10 @@ export class Task extends Session {
     public readonly dimension: DimensionType | undefined;
     public readonly mediaType: MediaType | undefined;
     public readonly progress: {
-        completedJobs: number;
-        totalJobs: number;
-        validationJobs: number;
-        annotationJobs: number;
+        completedJobs: number,
+        totalJobs: number,
+        validationJobs: number,
+        annotationJobs: number,
     };
     public readonly jobs: Job[];
     public readonly consensusEnabled: boolean;
@@ -892,15 +905,11 @@ export class Task extends Session {
         save: (meta: FramesMetaData) => Promise<FramesMetaData>;
     };
 
-    constructor(
-        initialData: Readonly<
-            Omit<SerializedTask, 'labels' | 'jobs'> & {
-                labels?: SerializedLabel[];
-                progress?: SerializedTask['jobs'];
-                jobs?: SerializedJob[];
-            }
-        >,
-    ) {
+    constructor(initialData: Readonly<Omit<SerializedTask, 'labels' | 'jobs'> & {
+        labels?: SerializedLabel[];
+        progress?: SerializedTask['jobs'];
+        jobs?: SerializedJob[];
+    }>) {
         super();
 
         const data = {
@@ -972,8 +981,7 @@ export class Task extends Session {
 
         if (Array.isArray(initialData.labels)) {
             data.labels = initialData.labels
-                .map((labelData) => new Label(labelData))
-                .filter((label) => !label.hasParent);
+                .map((labelData) => new Label(labelData)).filter((label) => !label.hasParent);
         }
 
         data.source_storage = new Storage({
@@ -1232,7 +1240,10 @@ export class Task extends Session {
         return result;
     }
 
-    async listenToCreate(rqID, options): Promise<Task> {
+    async listenToCreate(
+        rqID,
+        options,
+    ): Promise<Task> {
         const result = await PluginRegistry.apiWrapper.call(this, Task.prototype.listenToCreate, rqID, options);
         return result;
     }

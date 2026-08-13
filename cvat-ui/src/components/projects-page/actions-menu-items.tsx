@@ -73,17 +73,17 @@ export default function ProjectActionsItems(
         disabled: isDisabled('edit_assignee'),
     }, 30]);
 
-    // menuItems.push([{
-    //     key: 'view-analytics',
-    //     label: <Link to={`/projects/${projectId}/analytics`}>{t('common.view_analytics')}</Link>,
-    //     disabled: isDisabled('view-analytics'),
-    // }, 40]);
+    menuItems.push([{
+        key: 'view-analytics',
+        label: <Link to={`/projects/${projectId}/analytics`}>{t('common.view_analytics')}</Link>,
+        disabled: isDisabled('view-analytics'),
+    }, 40]);
 
-    // menuItems.push([{
-    //     key: 'quality-control',
-    //     label: <Link to={`/projects/${projectId}/quality-control`}>{t('common.quality_control')}</Link>,
-    //     disabled: isDisabled('quality-control'),
-    // }, 50]);
+    menuItems.push([{
+        key: 'quality-control',
+        label: <Link to={`/projects/${projectId}/quality-control`}>{t('common.quality_control')}</Link>,
+        disabled: isDisabled('quality-control'),
+    }, 50]);
 
     menuItems.push([{
         key: 'set-webhooks',

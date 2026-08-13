@@ -442,8 +442,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                 const allowedExtensions = selectedLoader.format.toLowerCase().split(', ');
                 if (!allowedExtensions.includes(extension)) {
                     return Promise.reject(new Error(
-                        `仅支持 ${selectedLoader.name} 格式 ` +
-                        `仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`,
+                        `仅支持 ${selectedLoader.name} 格式仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`,
                     ));
                 }
             }
@@ -565,9 +564,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                         instance instanceof core.classes.Project && (
                             <CVATTooltip
                                 title={
-                                    instance && !instance.labels.length ?
-                                        '从数据集中导入标签' :
-                                        '将使用来自项目的标签'
+                                    instance && !instance.labels.length ? '从数据集中导入标签' : '将使用来自项目的标签'
                                 }
                             >
                                 <QuestionCircleOutlined className='cvat-modal-import-header-question-icon' />

@@ -121,7 +121,9 @@ Object.defineProperties(User.prototype.save, {
     implementation: {
         writable: false,
         enumerable: false,
-        value: async function implementation(fields: Parameters<typeof User.prototype.save>[0]): Promise<User> {
+        value: async function implementation(
+            fields: Parameters<typeof User.prototype.save>[0],
+        ): Promise<User> {
             const data = fieldsToSnakeCase(fields);
 
             const result = await serverProxy.users.update(this.id, data);

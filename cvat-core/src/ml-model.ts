@@ -4,8 +4,12 @@
 // SPDX-License-Identifier: MIT
 
 import PluginRegistry from './plugins';
-import { LabelType, ModelProviders, ModelKind, ShapeType } from './enums';
-import { SerializedModel, ModelParams, MLModelTip, MLModelLabel } from './core-types';
+import {
+    LabelType, ModelProviders, ModelKind, ShapeType,
+} from './enums';
+import {
+    SerializedModel, ModelParams, MLModelTip, MLModelLabel,
+} from './core-types';
 
 export default class MLModel {
     private serialized: SerializedModel;
@@ -45,10 +49,8 @@ export default class MLModel {
     public get displayKind(): string {
         if (this.kind === ModelKind.DETECTOR) {
             switch (this.returnType) {
-                case LabelType.TAG:
-                    return 'classifier';
-                case LabelType.MASK:
-                    return 'segmenter';
+                case LabelType.TAG: return 'classifier';
+                case LabelType.MASK: return 'segmenter';
                 default: // fall back on the original kind
             }
         }

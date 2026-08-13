@@ -26,7 +26,7 @@ export class RegionSelectorImpl implements RegionSelector {
     };
 
     private getSelectionBox(event: MouseEvent): { xtl: number; ytl: number; xbr: number; ybr: number } {
-        const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+        const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
         const stopSelectionPoint = {
             x: point[0],
             y: point[1],
@@ -55,7 +55,7 @@ export class RegionSelectorImpl implements RegionSelector {
 
     private onMouseDown = (event: MouseEvent): void => {
         if (!this.selectionRect && !event.altKey) {
-            const point = translateToSVG(this.canvas.node as any as SVGSVGElement, [event.clientX, event.clientY]);
+            const point = translateToSVG((this.canvas.node as any) as SVGSVGElement, [event.clientX, event.clientY]);
             this.startSelectionPoint = {
                 x: point[0],
                 y: point[1],
@@ -74,7 +74,9 @@ export class RegionSelectorImpl implements RegionSelector {
     private onMouseUp = (): void => {
         const { offset } = this.geometry;
         if (this.selectionRect) {
-            const { w, h, x, y, x2, y2 } = this.selectionRect.bbox();
+            const {
+                w, h, x, y, x2, y2,
+            } = this.selectionRect.bbox();
             this.selectionRect.remove();
             this.selectionRect = null;
             if (w <= 1 && h <= 1) {
@@ -101,11 +103,7 @@ export class RegionSelectorImpl implements RegionSelector {
         this.stopSelection();
     }
 
-    public constructor(
-        onRegionSelected: RegionSelectorImpl['onRegionSelected'],
-        canvas: SVG.Container,
-        geometry: Geometry,
-    ) {
+    public constructor(onRegionSelected: RegionSelectorImpl['onRegionSelected'], canvas: SVG.Container, geometry: Geometry) {
         this.onRegionSelected = onRegionSelected;
         this.geometry = geometry;
         this.canvas = canvas;

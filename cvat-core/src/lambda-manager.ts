@@ -16,7 +16,7 @@ export interface MinimalShape {
 }
 
 interface InteractorShape extends MinimalShape {
-    attributes: { spec_id: number; value: string }[];
+    attributes: { spec_id: number; value: string }[]
 }
 
 // This type is compatible with our SerializedCollection, however the client only supports it partly
@@ -33,19 +33,16 @@ export interface TrackerResults {
 }
 
 class LambdaManager {
-    private listening: Record<
-        number,
-        {
-            onUpdate: ((status: RQStatus, progress: number, message?: string) => void)[];
-            timeout: number | null;
-        }
-    >;
+    private listening: Record<number, {
+        onUpdate: ((status: RQStatus, progress: number, message?: string) => void)[];
+        timeout: number | null;
+    }>;
 
     constructor() {
         this.listening = {};
     }
 
-    async list(): Promise<{ models: MLModel[]; count: number }> {
+    async list(): Promise<{ models: MLModel[], count: number }> {
         const lambdaFunctions = await serverProxy.lambda.list();
         const models = [];
 
@@ -108,16 +105,11 @@ class LambdaManager {
                 return {
                     shapes: (result as InteractorResults).shapes.map((item) => ({
                         points: item.points,
-                        attributes:
-                            Array.isArray(item.attributes) &&
-                            item.attributes.every(
-                                (attr) =>
-                                    typeof attr === 'object' &&
-                                    typeof attr.spec_id === 'number' &&
-                                    typeof attr.value === 'string',
-                            )
-                                ? item.attributes
-                                : [],
+                        attributes: Array.isArray(item.attributes) && item.attributes.every(
+                            (attr) => typeof attr === 'object' &&
+                                typeof attr.spec_id === 'number' &&
+                                typeof attr.value === 'string',
+                        ) ? item.attributes : [],
                         type: item.type ?? ShapeType.MASK,
                     })),
                 };
@@ -129,7 +121,8 @@ class LambdaManager {
 
     async requests(): Promise<SerializedFunctionRequest[]> {
         const lambdaRequests = await serverProxy.lambda.requests();
-        return lambdaRequests.filter((request) => [RQStatus.QUEUED, RQStatus.STARTED].includes(request.status));
+        return lambdaRequests
+            .filter((request) => [RQStatus.QUEUED, RQStatus.STARTED].includes(request.status));
     }
 
     async cancel(requestID): Promise<void> {

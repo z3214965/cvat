@@ -21,9 +21,9 @@ export enum PointSizeBase {
     GROUP_BBOX_SIZE = 'group_bbox_size',
 }
 
-export type QualitySettingsSaveFields = Partial<
-    Camelized<Omit<SerializedQualitySettingsData, 'id' | 'task_id' | 'descriptions'>>
->;
+export type QualitySettingsSaveFields = Partial<Camelized<
+    Omit<SerializedQualitySettingsData, 'id' | 'task_id' | 'descriptions'>
+>>;
 
 export default class QualitySettings {
     #id: number;
@@ -183,7 +183,9 @@ Object.defineProperties(QualitySettings.prototype.save, {
         ): Promise<QualitySettings> {
             const data = fieldsToSnakeCase(fields);
 
-            const result = await serverProxy.analytics.quality.settings.update(this.id, data);
+            const result = await serverProxy.analytics.quality.settings.update(
+                this.id, data,
+            );
             const schema = await getServerAPISchema();
             const descriptions = convertDescriptions(schema.components.schemas.QualitySettings.properties);
             return new QualitySettings({ ...result, descriptions });

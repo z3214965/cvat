@@ -5,25 +5,15 @@
 
 import _ from 'lodash';
 import {
-    shapeFactory,
-    trackFactory,
-    Track,
-    Shape,
-    Tag,
-    MaskShape,
-    BasicInjection,
-    SkeletonShape,
-    SkeletonTrack,
-    PolygonShape,
-    CuboidShape,
-    RectangleShape,
-    PolylineShape,
-    PointsShape,
-    EllipseShape,
-    InterpolationNotPossibleError,
-    AudioInterval,
+    shapeFactory, trackFactory, Track, Shape, Tag,
+    MaskShape, BasicInjection, SkeletonShape,
+    SkeletonTrack, PolygonShape, CuboidShape,
+    RectangleShape, PolylineShape, PointsShape, EllipseShape,
+    InterpolationNotPossibleError, AudioInterval,
 } from './annotations-objects';
-import { SerializedCollection, SerializedShape, SerializedTrack } from './server-response-types';
+import {
+    SerializedCollection, SerializedShape, SerializedTrack,
+} from './server-response-types';
 import AnnotationsFilter from './annotations-filter';
 import { checkObjectType } from './common';
 import Statistics from './statistics';
@@ -33,7 +23,9 @@ import ObjectState from './object-state';
 import { cropMask } from './object-utils';
 import { AudioIntervalState } from './annotations-objects/audio-interval-state';
 import config from './config';
-import { HistoryActions, ShapeType, ObjectType, colors, Source, DimensionType, JobType } from './enums';
+import {
+    HistoryActions, ShapeType, ObjectType, colors, Source, DimensionType, JobType,
+} from './enums';
 import AnnotationHistory from './annotations-history';
 
 type AnnotationObject = Shape | Tag | Track | AudioInterval;
@@ -48,17 +40,18 @@ const validateAttributesList = (
     return attributes;
 };
 
-const objectAttributesAsList = (state: AnnotationState): { spec_id: number; value: string }[] =>
+const objectAttributesAsList = (state: AnnotationState): { spec_id: number, value: string }[] => (
     Object.entries(state.attributes).map(([key, value]) => ({
         spec_id: +key,
         value,
-    }));
+    }))
+);
 
 type LayerPlacement = { exact: number } | { before: number } | { after: number };
 type LayerPlacementData =
-    | { kind: 'exact'; zOrder: number }
-    | { kind: 'before'; zOrder: number }
-    | { kind: 'after'; zOrder: number };
+    { kind: 'exact'; zOrder: number } |
+    { kind: 'before'; zOrder: number } |
+    { kind: 'after'; zOrder: number };
 
 function isLayerState(state: ObjectState): boolean {
     return [ObjectType.SHAPE, ObjectType.TRACK].includes(state.objectType);
@@ -156,8 +149,8 @@ export default class Collection {
             dimension: data.dimension,
             jobType: data.jobType,
             nextClientID: () => ++config.globalObjectsCounter,
-            getMasksOnFrame: (frame: number) =>
-                (this.shapes[frame] as MaskShape[]).filter((object) => object instanceof MaskShape),
+            getMasksOnFrame: (frame: number) => (this.shapes[frame] as MaskShape[])
+                .filter((object) => object instanceof MaskShape),
             replicasCount: data.replicasCount,
         };
     }
@@ -382,7 +375,9 @@ export default class Collection {
     }
 
     public getAllIntervals(filters: object[]): AudioIntervalState[] {
-        const intervals = this.intervals.filter((interval) => !interval.removed).map((interval) => interval.get());
+        const intervals = this.intervals
+            .filter((interval) => !interval.removed)
+            .map((interval) => interval.get());
 
         const filtered = this.annotationsFilter.filterAudioIntervalStates(intervals, filters);
         return intervals.filter((interval) => !filters.length || filtered.includes(interval.clientID as number));
@@ -390,7 +385,8 @@ export default class Collection {
 
     public export(): SerializedCollection {
         const data = {
-            tracks: this.tracks.filter((track) => !track.removed).map((track) => track.toJSON() as SerializedTrack),
+            tracks: this.tracks.filter((track) => !track.removed)
+                .map((track) => track.toJSON() as SerializedTrack),
             shapes: Object.values(this.shapes)
                 .reduce((accumulator, frameShapes) => {
                     accumulator.push(...frameShapes);
@@ -405,7 +401,9 @@ export default class Collection {
                 }, [])
                 .filter((tag) => !tag.removed)
                 .map((tag) => tag.toJSON()),
-            intervals: this.intervals.filter((interval) => !interval.removed).map((interval) => interval.toJSON()),
+            intervals: this.intervals
+                .filter((interval) => !interval.removed)
+                .map((interval) => interval.toJSON()),
         };
 
         return data;
@@ -567,7 +565,9 @@ export default class Collection {
             if (object.shapeType === ShapeType.SKELETON) {
                 for (const element of (object as unknown as SkeletonShape | SkeletonTrack).elements) {
                     // for each track/shape element get its first objectState and keep it
-                    elements[element.label.id] = [...(elements[element.label.id] || []), element];
+                    elements[element.label.id] = [
+                        ...(elements[element.label.id] || []), element,
+                    ];
                 }
             }
         }
@@ -921,7 +921,10 @@ export default class Collection {
                         object.removed = true;
                     }
                 },
-                [...objectsToJoin.map((object) => object.clientID), ...importedShapes.map((shape) => shape.clientID)],
+                [
+                    ...objectsToJoin.map((object) => object.clientID),
+                    ...importedShapes.map((shape) => shape.clientID),
+                ],
                 objectsToJoin[0].frame,
             );
         }
@@ -952,36 +955,35 @@ export default class Collection {
         }
 
         const imported = this.import({
-            shapes: [
-                {
-                    attributes: validateAttributesList(objectAttributesAsList(state)),
-                    frame: slicedObject.frame,
-                    group: slicedObject.group,
-                    label_id: slicedObject.label.id,
-                    outside: false,
-                    occluded: slicedObject.occluded,
-                    points: slicedObject.shapeType === ShapeType.POLYGON ? points1 : cropMask(points1, width, height),
-                    rotation: 0,
-                    type: slicedObject.shapeType,
-                    z_order: slicedObject.zOrder,
-                    source: Source.MANUAL,
-                    elements: [],
-                },
-                {
-                    attributes: validateAttributesList(objectAttributesAsList(state)),
-                    frame: slicedObject.frame,
-                    group: slicedObject.group,
-                    label_id: slicedObject.label.id,
-                    outside: false,
-                    occluded: slicedObject.occluded,
-                    points: slicedObject.shapeType === ShapeType.POLYGON ? points2 : cropMask(points2, width, height),
-                    rotation: 0,
-                    type: slicedObject.shapeType,
-                    z_order: slicedObject.zOrder,
-                    source: Source.MANUAL,
-                    elements: [],
-                },
-            ],
+            shapes: [{
+                attributes: validateAttributesList(objectAttributesAsList(state)),
+                frame: slicedObject.frame,
+                group: slicedObject.group,
+                label_id: slicedObject.label.id,
+                outside: false,
+                occluded: slicedObject.occluded,
+                points: slicedObject.shapeType === ShapeType.POLYGON ?
+                    points1 : cropMask(points1, width, height),
+                rotation: 0,
+                type: slicedObject.shapeType,
+                z_order: slicedObject.zOrder,
+                source: Source.MANUAL,
+                elements: [],
+            }, {
+                attributes: validateAttributesList(objectAttributesAsList(state)),
+                frame: slicedObject.frame,
+                group: slicedObject.group,
+                label_id: slicedObject.label.id,
+                outside: false,
+                occluded: slicedObject.occluded,
+                points: slicedObject.shapeType === ShapeType.POLYGON ?
+                    points2 : cropMask(points2, width, height),
+                rotation: 0,
+                type: slicedObject.shapeType,
+                z_order: slicedObject.zOrder,
+                source: Source.MANUAL,
+                elements: [],
+            }],
         });
         slicedObject.removed = true;
 
@@ -1004,7 +1006,11 @@ export default class Collection {
         );
     }
 
-    public clear(options?: { from?: number; to?: number; delTrackKeyframesOnly?: boolean }): void {
+    public clear(options?: {
+        from?: number;
+        to?: number;
+        delTrackKeyframesOnly?: boolean;
+    }): void {
         const { from, to, delTrackKeyframesOnly } = options ?? {};
 
         if (typeof from === 'undefined' && typeof to === 'undefined') {
@@ -1168,14 +1174,12 @@ export default class Collection {
                 continue;
             }
 
-            if (
-                !(
-                    object instanceof Shape ||
-                    object instanceof Track ||
-                    object instanceof Tag ||
-                    object instanceof AudioInterval
-                )
-            ) {
+            if (!(
+                object instanceof Shape ||
+                object instanceof Track ||
+                object instanceof Tag ||
+                object instanceof AudioInterval
+            )) {
                 continue;
             }
 
@@ -1261,7 +1265,7 @@ export default class Collection {
                 constructed.intervals.push({
                     attributes,
                     start: state.start,
-                    stop: Math.min(state.stop ?? this.stopFrame, this.stopFrame),
+                    stop: Math.min(state.stop ?? this.stopFrame + 1, this.stopFrame + 1),
                     label_id: state.label.id,
                     group: 0,
                     source: state.source,
@@ -1304,32 +1308,26 @@ export default class Collection {
                         label_id: state.label.id,
                         outside: state.outside || false,
                         occluded: state.occluded || false,
-                        points:
-                            state.shapeType === 'mask'
-                                ? (() => {
-                                      const { width, height } = this.injection.framesInfo[state.frame];
-                                      return cropMask(state.points, width, height);
-                                  })()
-                                : state.points,
+                        points: state.shapeType === 'mask' ? (() => {
+                            const { width, height } = this.injection.framesInfo[state.frame];
+                            return cropMask(state.points, width, height);
+                        })() : state.points,
                         rotation: state.rotation || 0,
                         type: state.shapeType,
                         z_order: state.zOrder,
                         source: state.source,
-                        elements:
-                            state.shapeType === 'skeleton'
-                                ? state.elements.map((element) => ({
-                                      attributes: validateAttributesList(objectAttributesAsList(element)),
-                                      frame: element.frame,
-                                      group: 0,
-                                      label_id: element.label.id,
-                                      points: [...element.points],
-                                      rotation: 0,
-                                      type: element.shapeType,
-                                      z_order: 0,
-                                      outside: element.outside || false,
-                                      occluded: element.occluded || false,
-                                  }))
-                                : undefined,
+                        elements: state.shapeType === 'skeleton' ? state.elements.map((element) => ({
+                            attributes: validateAttributesList(objectAttributesAsList(element)),
+                            frame: element.frame,
+                            group: 0,
+                            label_id: element.label.id,
+                            points: [...element.points],
+                            rotation: 0,
+                            type: element.shapeType,
+                            z_order: 0,
+                            outside: element.outside || false,
+                            occluded: element.occluded || false,
+                        })) : undefined,
                     });
                 } else if (state.objectType === 'track') {
                     constructed.tracks.push({
@@ -1471,7 +1469,10 @@ export default class Collection {
         // Resolve requested IDs against the whole collection on the frame
         // Ignore objects which cannot be moved (e.g. tags or locked)
         // And perform the grouping by clientID and by layer
-        const { clientId: visibleStatesByClientID, layer: visibleStatesByLayer } = this.get(frame, false, []).reduce(
+        const {
+            clientId: visibleStatesByClientID,
+            layer: visibleStatesByLayer,
+        } = this.get(frame, false, []).reduce(
             (accumulator, state) => {
                 if (!isLayerState(state) || state.lock) {
                     return accumulator;
@@ -1481,8 +1482,7 @@ export default class Collection {
                 accumulator.layer.set(state.zOrder, accumulator.layer.get(state.zOrder) ?? []);
                 accumulator.layer.get(state.zOrder)?.push(state);
                 return accumulator;
-            },
-            {
+            }, {
                 clientId: new Map<number, ObjectState>(),
                 layer: new Map<number, ObjectState[]>(),
             },
@@ -1490,17 +1490,14 @@ export default class Collection {
 
         // Filter the requested states to move by visibility and existence on the frame
         const requestedStatesClientIds = new Set(
-            objectStates
-                .map((state) => state.clientID)
-                .filter(
-                    (clientID): clientID is number =>
-                        Number.isInteger(clientID) && visibleStatesByClientID.has(clientID),
-                ),
+            objectStates.map((state) => state.clientID)
+                .filter((clientID): clientID is number => (
+                    Number.isInteger(clientID) && visibleStatesByClientID.has(clientID)
+                )),
         );
 
-        const requestedStates = Array.from(requestedStatesClientIds).map((clientID) =>
-            visibleStatesByClientID.get(clientID),
-        );
+        const requestedStates = Array.from(requestedStatesClientIds)
+            .map((clientID) => visibleStatesByClientID.get(clientID));
         if (!requestedStates.length) {
             return [];
         }
@@ -1517,9 +1514,9 @@ export default class Collection {
         const scheduleMove = (states: ObjectState[], zOrder: number): void => {
             // Find the objects already occupying the target layer, excluding the current move batch.
             const movingClientIDs = new Set(states.map((state) => state.clientID));
-            const displacedStates = (visibleStatesByLayer.get(zOrder) ?? []).filter(
-                (state) => !movingClientIDs.has(state.clientID) && !requestedStatesClientIds.has(state.clientID),
-            );
+            const displacedStates = (visibleStatesByLayer.get(zOrder) ?? []).filter((state) => (
+                !movingClientIDs.has(state.clientID) && !requestedStatesClientIds.has(state.clientID)
+            ));
 
             if (displacedStates.length) {
                 // First make room deeper in the stack, then place this batch into the freed layer.
@@ -1543,7 +1540,7 @@ export default class Collection {
     }
 
     public compactLayers(frame: number): ObjectState[] {
-        checkObjectType('frame', frame, 'integer', null);
+        checkObjectType('帧', frame, 'integer', null);
 
         const allStates = this.get(frame, false, []).filter((state) => isLayerState(state) && !state.lock);
         const zOrderMap = new Map(
@@ -1583,7 +1580,7 @@ export default class Collection {
                 continue;
             }
 
-            let distanceMetric: (typeof RectangleShape)['distance'] | null = null;
+            let distanceMetric: typeof RectangleShape['distance'] | null = null;
             switch (state.shapeType) {
                 case ShapeType.CUBOID:
                     distanceMetric = CuboidShape.distance;
@@ -1615,10 +1612,7 @@ export default class Collection {
 
             let points = [];
             if (state.shapeType === ShapeType.SKELETON) {
-                points = state.elements
-                    .filter((el) => !el.outside && !el.hidden)
-                    .map((el) => el.points)
-                    .flat();
+                points = state.elements.filter((el) => !el.outside && !el.hidden).map((el) => el.points).flat();
             } else {
                 points = state.points;
             }
@@ -1635,20 +1629,17 @@ export default class Collection {
         };
     }
 
-    public selectInterval(
-        intervalStates: AudioIntervalState[],
-        position: number,
-    ): {
-        state: AudioIntervalState | null;
-        distance: number | null;
+    public selectInterval(intervalStates: AudioIntervalState[], position: number): {
+        state: AudioIntervalState | null,
+        distance: number | null,
     } {
-        checkObjectType('intervals for select', intervalStates, null, { cls: Array, name: 'Array' });
-        checkObjectType('position', position, 'number', null);
+        checkObjectType('选择区间', intervalStates, null, { cls: Array, name: 'Array' });
+        checkObjectType('位置', position, 'number', null);
 
         let minimumDistance = null;
         let minimumState = null;
         for (const state of intervalStates) {
-            checkObjectType('interval state', state, null, { cls: AudioIntervalState, name: 'AudioIntervalState' });
+            checkObjectType('区间状态', state, null, { cls: AudioIntervalState, name: 'AudioIntervalState' });
             if (state.hidden) {
                 continue;
             }
@@ -1757,8 +1748,7 @@ export default class Collection {
         }
 
         const filtersStr = JSON.stringify(annotationsFilters);
-        const linearSearch =
-            filtersStr.match(/"var":"width"/) ||
+        const linearSearch = filtersStr.match(/"var":"width"/) ||
             filtersStr.match(/"var":"height"/) ||
             filtersStr.match(/"var":"rotation"/) ||
             filtersStr.match(/"var":"zOrder"/);
@@ -1775,10 +1765,14 @@ export default class Collection {
                 (frame in this.shapes ? this.shapes[frame] : [])
                     .filter((shape) => !shape.removed)
                     .map((shape) => shape.get(frame)),
-                (frame in this.tags ? this.tags[frame] : []).filter((tag) => !tag.removed).map((tag) => tag.get(frame)),
+                (frame in this.tags ? this.tags[frame] : [])
+                    .filter((tag) => !tag.removed)
+                    .map((tag) => tag.get(frame)),
             );
             const tracks = Object.values(this.tracks)
-                .filter((track) => frame in track.shapes || frame === frameFrom || frame === frameTo || linearSearch)
+                .filter((track) => (
+                    frame in track.shapes || frame === frameFrom ||
+                    frame === frameTo || linearSearch))
                 .filter((track) => !track.removed);
             statesData.push(...tracks.map((track) => track.get(frame)).filter((state) => !state.outside));
 

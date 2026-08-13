@@ -27,4 +27,10 @@ function updateHistoryFromQuery(query: Indexable): string {
     return search ? `?${search}` : '';
 }
 
-export { SortingComponent, ResourceFilterHOC, ResourceSelectionInfo, defaultVisibility, updateHistoryFromQuery };
+export {
+    SortingComponent,
+    ResourceFilterHOC,
+    ResourceSelectionInfo,
+    defaultVisibility,
+    updateHistoryFromQuery,
+};

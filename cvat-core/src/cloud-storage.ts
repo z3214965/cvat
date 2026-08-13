@@ -229,12 +229,9 @@ export default class CloudStorage {
         return result;
     }
 
-    public async getContent(
-        path?: string,
-        nextToken?: string,
-    ): Promise<{
-        next: string | null;
-        content: (Omit<SerializedRemoteFile, 'mime_type'> & { mimeType: string })[];
+    public async getContent(path?: string, nextToken?: string): Promise<{
+        next: string | null,
+        content: (Omit<SerializedRemoteFile, 'mime_type'> & { mimeType: string })[],
     }> {
         const result = await PluginRegistry.apiWrapper.call(this, CloudStorage.prototype.getContent, path, nextToken);
         return result;
