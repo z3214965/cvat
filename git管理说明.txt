@@ -4,36 +4,38 @@ git clone --depth 1 https://github.com/z3214965/cvat.git
 git config core.fileMode false
 
 git remote -v
-
 git remote set-url origin git@github.com:z3214965/cvat.git
-
 git remote add upstream https://github.com/cvat-ai/cvat.git
 
+新建dev分支，并推送
 git checkout -b dev
 git add .
 git commit -m "首次提交"
 git push origin dev
-
+新建main分支，并推送
 git checkout -b main
 git push origin main
 
-拉取上游最新提交（不会自动合并）
-git fetch --depth=1 upstream develop
+清理代码库
 git reflog expire --expire=now --all
 git gc --prune=now
 git prune --注意使用
 
+拉取上游最新提交（不会自动合并）
+git fetch upstream develop
+
 # 切换到本地 develop 分支
 git checkout develop
-# 把 upstream/develop 合并到本地 develop（真正更新）
-git merge upstream/develop
-# 推送到你自己的远程仓库（可选，建议执行）
+# 丢弃本地独有提交，HEAD 直接切到上游 commit
+git reset --hard upstream/develop
+# 推送到你自己的远程仓库
 git push origin develop
 
 # 切换到你的开发分支 dev
 git checkout dev
-# 把刚更新好的 upstream/develop 合并到 dev
-git merge upstream/develop
+# 把刚更新好的 develop最新一次提交合并到 dev
+git cherry-pick $(git rev-parse develop)
+git cherry-pick --continue
 # 推送到你自己的远程 dev
 git push origin dev
 
@@ -178,8 +180,11 @@ nuctl delete function onnx-ultralytics-yolo11 --force
 普通用户，查看不到cloud storages、 models、 analytics、 admin、 organization、 about
 
 -----------------更新说明--------------------------
-1、拉取代码，合并代码
-2、拉取官方已发布的服务端，docker pull cvat/server:v2.72.0
+set HTTP_PROXY=http://192.168.1.5:10810
+set HTTPS_PROXY=http://192.168.1.5:10810
+set ALL_PROXY=socks5://192.168.1.5:10810
+1、拉取官方已发布的服务端，docker pull cvat/server:v2.73.0
+2、拉取代码，合并代码
 3、重新安装前端依赖：yarn install
 4、打包前端项目：yarn build:cvat-ui  
 5、修改docker-compose.yml中cvat_ui中image节点，日期为当前时间
@@ -204,7 +209,7 @@ docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker
 9、启动服务
 export CVAT_HOST=39.105.209.194
 export CVAT_POSTGRES_PASSWORD=diorszhang1987.
-export CVAT_VERSION=v2.72.0
+export CVAT_VERSION=v2.73.0
 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
 10、访问地址
 http://192.168.1.17:8080  /  http://39.105.209.194:4414
