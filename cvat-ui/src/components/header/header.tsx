@@ -302,7 +302,7 @@ function HeaderComponent(props: Props): JSX.Element {
             onClick: (): void => {
                 window.open('/admin', '_blank');
             },
-            label: 'Admin page',
+            label: t('header.admin_page'),
         }, 0]);
     }
 
@@ -312,7 +312,7 @@ function HeaderComponent(props: Props): JSX.Element {
         onClick: (): void => {
             history.push('/profile');
         },
-        label: 'Profile',
+        label: t('header.profile'),
     }, 10]);
 
     const viewType: 'menu' | 'list' = (organizationsList?.length || 0) > 5 ? 'list' : 'menu';
@@ -320,31 +320,31 @@ function HeaderComponent(props: Props): JSX.Element {
     menuItems.push([{
         key: 'organization',
         icon: organizationFetching || organizationsListFetching ? <LoadingOutlined /> : <TeamOutlined />,
-        label: 'Organization',
+        label: t('header.organization'),
         disabled: organizationFetching || organizationsListFetching,
         children: [
             ...(currentOrganization ? [{
                 key: 'open_organization',
                 icon: <SettingOutlined />,
-                label: 'Settings',
+                label: t('header.open_organization'),
                 className: 'cvat-header-menu-open-organization',
                 onClick: () => history.push('/organization'),
             }] : []), {
                 key: 'invitations',
                 icon: <MailOutlined />,
-                label: 'Invitations',
+                label: t('header.invitations'),
                 className: 'cvat-header-menu-organization-invitations-item',
                 onClick: () => history.push('/invitations'),
             }, {
                 key: 'create_organization',
                 icon: <PlusOutlined />,
-                label: 'Create',
+                label: t('header.create_organization'),
                 className: 'cvat-header-menu-create-organization',
                 onClick: () => history.push('/organizations/create'),
             },
             ...(!!organizationsList && viewType === 'list' ? [{
                 key: 'switch_organization',
-                label: 'Switch organization',
+                label: t('header.switch_organization'),
                 onClick: () => {
                     openSelectOrganizationModal(setNewOrganization);
                 },
@@ -353,7 +353,7 @@ function HeaderComponent(props: Props): JSX.Element {
                 type: 'divider' as const,
             }, {
                 key: '$personal',
-                label: 'Personal workspace',
+                label: t('header.personal_workspace'),
                 className: !currentOrganization ? 'cvat-header-menu-active-organization-item' : 'cvat-header-menu-organization-item',
                 onClick: resetOrganization,
             }, ...organizationsList.map((organization: Organization) => ({
@@ -372,6 +372,15 @@ function HeaderComponent(props: Props): JSX.Element {
         title: `按 ${switchSettingsShortcut} 切换设置`,
         label: t('header.settings'),
     }, 30]);
+
+    if (user.isStaff) {
+        menuItems.push([{
+            key: 'about',
+            icon: <InfoCircleOutlined />,
+            onClick: () => showAboutModal(),
+            label: t('header.about'),
+        }, 40]);
+    }
 
     menuItems.push([{
         key: 'logout',
@@ -437,71 +446,89 @@ function HeaderComponent(props: Props): JSX.Element {
                 >
                     {t('header.jobs')}
                 </Button>
-                <Button
-                    className={getButtonClassName('requests')}
-                    type='link'
-                    value='requests'
-                    href='/requests?page=1'
-                    onClick={(event: React.MouseEvent): void => {
-                        event.preventDefault();
-                        history.push('/requests');
-                    }}
-                >
-                    Requests
-                </Button>
-                <Button
-                    className={getButtonClassName('models')}
-                    type='link'
-                    value='models'
-                    href='/models'
-                    onClick={(event: React.MouseEvent): void => {
-                        event.preventDefault();
-                        history.push('/models');
-                    }}
-                >
-                    Models
-                </Button>
                 {isAnalyticsPluginActive && user.hasAnalyticsAccess ? (
-                    <Button
-                        className={getButtonClassName('analytics', false)}
-                        type='link'
-                        href='/analytics'
-                        onClick={(event: React.MouseEvent): void => {
-                            event.preventDefault();
-                            window.open('/analytics', '_blank');
-                        }}
-                    >
-                        Analytics
-                    </Button>
+                    <>
+                        <Button
+                            className={getButtonClassName('cloudstorages')}
+                            type='link'
+                            value='cloudstorages'
+                            href='/cloudstorages?page=1'
+                            onClick={(event: React.MouseEvent): void => {
+                                event.preventDefault();
+                                history.push('/cloudstorages');
+                            }}
+                        >
+                            {t('header.cloud_storages')}
+                        </Button>
+                        <Button
+                            className={getButtonClassName('requests')}
+                            type='link'
+                            value='requests'
+                            href='/requests?page=1'
+                            onClick={(event: React.MouseEvent): void => {
+                                event.preventDefault();
+                                history.push('/requests');
+                            }}
+                        >
+                            {t('header.requests')}
+                        </Button>
+                        <Button
+                            className={getButtonClassName('models')}
+                            type='link'
+                            value='models'
+                            href='/models'
+                            onClick={(event: React.MouseEvent): void => {
+                                event.preventDefault();
+                                history.push('/models');
+                            }}
+                        >
+                            {t('header.models')}
+                        </Button>
+                        <Button
+                            className={getButtonClassName('analytics', false)}
+                            type='link'
+                            href='/analytics'
+                            onClick={(event: React.MouseEvent): void => {
+                                event.preventDefault();
+                                window.open('/analytics', '_blank');
+                            }}
+                        >
+                            {t('header.analytics')}
+                        </Button>
+                    </>
                 ) : null}
             </div>
             <div className='cvat-right-header'>
-                <CVATTooltip overlay='Click to open repository'>
-                    <Button
-                        icon={<GithubOutlined />}
-                        size='large'
-                        className='cvat-open-repository-button cvat-header-button'
-                        type='link'
-                        href={GITHUB_URL}
-                        onClick={(event: React.MouseEvent): void => {
-                            event.preventDefault();
-                            window.open(GITHUB_URL, '_blank');
-                        }}
-                    />
-                </CVATTooltip>
-                <CVATTooltip overlay='Click to open guide'>
-                    <Button
-                        icon={<QuestionCircleOutlined />}
-                        size='large'
-                        className='cvat-open-guide-button cvat-header-button'
-                        type='link'
-                        href={GUIDE_URL}
-                        onClick={(event: React.MouseEvent): void => {
-                            event.preventDefault();
-                            window.open(GUIDE_URL, '_blank');
-                        }}
-                    />
-                </CVATTooltip>
+                {user.isStaff && (
+                    <>
+                        <CVATTooltip overlay={t('header.github')}>
+                            <Button
+                                icon={<GithubOutlined />}
+                                size='large'
+                                className='cvat-open-repository-button cvat-header-button'
+                                type='link'
+                                href={GITHUB_URL}
+                                onClick={(event: React.MouseEvent): void => {
+                                    event.preventDefault();
+                                    window.open(GITHUB_URL, '_blank');
+                                }}
+                            />
+                        </CVATTooltip>
+                        <CVATTooltip overlay={t('header.guide')}>
+                            <Button
+                                icon={<QuestionCircleOutlined />}
+                                size='large'
+                                className='cvat-open-guide-button cvat-header-button'
+                                type='link'
+                                href={GUIDE_URL}
+                                onClick={(event: React.MouseEvent): void => {
+                                    event.preventDefault();
+                                    window.open(GUIDE_URL, '_blank');
+                                }}
+                            />
+                        </CVATTooltip>
+                    </>
+                )}
                 <Dropdown
                     trigger={['click']}
                     destroyPopupOnHide
