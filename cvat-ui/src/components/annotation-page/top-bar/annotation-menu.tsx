@@ -212,7 +212,7 @@ function AnnotationMenuComponent(props: Props): JSX.Element {
             >
                 <Button type='link' className='cvat-annotation-header-menu-button cvat-annotation-header-button'>
                     <Icon component={MainMenuIcon} />
-                    Menu
+                    菜单
                 </Button>
             </Dropdown>
         </>

@@ -1255,7 +1255,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                     <UpOutlined className='cvat-canvas-image-setups-trigger' />
                 </Popover>
 
-                <CVATTooltip title={`Open layer stack. Current layer ${currentZLayer}`}>
+                <CVATTooltip title={`打开图层栈。当前图层 ${currentZLayer}`}>
                     <button
                         className='cvat-canvas-layer-stack-trigger'
                         type='button'
