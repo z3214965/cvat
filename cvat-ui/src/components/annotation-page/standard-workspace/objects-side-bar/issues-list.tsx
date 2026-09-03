@@ -249,7 +249,8 @@ export default function IssuesListComponent(): JSX.Element {
                             key={frameConflict.id}
                             id={`cvat-objects-sidebar-conflict-item-${frameConflict.id}`}
                             className={
-                                `${frameConflict.severity === ConflictSeverity.WARNING ? 'cvat-objects-sidebar-warning-item' : 'cvat-objects-sidebar-conflict-item'}
+                                `${frameConflict.severity === ConflictSeverity.WARNING ?
+                                    'cvat-objects-sidebar-warning-item' : 'cvat-objects-sidebar-conflict-item'}
                                   ${frameConflict.id === highlightedConflict?.id ? 'cvat-objects-sidebar-item-active' : ''}  `
                             }
                             onMouseEnter={() => {

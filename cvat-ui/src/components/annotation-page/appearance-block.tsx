@@ -15,7 +15,7 @@ import Button from 'antd/lib/button';
 
 import ColorPicker from 'components/annotation-page/standard-workspace/objects-side-bar/color-picker';
 import { ColorizeIcon } from 'icons';
-import { ColorBy, CombinedState, Workspace } from 'reducers';
+import { ColorBy, ColorByNames, CombinedState, Workspace } from 'reducers';
 import { DimensionType, Job } from 'cvat-core-wrapper';
 import { OrientationVisibility } from 'cvat-canvas3d-wrapper';
 import { collapseAppearance as collapseAppearanceAction } from 'actions/annotation-actions';
@@ -53,6 +53,7 @@ registerComponentShortcuts(componentShortcuts);
 interface StateToProps {
     appearanceCollapsed: boolean;
     colorBy: ColorBy;
+    colorByNames: ColorByNames;
     opacity: number;
     selectedOpacity: number;
     outlined: boolean;
@@ -169,11 +170,6 @@ function AppearanceBlock(props: Props): JSX.Element {
         [ColorBy.INSTANCE]: ColorBy.GROUP,
         [ColorBy.GROUP]: ColorBy.LABEL,
     };
-    const colorByLabels: Record<string, string> = {
-        Instance: '对象',
-        Group: '组',
-        Label: '标签',
-    };
 
     const handlers: Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void> = {
         SWITCH_COLOR_BY_APPEARANCE: (event: KeyboardEvent | undefined) => {
@@ -210,10 +206,10 @@ function AppearanceBlock(props: Props): JSX.Element {
                             onChange={(event: RadioChangeEvent) => changeShapesColorBy(event.target.value)}
                         >
                             {Object.keys(nextColorBy).map((val) => (
-                                <Radio.Button value={val} key={val}>{colorByLabels[val]}</Radio.Button>
+                                <Radio.Button value={val} key={val}>{ColorByNames[val]}</Radio.Button>
                             ))}
                         </Radio.Group>
-                        <Text type='secondary'>透明度</Text>
+                        <Text type='secondary'>不透明度</Text>
                         <Slider
                             className='cvat-appearance-opacity-slider'
                             onChange={changeShapesOpacity}

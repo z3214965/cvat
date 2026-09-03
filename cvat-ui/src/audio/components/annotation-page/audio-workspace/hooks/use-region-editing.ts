@@ -7,25 +7,32 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { Region, UpdateSide } from 'wavesurfer.js/dist/plugins/regions';
 
 import { MIN_INTERVAL_DURATION, INTERVAL_BOUNDARY_EPSILON } from 'audio/utils/waveform-geometry';
-import { createAudioIntervalAsync, updateAudioIntervalAsync } from 'actions/audio-actions';
+import { audioActions, createAudioIntervalAsync, updateAudioIntervalAsync } from 'actions/audio-actions';
 import { ActiveControl, CombinedState } from 'reducers';
+import { clamp } from 'utils/math';
 import { shallowEqual, ThunkDispatch } from 'utils/redux';
 
 import {
-    clientIDFromWaveRegionId, intervalEndSeconds, intervalStartSeconds,
+    clampRange, clientIDFromWaveRegionId, intervalEndSeconds, intervalStartSeconds,
 } from '../utils/audio-interval';
 import { attachRegionResizeAutoScroll } from '../utils/region-resize-auto-scroll';
 import { WaveformRegionRuntime } from './use-audio-waveform';
+import { useBulkBoundariesEditing } from './use-bulk-boundaries-editing';
+import type { RegionHighlighting } from './use-region-projection';
+import type { RegionSelection } from './use-region-selection';
 import { WaveformViewport } from './use-waveform-viewport';
 
 const REGION_DRAG_BOUNDS_CONSTRAINT = Symbol('regionDragBoundsConstraint');
 const RESIZE_CURSOR_CLASS = 'cvat-audio-waveform-interaction-resize';
 const AUTO_SCROLL_CLASS = 'cvat-audio-waveform-interaction-auto-scroll';
 
-interface ResizeDrag {
+interface RegionPointerInteraction {
     pointerID: number;
-    region: Region;
     clientID: number;
+}
+
+interface ResizeMeta {
+    region: Region;
     side: UpdateSide;
     startTime: number;
     start: number;
@@ -36,6 +43,8 @@ interface ResizeDrag {
 
 interface Params {
     regionRuntime: WaveformRegionRuntime;
+    regionHighlighting: RegionHighlighting;
+    regionSelection: RegionSelection;
     viewport: WaveformViewport;
     isPreviewRegion(region: Region): boolean;
     durationRef: React.MutableRefObject<number>;
@@ -67,7 +76,7 @@ function installRegionDragBoundsConstraint(region: Region): void {
             return;
         }
         const deltaSeconds = (deltaPx / width) * total;
-        const clampedSeconds = Math.max(-region.start, Math.min(total - region.end, deltaSeconds));
+        const clampedSeconds = clamp(deltaSeconds, -region.start, total - region.end);
         original((clampedSeconds / total) * width, side, startTime);
     };
     /* eslint-enable no-underscore-dangle */
@@ -77,7 +86,8 @@ function installRegionDragBoundsConstraint(region: Region): void {
  * Persists user-created and user-edited waveform regions as audio intervals.
  */
 export function useRegionEditing({
-    regionRuntime, viewport, isPreviewRegion, durationRef, ready,
+    regionRuntime, regionHighlighting, regionSelection, viewport,
+    isPreviewRegion, durationRef, ready,
 }: Params): void {
     const dispatch = useDispatch<ThunkDispatch>();
     const { intervals, activeLabelId, activeControl } = useSelector(
@@ -90,6 +100,9 @@ export function useRegionEditing({
     );
     const latestRef = useRef({ intervals, activeLabelId, activeControl });
     latestRef.current = { intervals, activeLabelId, activeControl };
+    useBulkBoundariesEditing({
+        regionRuntime, regionHighlighting, regionSelection, viewport, durationRef, ready,
+    });
 
     // setup when runtime is ready
     useEffect(() => {
@@ -106,8 +119,7 @@ export function useRegionEditing({
                 clientID !== null && latestRef.current.intervals.some((interval) => interval.clientID === clientID);
             if (exists) return;
 
-            const start = Math.max(0, region.start);
-            const end = Math.max(start, region.end);
+            const { start, end } = clampRange(region, durationRef.current);
             // remove the source region to get it re-created from redux
             region.remove();
             if (end - start > MIN_INTERVAL_DURATION) {
@@ -132,12 +144,10 @@ export function useRegionEditing({
                 return;
             }
 
-            dispatch(
-                updateAudioIntervalAsync(clientID, {
-                    start: Math.round(region.start * 1000),
-                    stop: Math.round(region.end * 1000),
-                }),
-            );
+            dispatch(updateAudioIntervalAsync(clientID, {
+                start: Math.round(region.start * 1000),
+                stop: Math.round(region.end * 1000),
+            }));
         };
 
         regionsPlugin.getRegions().forEach((region) => {
@@ -165,7 +175,8 @@ export function useRegionEditing({
     useEffect(() => {
         if (!ready) return undefined;
 
-        let resizeDrag: ResizeDrag | null = null;
+        let interaction: RegionPointerInteraction | null = null;
+        let resizeMeta: ResizeMeta | null = null;
         let hasResized = false;
         let resizeCursorViewport: HTMLElement | null = null;
         let autoScrollViewport: HTMLElement | null = null;
@@ -200,48 +211,51 @@ export function useRegionEditing({
             document.body.style.cursor = 'ew-resize';
         };
 
-        const updateResize = (drag: ResizeDrag): boolean => {
-            const time = viewport.clientXToTime(drag.clientX + drag.grabOffsetX);
+        const updateResize = (resize: ResizeMeta): boolean => {
+            const time = viewport.clientXToTime(resize.clientX + resize.grabOffsetX);
             const duration = durationRef.current;
             if (time === null || duration <= 0) return false;
 
-            const delta = time - drag.startTime;
-            const start = drag.side === 'start' ? Math.max(
-                0,
-                Math.min(drag.start + delta, drag.end - MIN_INTERVAL_DURATION),
-            ) : drag.start;
-            const end = drag.side === 'end' ? Math.min(
-                duration,
-                Math.max(drag.end + delta, drag.start + MIN_INTERVAL_DURATION),
-            ) : drag.end;
-            if (start === drag.region.start && end === drag.region.end) {
+            const delta = time - resize.startTime;
+            const start = resize.side === 'start' ? clamp(
+                resize.start + delta, 0, resize.end - MIN_INTERVAL_DURATION,
+            ) : resize.start;
+            const end = resize.side === 'end' ? clamp(
+                resize.end + delta, resize.start + MIN_INTERVAL_DURATION, duration,
+            ) : resize.end;
+            if (start === resize.region.start && end === resize.region.end) {
                 return false;
             }
 
-            drag.region.setOptions({ start, end });
+            resize.region.setOptions({ start, end });
             return true;
         };
 
         const refreshResize = (): void => {
-            if (resizeDrag && updateResize(resizeDrag)) {
+            if (resizeMeta && updateResize(resizeMeta)) {
                 hasResized = true;
             }
         };
 
         const unsubscribeTransformChange = viewport.onTransformChange(refreshResize);
 
+        const isPointerOverWaveform = (event: PointerEvent): boolean => {
+            const waveform = viewport.containerRef.current;
+            return !!waveform && event.composedPath().includes(waveform);
+        };
+
         const onPointerDown = (event: PointerEvent): void => {
             if (
-                resizeDrag ||
+                interaction ||
                 event.button !== 0 ||
-                latestRef.current.activeControl !== ActiveControl.AUDIO_REGION_EDIT
+                latestRef.current.activeControl !== ActiveControl.CURSOR
             ) return;
 
             const path = event.composedPath();
             const region = regionRuntime.regionsPlugin.getRegions().find(
                 (item) => item.element && path.includes(item.element),
             );
-            if (!region || !region.resize) return;
+            if (!region) return;
 
             // WaveSurfer documents the handles' part attribute as public API.
             const handle = path.find((item): item is HTMLElement => (
@@ -255,17 +269,24 @@ export function useRegionEditing({
                 side = 'end';
             }
             const clientID = clientIDFromWaveRegionId(region.id);
-            if (!side || clientID === null || !region.element) return;
+            if (clientID === null) return;
 
-            const regionBoundingBox = region.element.getBoundingClientRect();
+            const regionElement = region.element;
+
+            if (side === null && !region.drag) return;
+            if (side !== null && (!region.resize || !regionElement)) return;
+
+            interaction = { pointerID: event.pointerId, clientID };
+            dispatch(audioActions.setAudioInteractingInterval(clientID));
+            if (side === null || !regionElement) return;
+
+            const regionBoundingBox = regionElement.getBoundingClientRect();
             const visualBoundaryX = side === 'start' ? regionBoundingBox.left : regionBoundingBox.right;
             const grabOffsetX = visualBoundaryX - event.clientX;
             const startTime = side === 'start' ? region.start : region.end;
 
-            resizeDrag = {
-                pointerID: event.pointerId,
+            resizeMeta = {
                 region,
-                clientID,
                 side,
                 startTime,
                 start: region.start,
@@ -290,16 +311,16 @@ export function useRegionEditing({
         };
 
         const onPointerMove = (event: PointerEvent): void => {
-            const drag = resizeDrag;
-            if (!drag || drag.pointerID !== event.pointerId) return;
+            const resize = resizeMeta;
+            if (!interaction || !resize || interaction.pointerID !== event.pointerId) return;
 
             let movementDirection: -1 | 1 | null = null;
-            if (event.clientX < drag.clientX) {
+            if (event.clientX < resize.clientX) {
                 movementDirection = -1;
-            } else if (event.clientX > drag.clientX) {
+            } else if (event.clientX > resize.clientX) {
                 movementDirection = 1;
             }
-            resizeDrag = { ...drag, clientX: event.clientX };
+            resizeMeta = { ...resize, clientX: event.clientX };
             refreshResize();
 
             if (movementDirection !== null) {
@@ -307,28 +328,52 @@ export function useRegionEditing({
             }
         };
 
-        const onPointerUp = (event: PointerEvent): void => {
-            const drag = resizeDrag;
-            if (!drag || drag.pointerID !== event.pointerId) return;
+        const onPointerEnd = (event: PointerEvent, preserveReleasedIntervalHover: boolean): void => {
+            const currInteraction = interaction;
+            if (!currInteraction || currInteraction.pointerID !== event.pointerId) return;
+            const currResize = resizeMeta;
 
-            resizeDrag = null;
+            interaction = null;
+            resizeMeta = null;
+            if (!currResize) {
+                if (preserveReleasedIntervalHover) {
+                    dispatch(audioActions.setAudioHoveredInterval(currInteraction.clientID));
+                }
+                dispatch(audioActions.setAudioInteractingInterval(null));
+                return;
+            }
+
             autoScroll.stop();
             restoreResizeCursor();
+            if (preserveReleasedIntervalHover) {
+                dispatch(audioActions.setAudioHoveredInterval(currInteraction.clientID));
+            }
+            dispatch(audioActions.setAudioInteractingInterval(null));
             if (!hasResized) return;
 
-            dispatch(updateAudioIntervalAsync(drag.clientID, {
-                start: Math.round(drag.region.start * 1000),
-                stop: Math.round(drag.region.end * 1000),
+            dispatch(updateAudioIntervalAsync(currInteraction.clientID, {
+                start: Math.round(currResize.region.start * 1000),
+                stop: Math.round(currResize.region.end * 1000),
             }));
+        };
+
+        const onPointerUp = (event: PointerEvent): void => {
+            onPointerEnd(event, isPointerOverWaveform(event));
+        };
+
+        const onPointerCancel = (event: PointerEvent): void => {
+            onPointerEnd(event, false);
         };
 
         document.addEventListener('pointerdown', onPointerDown);
         document.addEventListener('pointermove', onPointerMove);
         document.addEventListener('pointerup', onPointerUp);
-        document.addEventListener('pointercancel', onPointerUp);
+        document.addEventListener('pointercancel', onPointerCancel);
         return () => {
-            resizeDrag = null;
+            interaction = null;
+            resizeMeta = null;
             hasResized = false;
+            dispatch(audioActions.setAudioInteractingInterval(null));
             autoScroll.destroy();
             setAutoScrolling(false);
             restoreResizeCursor();
@@ -336,7 +381,7 @@ export function useRegionEditing({
             document.removeEventListener('pointerdown', onPointerDown);
             document.removeEventListener('pointermove', onPointerMove);
             document.removeEventListener('pointerup', onPointerUp);
-            document.removeEventListener('pointercancel', onPointerUp);
+            document.removeEventListener('pointercancel', onPointerCancel);
         };
     }, [ready]);
 }

@@ -16,12 +16,12 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import ast
-import os
-import tempfile
-import urllib
 from datetime import timedelta
 from enum import Enum, IntEnum
+import os
 from pathlib import Path
+import tempfile
+import urllib
 
 from attr.converters import to_bool
 from corsheaders.defaults import default_headers
@@ -30,6 +30,7 @@ from logstash_async.constants import constants as logstash_async_constants
 
 from cvat import __version__
 from cvat.apps.iam.password_validation import DEFAULT_MIN_PASSWORD_LENGTH
+
 
 # Build paths inside the project like this: BASE_DIR / ...
 BASE_DIR = Path(os.environ.get("CVAT_BASE_DIR", Path(__file__).parents[2]))
@@ -55,7 +56,7 @@ def generate_secret_key():
 
     with tempfile.NamedTemporaryFile(mode="wt", dir=keys_dir, prefix=secret_key_fname + ".") as f:
         chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
-        f.write("SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
+        f.write(f"SECRET_KEY = '{get_random_string(50, chars)}'\n")
 
         # Make sure the file contents are written before we link to it
         # from the final location.
@@ -147,7 +148,10 @@ INSTALLED_APPS = [
     "cvat.apps.redis_handler",
     "cvat.apps.consensus",
     "cvat.apps.access_tokens",
+    "cvat.apps.growth",
 ]
+
+AUTH_USER_MODEL = "iam.User"
 
 SITE_ID = 1
 
@@ -297,6 +301,7 @@ OBJECTS_NOT_RELATED_WITH_ORG = [
     "server",
     "request",
     "access_token",
+    "growth",
 ]
 
 # ORG settings
@@ -830,6 +835,7 @@ ONE_RUNNING_JOB_IN_QUEUE_PER_USER = to_bool(os.getenv("ONE_RUNNING_JOB_IN_QUEUE_
 CVAT_CONCURRENT_CHUNK_PROCESSING = int(os.getenv("CVAT_CONCURRENT_CHUNK_PROCESSING", 1))
 
 from cvat.rq_patching import patch_rq
+
 
 patch_rq()
 

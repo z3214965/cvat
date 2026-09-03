@@ -45,7 +45,7 @@ function ConstructorViewer(props: ConstructorViewerProps): JSX.Element {
                 onClick={() => onCreate('skeleton')}
                 className='cvat-constructor-viewer-new-skeleton-item'
             >
-                Setup skeleton
+                配置骨架
                 <PlusCircleOutlined />
             </Button>,
         );
@@ -58,7 +58,7 @@ function ConstructorViewer(props: ConstructorViewerProps): JSX.Element {
                 onClick={() => onCreate('model')}
                 className='cvat-constructor-viewer-new-from-model-item'
             >
-                From model
+                模型导入
                 <PlusCircleOutlined />
             </Button>,
         );

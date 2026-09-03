@@ -67,6 +67,12 @@ function TaskActionsComponent(props: Readonly<Props>): JSX.Element {
     }), shallowEqual);
 
     const isBulkMode = selectedIds.length > 1;
+    const isExportDatasetDisabled = isBulkMode &&
+        new Set(
+            currentTasks
+                .filter((task) => selectedIds.includes(task.id))
+                .map((task) => task.dimension),
+        ).size > 1;
     const {
         dropdownOpen,
         editField,
@@ -157,9 +163,7 @@ function TaskActionsComponent(props: Readonly<Props>): JSX.Element {
         const tasksToDelete = currentTasks.filter((task) => selectedIds.includes(task.id));
         Modal.confirm({
             title: isBulkMode ? `删除所选中的 ${tasksToDelete.length} 任务` : `任务 #${taskInstance.id} 将要被删除`,
-            content: isBulkMode ?
-                '所有选定任务的所有相关数据(图片、标注)都将丢失。是否继续？' :
-                '所有相关数据(图片、标注)都将丢失。是否继续？',
+            content: isBulkMode ? '所有选定任务的所有相关数据(图片、标注)都将丢失。是否继续？' : '所有相关数据(图片、标注)都将丢失。是否继续？',
             className: 'cvat-modal-confirm-delete-task',
             onOk: () => {
                 dispatch(makeBulkOperationAsync(
@@ -270,6 +274,7 @@ function TaskActionsComponent(props: Readonly<Props>): JSX.Element {
             onMoveTaskToProject,
             onDeleteTask,
             selectedIds,
+            isExportDatasetDisabled,
             t,
         }, props);
     }

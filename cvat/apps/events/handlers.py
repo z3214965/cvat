@@ -5,7 +5,6 @@
 import traceback
 from typing import Any
 
-import rq
 from crum import get_current_request, get_current_user
 from django.db import DatabaseError
 from django.db.models import Model
@@ -14,6 +13,7 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import exception_handler as drf_exception_handler
+import rq
 
 from cvat.apps.access_tokens.models import AccessToken
 from cvat.apps.access_tokens.serializers import AccessTokenReadSerializer
@@ -27,7 +27,6 @@ from cvat.apps.engine.models import (
     Project,
     ShapeType,
     Task,
-    User,
 )
 from cvat.apps.engine.rq import BaseRQMeta
 from cvat.apps.engine.serializers import (
@@ -41,6 +40,7 @@ from cvat.apps.engine.serializers import (
     TaskReadSerializer,
 )
 from cvat.apps.events import utils
+from cvat.apps.iam.models import User
 from cvat.apps.organizations.models import Invitation, Membership, Organization
 from cvat.apps.organizations.serializers import (
     InvitationReadSerializer,
@@ -324,6 +324,7 @@ def get_cleaned_up_serializer(instance):
 
 
 from cvat.apps.engine.log import ServerLogManager
+
 
 slogger = ServerLogManager(__name__)
 

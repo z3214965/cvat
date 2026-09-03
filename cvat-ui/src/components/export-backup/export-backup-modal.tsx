@@ -201,9 +201,7 @@ function ExportBackupModal(): JSX.Element {
                 );
                 closeModal();
 
-                const description = isBulkMode ?
-                    '批量备份导出已开始。您可以在[here](/requests)查看进度。' :
-                    '备份导出已开始。您可以在[here](/requests)查看进度。';
+                const description = isBulkMode ? '批量备份导出已开始。您可以在[here](/requests)查看进度。' : '备份导出已开始。您可以在[here](/requests)查看进度。';
                 Notification.info({
                     message: isBulkMode ? '批量备份导出已开始' : '备份导出已开始',
                     description: (

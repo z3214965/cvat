@@ -25,6 +25,7 @@ interface MenuItemsData {
     onGoToReplicas: (() => void) | null;
     startEditField: (key: string) => void;
     jobsToAct: Job[];
+    isExportAnnotationsDisabled: boolean;
     t: (key: string) => string;
 }
 
@@ -63,6 +64,7 @@ export default function JobActionsItems(
         jobsToAct,
         onGoToParent,
         onGoToReplicas,
+        isExportAnnotationsDisabled,
         t,
     } = menuItemsData;
 

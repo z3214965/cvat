@@ -105,15 +105,6 @@ function RightGroup(props: Props): JSX.Element {
         }
     }, []);
 
-    const workspaceNames: Record<Workspace, string> = {
-        [Workspace.STANDARD3D]: '标准3D',
-        [Workspace.STANDARD]: '标准',
-        [Workspace.ATTRIBUTES]: '属性标注',
-        [Workspace.SINGLE_SHAPE]: '单形状',
-        [Workspace.TAGS]: '标签标注',
-        [Workspace.REVIEW]: '审核',
-    };
-
     return (
         <Col className='cvat-annotation-header-right-group'>
             <Button
@@ -168,20 +159,23 @@ function RightGroup(props: Props): JSX.Element {
                     value={workspace}
                 >
                     {Object.values(Workspace).map((ws) => {
+                        if (jobInstance.mediaType !== 'audio' && ws === Workspace.AUDIO) {
+                            return null;
+                        }
                         if (jobInstance.dimension === DimensionType.DIMENSION_3D) {
                             if (ws === Workspace.STANDARD) {
                                 return null;
                             }
                             return (
                                 <Select.Option disabled={ws !== Workspace.STANDARD3D} key={ws} value={ws}>
-                                    {workspaceNames[ws]}
+                                    {ws}
                                 </Select.Option>
                             );
                         }
                         if (ws !== Workspace.STANDARD3D) {
                             return (
                                 <Select.Option key={ws} value={ws}>
-                                    {workspaceNames[ws]}
+                                    {ws}
                                 </Select.Option>
                             );
                         }

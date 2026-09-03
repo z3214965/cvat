@@ -3,11 +3,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-import io
-import mimetypes
-import os
-import re
-import shutil
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict, deque
 from collections.abc import Collection, Iterable
@@ -15,18 +10,24 @@ from contextlib import closing
 from copy import deepcopy
 from datetime import timedelta
 from enum import Enum
+import io
+import itertools
 from logging import Logger
+import mimetypes
+import os
 from pathlib import Path, PurePath
+import re
+import shutil
 from typing import Any, ClassVar
 from zipfile import ZipFile, ZipInfo
 
-import rapidjson
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from django.db.models import Min, Prefetch
 from django.utils import timezone
+import rapidjson
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
@@ -70,6 +71,7 @@ from cvat.utils import django_database as db_utils
 from cvat.utils.paths import join_untrusted_path, problem_with_untrusted_path
 from utils.dataset_manifest import ImageManifestManager
 
+
 slogger = ServerLogManager(__name__)
 
 
@@ -105,7 +107,7 @@ def _write_annotation_guide(
 
         for db_asset in assets:
             md = md.replace(
-                f"/api/assets/{str(db_asset.pk)}", os.path.join(assets_dirname, db_asset.filename)
+                f"/api/assets/{db_asset.pk!s}", os.path.join(assets_dirname, db_asset.filename)
             )
             file = os.path.join(settings.ASSETS_ROOT, str(db_asset.pk), db_asset.filename)
             with open(file, "rb") as asset_file:
@@ -123,7 +125,7 @@ def _read_annotation_guide(zip_object, guide_filename, assets_dirname):
         assets = [(x, zip_object.read(x)) for x in assets]
 
         if len(assets) > settings.ASSET_MAX_COUNT_PER_GUIDE:
-            raise ValidationError(f"Maximum number of assets per guide reached")
+            raise ValidationError("Maximum number of assets per guide reached")
         for asset in assets:
             if len(asset[1]) / (1024 * 1024) > settings.ASSET_MAX_SIZE_MB:
                 raise ValidationError(f"Maximum size of asset is {settings.ASSET_MAX_SIZE_MB} MB")
@@ -174,7 +176,7 @@ class _BackupBase:
         keys_to_drop = set(meta.keys()) - allowed_keys
         if keys_to_drop:
             if self._logger:
-                self._logger.warning("the following keys are dropped {}".format(keys_to_drop))
+                self._logger.warning(f"the following keys are dropped {keys_to_drop}")
             for key in keys_to_drop:
                 del meta[key]
 
@@ -522,8 +524,6 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
                 assert False, f"Unknown media type '{media_type}' with mode '{mode}'"
 
     def _write_data_from_cloud_storage(self, zip_object: ZipFile, target_dir: str) -> None:
-        assert not hasattr(self._db_data, "video"), "Only images can be stored in cloud storage"
-
         target_data_dir = os.path.join(target_dir, self.DATA_DIRNAME)
         data_dir = self._db_data.get_upload_dirname()
 
@@ -532,7 +532,10 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
         files_for_local_copy = []
 
         media_files_to_download: list[PurePath] = []
-        for media_file in self._db_data.related_files.all():
+        for media_file in itertools.chain(
+            self._db_data.related_files.all(),
+            [self._db_data.video] if hasattr(self._db_data, "video") else [],
+        ):
             media_path = PurePath(media_file.path)
 
             local_path = os.path.join(data_dir, media_path)
@@ -691,8 +694,8 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
 
             segment_type = serialized_segment.pop("type")
             if (
-                self._db_task.segment_size == 0
-                and segment_type == models.SegmentType.RANGE
+                (self._db_task.segment_size == 0
+                and segment_type == models.SegmentType.RANGE)
                 or self._db_data.validation_mode == models.ValidationMode.GT_POOL
             ):
                 assert self._db_task.media_type != models.MediaType.AUDIO
@@ -769,8 +772,8 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
 
             if (
                 self._db_data.storage == StorageChoice.SHARE
-                or self._db_data.storage == StorageChoice.CLOUD_STORAGE
-                and not self._lightweight
+                or (self._db_data.storage == StorageChoice.CLOUD_STORAGE
+                and not self._lightweight)
             ):
                 data["storage"] = StorageChoice.LOCAL
             else:
@@ -849,7 +852,7 @@ class _ImporterBase:
         try:
             return Version(version)
         except ValueError:
-            raise ValueError("{} version is not supported".format(version))
+            raise ValueError(f"{version} version is not supported")
 
     @staticmethod
     def _prepare_dirs(filepath):
@@ -1024,7 +1027,7 @@ class TaskImporter(_ImporterBase, _TaskBackupBase):
         output_data_path = self._db_task.data.get_upload_dirname()
         uploaded_files = []
         for file_path in input_archive.namelist():
-            if file_path.endswith("/") or self._subdir and not file_path.startswith(self._subdir):
+            if file_path.endswith("/") or (self._subdir and not file_path.startswith(self._subdir)):
                 continue
 
             file_name = os.path.relpath(file_path, self._subdir)
@@ -1170,7 +1173,7 @@ class TaskImporter(_ImporterBase, _TaskBackupBase):
                     raise ValidationError(f"Unsafe file path in manifest: {problem}")
         else:
             if data_serializer.initial_data["storage"] != StorageChoice.LOCAL:
-                raise ValidationError(f"Unexpected storage type in the backup files")
+                raise ValidationError("Unexpected storage type in the backup files")
 
             db_data.storage = StorageChoice.LOCAL
 
@@ -1510,9 +1513,7 @@ def create_backup(
         # Need to retry later if the lock was not available
         retry_current_rq_job(EXPORT_LOCKED_RETRY_INTERVAL)
         logger.info(
-            "Failed to acquire export cache lock. Retrying in {}".format(
-                EXPORT_LOCKED_RETRY_INTERVAL
-            )
+            f"Failed to acquire export cache lock. Retrying in {EXPORT_LOCKED_RETRY_INTERVAL}"
         )
         raise
 

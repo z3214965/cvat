@@ -13,7 +13,6 @@ import { CombinedState } from 'reducers';
 import IncrementalCSVWriter, { CSVColumn, downloadCSV } from 'utils/csv-writer';
 import { exportToCSVAsync } from 'actions/csv-export-actions';
 import { filterNull, NonNullableProperties } from 'utils/filter-null';
-import { getInstanceTypeText } from 'utils/conversion-txt';
 
 interface CSVExportButtonConfig<T, Q> {
     resourceName: string;
@@ -44,9 +43,8 @@ function createCSVExportButton<T, Q>(
         const columns = useMemo(() => config.columns, []);
 
         const handleExport = useCallback(() => {
-            const resourceTxt = getInstanceTypeText(config.resourceName);
             const timestamp = new Date().toISOString().split('T')[0];
-            const filename = `cvat-${resourceTxt}-${timestamp}.csv`;
+            const filename = `cvat-${config.resourceName}-${timestamp}.csv`;
 
             if (predefinedData) {
                 const csvWriter = new IncrementalCSVWriter(columns, config.uniqueKey ?? null);

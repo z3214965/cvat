@@ -1,16 +1,16 @@
-import os
-import tempfile
 from collections import namedtuple
 from collections.abc import Callable
+import os
+import tempfile
 from unittest import TestCase, mock
 from unittest.mock import Mock
 
-import numpy as np
 from datumaro import AnnotationType, Bbox, LabelCategories
 from datumaro.components import media
 from datumaro.components.dataset import StreamDataset
 from datumaro.components.dataset_base import CategoriesInfo, DatasetBase, DatasetItem
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
+import numpy as np
 from rest_framework import status
 from rq.job import Job as RQJob
 
@@ -35,6 +35,7 @@ from cvat.apps.engine.tests.utils import (
     generate_image_file,
     get_paginated_collection,
 )
+from cvat.apps.iam.models import User
 
 
 class TestExtractors(TestCase):

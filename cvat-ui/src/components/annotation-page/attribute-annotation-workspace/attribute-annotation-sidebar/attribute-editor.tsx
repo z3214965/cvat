@@ -245,7 +245,7 @@ function AttrValuesList(props: ListProps): JSX.Element | null {
                 updatedComponentShortcuts[key] = {
                     ...updatedComponentShortcuts[key],
                     nonActive: false,
-                    name: `Assign attribute value ${value}`,
+                    name: `分配属性值 ${value}`,
                     description: `将该属性的当前值修改为 ${value}`,
                 };
             });

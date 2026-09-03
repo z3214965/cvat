@@ -5,33 +5,33 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Collection, Generator, Iterator, Sequence
+from contextlib import ExitStack, closing
+from datetime import UTC, datetime
 import io
+from itertools import groupby, pairwise
 import os
 import os.path
+from pathlib import Path, PurePath
 import pickle  # nosec
 import tempfile
 import time
+from typing import Any, TypeAlias, overload
 import zipfile
 import zlib
-from collections.abc import Callable, Collection, Generator, Iterator, Sequence
-from contextlib import ExitStack, closing
-from datetime import datetime, timezone
-from itertools import groupby, pairwise
-from pathlib import Path, PurePath
-from typing import Any, TypeAlias, overload
 
 import attrs
 import av
-import django_rq
-import PIL.Image
-import PIL.ImageOps
-import rq
 from django.conf import settings
 from django.core.cache import caches
 from django.db import models as django_models
 from django.utils import timezone as django_tz
+import django_rq
+import PIL.Image
+import PIL.ImageOps
 from redis.exceptions import LockError
 from rest_framework.exceptions import NotFound, ValidationError
+import rq
 from rq.job import JobStatus as RQJobStatus
 
 from cvat.apps.engine import models
@@ -56,6 +56,7 @@ from cvat.utils import django_database as db_utils
 from cvat.utils.paths import join_untrusted_path
 from utils.dataset_manifest import ImageManifestManager
 from utils.dataset_manifest.utils import Openable
+
 
 slogger = ServerLogManager(__name__)
 
@@ -637,7 +638,7 @@ class MediaCache:
     @staticmethod
     def read_raw_images(
         db_task: models.Task, frame_ids: Sequence[int], *, decode: bool = True
-    ) -> Generator[tuple[PIL.Image.Image | str, str], None, None]:
+    ) -> Generator[tuple[PIL.Image.Image | str, str]]:
         db_data = db_task.require_data()
         manifest_path = db_data.get_manifest_path()
 
@@ -698,7 +699,7 @@ class MediaCache:
                     frame_path = media_item[1]
                     if checksum and not md5_hash(frame_path) == checksum:
                         slogger.task[db_task.id].warning(
-                            "Hash sums of files {} do not match".format(frame_path)
+                            f"Hash sums of files {frame_path} do not match"
                         )
 
                     if db_task.dimension == models.DimensionType.DIM_3D and (
@@ -736,7 +737,7 @@ class MediaCache:
         *,
         truncate_common_filename_prefix: bool = True,  # should be done on the UI, probably
         decode: bool = True,
-    ) -> Generator[tuple[int, tuple[PIL.Image.Image | str, str]], None, None]:
+    ) -> Generator[tuple[int, tuple[PIL.Image.Image | str, str]]]:
         raw_data_dir = db_data.get_raw_data_dirname()
 
         with ExitStack() as es:
@@ -793,7 +794,7 @@ class MediaCache:
     @staticmethod
     def _read_raw_frames(
         db_task: models.Task | int, frame_ids: Sequence[int]
-    ) -> Generator[tuple[av.VideoFrame | PIL.Image.Image | str, str | None], None, None]:
+    ) -> Generator[tuple[av.VideoFrame | PIL.Image.Image | str, str | None]]:
         if isinstance(db_task, int):
             db_task = models.Task.objects.get(pk=db_task)
 
@@ -805,7 +806,7 @@ class MediaCache:
         db_data = db_task.require_data()
 
         if hasattr(db_data, "video"):
-            source_path = db_data.get_raw_data_dirname() / db_data.video.path
+            source_path = db_data.get_openable(db_data.video.path)
 
             manifest_path = db_data.get_manifest_path()
             reader = VideoReaderWithManifest(
@@ -1092,7 +1093,7 @@ class MediaCache:
             )
 
             if not full_manifest_path.exists() or datetime.fromtimestamp(
-                full_manifest_path.stat().st_mtime, tz=timezone.utc
+                full_manifest_path.stat().st_mtime, tz=UTC
             ) < storage_client.get_file_last_modified(db_manifest.filename):
                 storage_client.download_file(db_manifest.filename, full_manifest_path)
 
@@ -1108,7 +1109,7 @@ class MediaCache:
             break
 
         if not preview_path:
-            msg = "Cloud storage {} does not contain any images".format(db_storage.pk)
+            msg = f"Cloud storage {db_storage.pk} does not contain any images"
             slogger.cloud_storage[db_storage.pk].info(msg)
             raise NotFound(msg)
 

@@ -23,7 +23,7 @@ import { ColorizeIcon } from 'icons';
 import patterns from 'utils/validation-patterns';
 import config from 'config';
 import {
-    equalArrayHead, idGenerator, LabelOptColor, SkeletonConfiguration,
+    equalArrayHead, idGenerator, LabelOptColor, SkeletonConfiguration, validateNumberAttributeValues,
 } from './common';
 
 export enum AttributeType {
@@ -337,29 +337,10 @@ export default class LabelForm extends React.Component<Props> {
         const validator = (_: any, strNumbers: string): Promise<void> => {
             if (typeof strNumbers !== 'string') return Promise.resolve();
 
-            const numbers = strNumbers.split(';').map((number): number => Number.parseFloat(number));
-            if (numbers.length !== 3) {
-                return Promise.reject(new Error('预期有三个数字'));
-            }
-
-            for (const number of numbers) {
-                if (Number.isNaN(number)) {
-                    return Promise.reject(new Error(`"${number}" 不是一个数字`));
-                }
-            }
-
-            const [min, max, step] = numbers;
-
-            if (min >= max) {
-                return Promise.reject(new Error('最小值必须小于最大值'));
-            }
-
-            if (max - min < step) {
-                return Promise.reject(new Error('步长必须小于最大最小差值'));
-            }
-
-            if (step <= 0) {
-                return Promise.reject(new Error('步长必须是正数'));
+            try {
+                validateNumberAttributeValues(strNumbers.split(';'));
+            } catch (error) {
+                return Promise.reject(error);
             }
 
             return Promise.resolve();

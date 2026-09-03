@@ -237,7 +237,8 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
 
         if (this.data.isFrameUpdating) {
             this.data.nextSetupRequest = {
-                frameData, objectStates,
+                frameData,
+                objectStates,
             };
             return;
         }
@@ -292,8 +293,10 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
     }
 
     public isAbleToChangeFrame(): boolean {
-        const isUnable = [Mode.EDIT].includes(this.data.mode) ||
-            this.data.isFrameUpdating || (this.data.mode === Mode.DRAW && typeof this.data.drawData.redraw === 'number');
+        const isUnable =
+            [Mode.EDIT].includes(this.data.mode) ||
+            this.data.isFrameUpdating ||
+            (this.data.mode === Mode.DRAW && typeof this.data.drawData.redraw === 'number');
         return !isUnable;
     }
 
@@ -408,7 +411,8 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
 
         if (typeof configuration.selectedShapeOpacity === 'number') {
             this.data.configuration.selectedShapeOpacity = Math.max(
-                0, Math.min(configuration.selectedShapeOpacity, 100),
+                0,
+                Math.min(configuration.selectedShapeOpacity, 100),
             );
         }
 
@@ -432,9 +436,7 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
         }
 
         if (typeof configuration.focusedObjectPadding === 'number') {
-            this.data.configuration.focusedObjectPadding = Math.max(
-                configuration.focusedObjectPadding, 0,
-            );
+            this.data.configuration.focusedObjectPadding = Math.max(configuration.focusedObjectPadding, 0);
         }
 
         this.notify(UpdateReasons.CONFIG_UPDATED);

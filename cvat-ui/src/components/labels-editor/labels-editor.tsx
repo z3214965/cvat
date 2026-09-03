@@ -340,7 +340,7 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
                     label: (
                         <span>
                             <EditOutlined />
-                            <Text>JSON配置</Text>
+                            <Text>Raw</Text>
                         </span>
                     ),
                     children: (

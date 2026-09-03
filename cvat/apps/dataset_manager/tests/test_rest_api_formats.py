@@ -3,34 +3,33 @@
 #
 # SPDX-License-Identifier: MIT
 
+from collections.abc import Callable
+from contextlib import ExitStack, contextmanager
 import copy
+from datetime import timedelta
+from functools import partial
+from io import BytesIO
 import itertools
 import json
 import multiprocessing
 import os
 import os.path as osp
-import random
-import xml.etree.ElementTree as ET
-import zipfile
-from collections.abc import Callable
-from contextlib import ExitStack, contextmanager
-from datetime import timedelta
-from functools import partial
-from io import BytesIO
 from pathlib import Path
+import random
 from tempfile import TemporaryDirectory
 from time import sleep
 from typing import Any, ClassVar, overload
-from unittest.mock import DEFAULT as MOCK_DEFAULT
-from unittest.mock import MagicMock, patch
+from unittest.mock import DEFAULT as MOCK_DEFAULT, MagicMock, patch
+import xml.etree.ElementTree as ET
+import zipfile
 
+from attr import define, field
 import av
 import datumaro
-import numpy as np
-from attr import define, field
 from datumaro.components.comparator import EqualityComparator
 from datumaro.components.dataset import Dataset
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
+import numpy as np
 from PIL import Image
 from rest_framework import status
 
@@ -52,6 +51,8 @@ from cvat.apps.engine.tests.utils import (
     ImportApiTestBase,
     get_paginated_collection,
 )
+from cvat.apps.iam.models import User
+
 
 projects_path = osp.join(osp.dirname(__file__), "assets", "projects.json")
 with open(projects_path) as file:
@@ -652,21 +653,20 @@ class TaskDumpUploadTest(_DbTestBase):
                 )
 
             for user, edata in list(expected.items()):
-                with self.subTest(format=f"{edata['name']}"):
-                    with TestDir() as test_dir:
-                        self._clear_temp_data()  # clean up from previous tests and iterations
+                with self.subTest(format=f"{edata['name']}"), TestDir() as test_dir:
+                    self._clear_temp_data()  # clean up from previous tests and iterations
 
-                        user_name = edata["name"]
-                        file_zip_name = osp.join(test_dir, f"{user_name}.zip")
-                        expected_4xx_status_code = None if user else status.HTTP_401_UNAUTHORIZED
-                        response = self._export_task_annotations(
-                            user,
-                            task_id,
-                            query_params=export_params,
-                            expected_4xx_status_code=expected_4xx_status_code,
-                        )
-                        self._save_file_from_response(response, file_zip_name)
-                        self.assertEqual(osp.exists(file_zip_name), edata["file_exists"])
+                    user_name = edata["name"]
+                    file_zip_name = osp.join(test_dir, f"{user_name}.zip")
+                    expected_4xx_status_code = None if user else status.HTTP_401_UNAUTHORIZED
+                    response = self._export_task_annotations(
+                        user,
+                        task_id,
+                        query_params=export_params,
+                        expected_4xx_status_code=expected_4xx_status_code,
+                    )
+                    self._save_file_from_response(response, file_zip_name)
+                    self.assertEqual(osp.exists(file_zip_name), edata["file_exists"])
 
     def test_api_v2_dump_and_upload_annotations_with_objects_are_different_images(self):
         test_name = self._testMethodName
@@ -681,49 +681,48 @@ class TaskDumpUploadTest(_DbTestBase):
         }
 
         for upload_type in upload_types:
-            with self.subTest(format=type):
-                with TestDir() as test_dir:
-                    if upload_type == "task":
-                        self._create_annotations(
-                            task, "CVAT for images 1.1 different types", "random"
-                        )
-                    else:
-                        jobs = self._get_jobs(task_id)
-                        job_id = jobs[0]["id"]
-                        self._create_annotations_in_job(
-                            task, job_id, "CVAT for images 1.1 different types", "random"
-                        )
-
-                    file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
-                    self._export_task_annotations(
-                        self.admin, task_id, query_params=export_params, file_path=file_zip_name
+            with self.subTest(format=type), TestDir() as test_dir:
+                if upload_type == "task":
+                    self._create_annotations(
+                        task, "CVAT for images 1.1 different types", "random"
                     )
-                    self.assertEqual(osp.exists(file_zip_name), True)
+                else:
+                    jobs = self._get_jobs(task_id)
+                    job_id = jobs[0]["id"]
+                    self._create_annotations_in_job(
+                        task, job_id, "CVAT for images 1.1 different types", "random"
+                    )
 
-                    url = self._generate_url_remove_tasks_annotations(task_id)
-                    self._remove_annotations(url, self.admin)
+                file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
+                self._export_task_annotations(
+                    self.admin, task_id, query_params=export_params, file_path=file_zip_name
+                )
+                self.assertEqual(osp.exists(file_zip_name), True)
 
-                    if upload_type == "task":
-                        with open(file_zip_name, "rb") as binary_file:
-                            self._import_task_annotations(
-                                self.admin,
-                                task_id,
-                                binary_file,
-                                query_params={"format": "CVAT 1.1"},
-                            )
-                    else:
-                        jobs = self._get_jobs(task_id)
-                        with open(file_zip_name, "rb") as binary_file:
-                            self._import_job_annotations(
-                                self.admin,
-                                jobs[0]["id"],
-                                binary_file,
-                                query_params={"format": "CVAT 1.1"},
-                            )
+                url = self._generate_url_remove_tasks_annotations(task_id)
+                self._remove_annotations(url, self.admin)
 
-                    response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
-                    self.assertEqual(len(response.data["shapes"]), 2)
-                    self.assertEqual(len(response.data["tracks"]), 0)
+                if upload_type == "task":
+                    with open(file_zip_name, "rb") as binary_file:
+                        self._import_task_annotations(
+                            self.admin,
+                            task_id,
+                            binary_file,
+                            query_params={"format": "CVAT 1.1"},
+                        )
+                else:
+                    jobs = self._get_jobs(task_id)
+                    with open(file_zip_name, "rb") as binary_file:
+                        self._import_job_annotations(
+                            self.admin,
+                            jobs[0]["id"],
+                            binary_file,
+                            query_params={"format": "CVAT 1.1"},
+                        )
+
+                response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
+                self.assertEqual(len(response.data["shapes"]), 2)
+                self.assertEqual(len(response.data["tracks"]), 0)
 
     def test_api_v2_dump_and_upload_annotations_with_objects_are_different_video(self):
         test_name = self._testMethodName
@@ -739,48 +738,47 @@ class TaskDumpUploadTest(_DbTestBase):
         }
 
         for upload_type in upload_types:
-            with self.subTest(format=type):
-                with TestDir() as test_dir:
-                    if upload_type == "task":
-                        self._create_annotations(
-                            task, "CVAT for images 1.1 different types", "random"
-                        )
-                    else:
-                        jobs = self._get_jobs(task_id)
-                        job_id = jobs[0]["id"]
-                        self._create_annotations_in_job(
-                            task, job_id, "CVAT for images 1.1 different types", "random"
-                        )
-
-                    file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
-                    self._export_task_annotations(
-                        self.admin, task_id, query_params=export_params, file_path=file_zip_name
+            with self.subTest(format=type), TestDir() as test_dir:
+                if upload_type == "task":
+                    self._create_annotations(
+                        task, "CVAT for images 1.1 different types", "random"
                     )
-                    self.assertEqual(osp.exists(file_zip_name), True)
-                    url = self._generate_url_remove_tasks_annotations(task_id)
-                    self._remove_annotations(url, self.admin)
-                    if upload_type == "task":
-                        with open(file_zip_name, "rb") as binary_file:
-                            self._import_task_annotations(
-                                self.admin,
-                                task_id,
-                                binary_file,
-                                query_params={"format": "CVAT 1.1"},
-                            )
-                    else:
-                        jobs = self._get_jobs(task_id)
-                        with open(file_zip_name, "rb") as binary_file:
-                            self._import_job_annotations(
-                                self.admin,
-                                jobs[0]["id"],
-                                binary_file,
-                                query_params={"format": "CVAT 1.1"},
-                            )
+                else:
+                    jobs = self._get_jobs(task_id)
+                    job_id = jobs[0]["id"]
+                    self._create_annotations_in_job(
+                        task, job_id, "CVAT for images 1.1 different types", "random"
+                    )
 
-                    self.assertEqual(osp.exists(file_zip_name), True)
-                    response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
-                    self.assertEqual(len(response.data["shapes"]), 0)
-                    self.assertEqual(len(response.data["tracks"]), 2)
+                file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
+                self._export_task_annotations(
+                    self.admin, task_id, query_params=export_params, file_path=file_zip_name
+                )
+                self.assertEqual(osp.exists(file_zip_name), True)
+                url = self._generate_url_remove_tasks_annotations(task_id)
+                self._remove_annotations(url, self.admin)
+                if upload_type == "task":
+                    with open(file_zip_name, "rb") as binary_file:
+                        self._import_task_annotations(
+                            self.admin,
+                            task_id,
+                            binary_file,
+                            query_params={"format": "CVAT 1.1"},
+                        )
+                else:
+                    jobs = self._get_jobs(task_id)
+                    with open(file_zip_name, "rb") as binary_file:
+                        self._import_job_annotations(
+                            self.admin,
+                            jobs[0]["id"],
+                            binary_file,
+                            query_params={"format": "CVAT 1.1"},
+                        )
+
+                self.assertEqual(osp.exists(file_zip_name), True)
+                response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
+                self.assertEqual(len(response.data["shapes"]), 0)
+                self.assertEqual(len(response.data["tracks"]), 2)
 
     def test_api_v2_dump_and_upload_with_objects_type_is_track_and_outside_property(self):
         test_name = self._testMethodName
@@ -1623,9 +1621,9 @@ class ExportBehaviorTest(_DbTestBase):
         EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT = EXPORT_CACHE_LOCK_TTL * 2
 
         def _export(*_, task_id: int):
-            import sys
             from os import replace as original_replace
             from os.path import exists as original_exists
+            import sys
 
             from cvat.apps.dataset_manager.task import export_task as original_export_task
             from cvat.apps.dataset_manager.views import log_exception as original_log_exception
@@ -2411,7 +2409,7 @@ class ProjectDumpUpload(_DbTestBase):
                 query_params={"format": dump_format_name},
                 file_path=file_zip_name,
             )
-            folder_name = osp.join(test_dir, f"folder")
+            folder_name = osp.join(test_dir, "folder")
             with zipfile.ZipFile(file_zip_name, "r") as zip_ref:
                 zip_ref.extractall(folder_name)
             dataset = Dataset.import_from(folder_name, "datumaro")
@@ -2542,7 +2540,7 @@ class ProjectDumpUpload(_DbTestBase):
 
 
 class ImportErrorMessageTest(_DbTestBase):
-    def test_import_error_message_includes_underlying_reason(self):
+    def test_api_v2_can_include_underlying_reason_in_import_error_message(self):
         # A YOLO 1.1 archive that passes format detection (obj.data is present)
         # but fails during import (obj.names is missing): the reported message
         # must contain the underlying reason, not only the generic
@@ -2551,15 +2549,13 @@ class ImportErrorMessageTest(_DbTestBase):
         task = self._create_task(tasks["main"], images)
 
         with TemporaryDirectory() as tmp_dir:
-            with open(osp.join(tmp_dir, "obj.data"), "w") as f:
-                f.write("classes = 1\ntrain = train.txt\nnames = obj.names\nbackup = backup/\n")
-            with open(osp.join(tmp_dir, "train.txt"), "w") as f:
-                f.write("obj_train_data/image_0.jpg\n")
-
             archive_path = osp.join(tmp_dir, "dataset.zip")
             with zipfile.ZipFile(archive_path, "w") as archive:
-                for filename in ("obj.data", "train.txt"):
-                    archive.write(osp.join(tmp_dir, filename), filename)
+                archive.writestr(
+                    "obj.data",
+                    "classes = 1\ntrain = train.txt\nnames = obj.names\nbackup = backup/\n",
+                )
+                archive.writestr("train.txt", "obj_train_data/image_0.jpg\n")
 
             with self.assertRaisesRegex(dm.bindings.CvatImportError, "obj\\.names"):
                 dm.task.import_task_annotations(

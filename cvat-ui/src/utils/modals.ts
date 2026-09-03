@@ -34,6 +34,5 @@ export function confirmTransferModal(
             danger: true,
         },
         okText: '继续',
-        cancelText: '取消',
     });
 }

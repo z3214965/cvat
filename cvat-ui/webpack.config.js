@@ -9,36 +9,31 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 const ExecScriptsPlugin = require('./exec-scripts-webpack-plugin.cjs');
-const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = (env, argv = {}) => {
     const isDevMode = argv.mode === 'development' || process.env.WEBPACK_SERVE === 'true';
-    const sourceMapsEnabled = isDevMode || (process.env.SOURCE_MAPS_ENABLED || 'false').toLocaleLowerCase() === 'true';
+    const sourceMapsEnabled = isDevMode ||
+        (process.env.SOURCE_MAPS_ENABLED || 'false').toLocaleLowerCase() === 'true';
 
     const defaultPlugins = ['plugins/sam'];
-    const plugins = process.env.CLIENT_PLUGINS
-        ? [...defaultPlugins, ...process.env.CLIENT_PLUGINS.split(':')]
-              .map((plugin) => plugin.trim())
-              .filter((plugin) => !!plugin)
-        : defaultPlugins;
+    const plugins = process.env.CLIENT_PLUGINS ? [...defaultPlugins, ...process.env.CLIENT_PLUGINS.split(':')]
+        .map((plugin) => plugin.trim()).filter((plugin) => !!plugin) : defaultPlugins;
 
-    const pluginPaths = plugins
-        .map((pluginPath) => {
-            const abs = path.isAbsolute(pluginPath) ? pluginPath : path.join(__dirname, pluginPath);
-            const prepareScript = path.join(abs, 'prepare.cjs');
-            return {
-                cwd: abs,
-                entrypoint: path.join(abs, 'src', 'ts', 'index.tsx'),
-                script: fs.existsSync(prepareScript) ? prepareScript : null,
-            };
-        })
-        .filter(({ entrypoint }) => {
-            if (!fs.existsSync(entrypoint)) {
-                console.warn(`未找到入口点 ${entrypoint}，该插件已跳过执行。`);
-                return false;
-            }
-            return true;
-        });
+    const pluginPaths = plugins.map((pluginPath) => {
+        const abs = path.isAbsolute(pluginPath) ? pluginPath : path.join(__dirname, pluginPath);
+        const prepareScript = path.join(abs, 'prepare.cjs');
+        return {
+            cwd: abs,
+            entrypoint: path.join(abs, 'src', 'ts', 'index.tsx'),
+            script: fs.existsSync(prepareScript) ? prepareScript : null,
+        };
+    }).filter(({ entrypoint }) => {
+        if (!fs.existsSync(entrypoint)) {
+            console.warn(`未找到入口点 ${entrypoint}，该插件已跳过执行。`);
+            return false;
+        }
+        return true;
+    });
 
     console.log('Source maps: ', sourceMapsEnabled ? 'enabled' : 'disabled');
     console.log('Plugins:');
@@ -52,29 +47,17 @@ module.exports = (env, argv = {}) => {
         target: 'web',
         mode: isDevMode ? 'development' : 'production',
         devtool: sourceMapsEnabled ? (isDevMode ? 'source-map' : 'hidden-source-map') : false,
-        optimization: {
-            minimize: !isDevMode, // 生产环境开启压缩，开发环境关闭
-            minimizer: [
-                new TerserPlugin({
-                    // 排除 onnxruntime 的 .mjs 文件，防止 Terser 压缩时崩溃
-                    exclude: /ort-wasm.*\.mjs$/,
-                }),
-            ],
-        },
         entry: {
             'cvat-ui': './src/index.tsx',
-            ...pluginPaths.reduce(
-                (acc, { entrypoint }, index) => ({
-                    ...acc,
-                    [`plugin_${index}`]: {
-                        dependOn: 'cvat-ui',
-                        // path can be absolute, in this case it is accepted as is
-                        // also the path can be relative to cvat-ui root directory
-                        import: entrypoint,
-                    },
-                }),
-                {},
-            ),
+            ...pluginPaths.reduce((acc, { entrypoint }, index) => ({
+                ...acc,
+                [`plugin_${index}`]: {
+                    dependOn: 'cvat-ui',
+                    // path can be absolute, in this case it is accepted as is
+                    // also the path can be relative to cvat-ui root directory
+                    import: entrypoint,
+                },
+            }), {})
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
@@ -208,7 +191,7 @@ module.exports = (env, argv = {}) => {
                     ],
                 },
                 {
-                    test: /\.(png|jpg|jpeg|gif)$/i,
+                    test: /\.(png|jpg|jpeg|gif|webp)$/i,
                     type: 'asset/resource',
                 },
             ],
@@ -246,7 +229,7 @@ module.exports = (env, argv = {}) => {
                         to  : 'assets/opencv_4.8.0.js',
                     },
                     {
-                        from: 'src/assets/*.png',
+                        from: 'src/assets/*.{png,webp}',
                         to  : 'assets/[name][ext]',
                     },
                     {

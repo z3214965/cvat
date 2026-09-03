@@ -44,9 +44,7 @@ function SelectCSUpdatingSchemeModal(): JSX.Element | null {
 
     const capitalizedInstanceType = instanceType.charAt(0).toUpperCase() + instanceType.slice(1);
     const alert = '数据关联存储仅会在迁移过程中重置，后续需手动更新';
-    const message = instances.length > 1 ?
-        '部分资源已链接至云存储' :
-        `${capitalizedInstanceType} #${instances[0].id} 已链接到云存储`;
+    const message = instances.length > 1 ? '部分资源已链接至云存储' : `${capitalizedInstanceType} #${instances[0].id} 已链接到云存储`;
 
     return (
         <Modal

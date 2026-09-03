@@ -30,7 +30,6 @@ import { ConsensusActionTypes } from 'actions/consensus-actions';
 import { BulkActionsTypes } from 'actions/bulk-actions';
 import { getInstanceType } from 'actions/common';
 import { ResourceUpdateTypes } from 'utils/enums';
-import { getInstanceTypeText, getResourceText } from 'utils/conversion-txt';
 
 import config from 'config';
 import { NotificationsState } from '.';
@@ -693,7 +692,8 @@ export default function (state = defaultState, action: AnyAction): Notifications
                             message,
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
-                            className: `cvat-notification-notice-${resource === 'annotation' ? 'load-annotation' : 'import-dataset'}-failed`,
+                            className: 'cvat-notification-notice-' +
+                                `${resource === 'annotation' ? 'load-annotation' : 'import-dataset'}-failed`,
                         },
                     },
                 },

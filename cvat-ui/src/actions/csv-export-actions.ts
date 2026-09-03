@@ -62,12 +62,10 @@ export function exportToCSVAsync<T>(options: CSVExportOptions<T>) {
                 csvWriter.addBatch(response.results);
 
                 const loadedCount = (page - 1) * pageSize + response.results.length;
-                dispatch(
-                    bulkActions.updateBulkActionStatus({
-                        message: `导出${resourceName}：已加载${loadedCount}个，共${totalCount}个`,
-                        percent: Math.round((page / totalPages) * 100),
-                    }),
-                );
+                dispatch(bulkActions.updateBulkActionStatus({
+                    message: `导出${resourceName}：已加载${loadedCount}个，共${totalCount}个`,
+                    percent: Math.round((page / totalPages) * 100),
+                }));
             }
 
             const csvContent = csvWriter.getContent();

@@ -30,6 +30,7 @@ import { makeBulkOperationAsync } from 'actions/bulk-actions';
 import {
     Dumper, ProjectOrTaskOrJob, Job, Project,
     Storage, StorageData, StorageLocation, Task,
+    DimensionType,
 } from 'cvat-core-wrapper';
 
 type FormValues = {
@@ -136,6 +137,10 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
         }
     }, [isBulkMode, instanceType, allTasks, allProjects, allJobs, instance]);
 
+    const canSaveImages = isBulkMode ?
+        selectedInstances.some((selectedInstance) => selectedInstance.dimension !== DimensionType.DIMENSION_1D) :
+        instance?.dimension !== DimensionType.DIMENSION_1D;
+
     const [nameTemplate, setNameTemplate] = useState('dataset_task_{{id}}');
 
     useEffect(() => {
@@ -187,6 +192,9 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
     const handleExport = useCallback(
         (values: FormValues): void => {
             const exportExtension = getExportExtension(dumpers, values.selectedFormat);
+            const shouldSaveImages = (target: ProjectOrTaskOrJob): boolean => (
+                target.dimension !== DimensionType.DIMENSION_1D && values.saveImages
+            );
             if (isBulkMode) {
                 dispatch(makeBulkOperationAsync<ProjectOrTaskOrJob>(
                     selectedInstances,
@@ -200,7 +208,7 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                             exportDatasetAsync(
                                 inst,
                                 values.selectedFormat as string,
-                                values.saveImages,
+                                shouldSaveImages(inst),
                                 false, // always custom storage in bulk
                                 new Storage({
                                     location: values.targetStorage?.location,
@@ -216,9 +224,7 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                 ));
                 closeModal();
                 const resource = values.saveImages ? '数据集' : '标注';
-                const description =
-                    `批量${resource.toLowerCase()}导出已开始。 ` +
-                    '你可以在[此处](/requests)查看进度并下载文件。';
+                const description = `批量${resource.toLowerCase()}导出已开始。你可以在[此处](/requests)查看进度并下载文件。`;
                 Notification.info({
                     message: `批量${resource.toLowerCase()}导出已开始`,
                     description: (
@@ -233,7 +239,7 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                 exportDatasetAsync(
                     instance as ProjectOrTaskOrJob,
                     values.selectedFormat as string,
-                    values.saveImages,
+                    shouldSaveImages(instance as ProjectOrTaskOrJob),
                     useDefaultTargetStorage,
                     useDefaultTargetStorage ? new Storage({
                         location: defaultStorageLocation,

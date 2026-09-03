@@ -3,18 +3,18 @@
 #
 # SPDX-License-Identifier: MIT
 
-import io
 from collections.abc import Callable, Mapping
 from contextlib import nullcontext
+import io
 from typing import Any
 
-import rq
 from datumaro.components.errors import DatasetError, DatasetImportError, DatasetNotFoundError
 from django.conf import settings
 from django.db import transaction
+import rq
 
 from cvat.apps.dataset_manager.task import TaskAnnotation
-from cvat.apps.dataset_manager.util import TmpDirManager, format_exception_chain
+from cvat.apps.dataset_manager.util import TmpDirManager, format_import_exception
 from cvat.apps.engine import models
 from cvat.apps.engine.log import DatasetLogManager
 from cvat.apps.engine.rq import ImportRQMeta
@@ -25,6 +25,7 @@ from cvat.utils import django_database as db_utils
 
 from .annotation import AnnotationIR
 from .bindings import CvatDatasetNotFoundError, CvatImportError, ProjectData, load_dataset_data
+
 
 dlogger = DatasetLogManager()
 
@@ -231,4 +232,4 @@ def import_dataset_as_project(src_file, project_id, format_name, conv_mask_to_po
         try:
             project.import_dataset(f, importer, conv_mask_to_poly=conv_mask_to_poly)
         except (DatasetError, DatasetImportError, DatasetNotFoundError) as ex:
-            raise CvatImportError(format_exception_chain(ex))
+            raise CvatImportError(format_import_exception(ex))

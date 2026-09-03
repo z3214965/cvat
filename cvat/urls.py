@@ -22,6 +22,7 @@ from django.apps import apps
 from django.contrib import admin
 from django.urls import include, path
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("cvat.apps.engine.urls")),
@@ -55,3 +56,6 @@ if apps.is_installed("cvat.apps.consensus"):
 
 if apps.is_installed("cvat.apps.access_tokens"):
     urlpatterns.append(path("api/", include("cvat.apps.access_tokens.urls")))
+
+if apps.is_installed("cvat.apps.growth"):
+    urlpatterns.append(path("api/", include("cvat.apps.growth.urls")))

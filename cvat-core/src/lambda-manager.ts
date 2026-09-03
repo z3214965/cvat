@@ -148,45 +148,42 @@ class LambdaManager {
         }
 
         const timeoutCallback = (): void => {
-            serverProxy.lambda
-                .status(requestID)
-                .then((response) => {
-                    const { status } = response;
-                    if (requestID in this.listening) {
-                        // check it was not cancelled
-                        const { onUpdate } = this.listening[requestID];
-                        if ([RQStatus.QUEUED, RQStatus.STARTED].includes(status)) {
-                            onUpdate.forEach((update) => update(status, response.progress || 0));
-                            this.listening[requestID].timeout = window.setTimeout(
-                                timeoutCallback,
-                                status === RQStatus.QUEUED ? 30000 : 10000,
-                            );
+            serverProxy.lambda.status(requestID).then((response) => {
+                const { status } = response;
+                if (requestID in this.listening) {
+                    // check it was not cancelled
+                    const { onUpdate } = this.listening[requestID];
+                    if ([RQStatus.QUEUED, RQStatus.STARTED].includes(status)) {
+                        onUpdate.forEach((update) => update(status, response.progress || 0));
+                        this.listening[requestID].timeout = window
+                            .setTimeout(timeoutCallback, status === RQStatus.QUEUED ? 30000 : 10000);
+                    } else {
+                        delete this.listening[requestID];
+                        if (status === RQStatus.FINISHED) {
+                            onUpdate
+                                .forEach((update) => update(status, response.progress ?? 100));
                         } else {
-                            delete this.listening[requestID];
-                            if (status === RQStatus.FINISHED) {
-                                onUpdate.forEach((update) => update(status, response.progress ?? 100));
-                            } else {
-                                onUpdate.forEach((update) =>
-                                    update(status, response.progress ?? 0, response.exc_info ?? ''),
-                                );
-                            }
+                            onUpdate
+                                .forEach((update) => update(status, response.progress ?? 0, response.exc_info ?? ''));
                         }
                     }
-                })
-                .catch((error) => {
-                    if (requestID in this.listening) {
-                        // check it was not cancelled
-                        const { onUpdate } = this.listening[requestID];
-                        onUpdate.forEach((update) =>
-                            update(RQStatus.UNKNOWN, 0, `无法获取请求 ${requestID} 的状态。${error.toString()}`),
-                        );
-                    }
-                })
-                .finally(() => {
-                    if (requestID in this.listening) {
-                        this.listening[requestID].timeout = null;
-                    }
-                });
+                }
+            }).catch((error) => {
+                if (requestID in this.listening) {
+                    // check it was not cancelled
+                    const { onUpdate } = this.listening[requestID];
+                    onUpdate
+                        .forEach((update) => update(
+                            RQStatus.UNKNOWN,
+                            0,
+                            `无法获取请求 ${requestID} 的状态。${error.toString()}`,
+                        ));
+                }
+            }).finally(() => {
+                if (requestID in this.listening) {
+                    this.listening[requestID].timeout = null;
+                }
+            });
         };
 
         this.listening[requestID] = {

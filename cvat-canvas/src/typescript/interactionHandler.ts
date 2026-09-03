@@ -8,14 +8,15 @@ import * as SVG from 'svg.js';
 import consts from './consts';
 import Crosshair from './crosshair';
 import {
-    stringifyPoints, translateToCanvas, RLEToImageData,
-    imageDataToDataURL, translateFromCanvas, translateToSVG,
+    stringifyPoints,
+    translateToCanvas,
+    RLEToImageData,
+    imageDataToDataURL,
+    translateFromCanvas,
+    translateToSVG,
     clamp,
 } from './shared';
-import {
-    InteractionData, InteractionResult, Geometry,
-    Configuration, CanvasHint,
-} from './canvasModel';
+import { InteractionData, InteractionResult, Geometry, Configuration, CanvasHint } from './canvasModel';
 
 export interface InteractionHandler {
     transform(geometry: Geometry): void;
@@ -192,7 +193,8 @@ export class InteractionHandlerImpl implements InteractionHandler {
 
         this.command = 'draw_box';
         const initNewDrawingBox = (): void => {
-            this.currentRectangle = this.container.rect()
+            this.currentRectangle = this.container
+                .rect()
                 .fill('rgba(0, 0, 0, 0)')
                 .stroke({ color: '#000000', width: this.effectiveStrokeWidth })
                 .opacity(this.effectiveShapeOpacity)
@@ -202,7 +204,10 @@ export class InteractionHandlerImpl implements InteractionHandler {
                 const rectangle = this.currentRectangle.clone() as SVG.Rect;
                 this.clearCurrentRectangle();
 
-                const { offset, image: { width: imWidth, height: imHeight } } = this.geometry;
+                const {
+                    offset,
+                    image: { width: imWidth, height: imHeight },
+                } = this.geometry;
                 const [x, y, width, height] = [rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height()];
                 const right = offset + imWidth;
                 const bottom = offset + imHeight;
@@ -286,9 +291,7 @@ export class InteractionHandlerImpl implements InteractionHandler {
         this.clearIntermediateShapes();
 
         for (const shape of shapes) {
-            const {
-                points, shapeType, maskOutlines,
-            } = shape;
+            const { points, shapeType, maskOutlines } = shape;
             if (shapeType === 'polygon') {
                 const isInvalidShape = points.length < 3 * 2;
                 const polygon = this.container
@@ -309,12 +312,15 @@ export class InteractionHandlerImpl implements InteractionHandler {
                 const right = points[points.length - 2];
                 const bottom = points[points.length - 1];
                 const imageBitmap = RLEToImageData(255, 255, 255, points);
-                const image = this.container.image().attr({
-                    'color-rendering': 'optimizeQuality',
-                    'shape-rendering': 'geometricprecision',
-                    'pointer-events': 'none',
-                    opacity: 0.5,
-                }).addClass('cvat_canvas_interact_intermediate_shape');
+                const image = this.container
+                    .image()
+                    .attr({
+                        'color-rendering': 'optimizeQuality',
+                        'shape-rendering': 'geometricprecision',
+                        'pointer-events': 'none',
+                        opacity: 0.5,
+                    })
+                    .addClass('cvat_canvas_interact_intermediate_shape');
                 image.move(this.geometry.offset + left, this.geometry.offset + top);
                 this.container.node.prepend(image.node);
                 this.intermediateShapes.push(image);
@@ -336,22 +342,17 @@ export class InteractionHandlerImpl implements InteractionHandler {
                     }
                 }
 
-                imageDataToDataURL(
-                    imageBitmap,
-                    right - left + 1,
-                    bottom - top + 1,
-                    (dataURL: string) => {
-                        const destroy = (): void => URL.revokeObjectURL(dataURL);
-                        if (image.parent() !== null) {
-                            // still in DOM
-                            image.loaded(destroy);
-                            image.error(destroy);
-                            image.load(dataURL);
-                        } else {
-                            destroy();
-                        }
-                    },
-                );
+                imageDataToDataURL(imageBitmap, right - left + 1, bottom - top + 1, (dataURL: string) => {
+                    const destroy = (): void => URL.revokeObjectURL(dataURL);
+                    if (image.parent() !== null) {
+                        // still in DOM
+                        image.loaded(destroy);
+                        image.error(destroy);
+                        image.load(dataURL);
+                    } else {
+                        destroy();
+                    }
+                });
             }
         }
     }
@@ -421,15 +422,18 @@ export class InteractionHandlerImpl implements InteractionHandler {
         const { x, y } = getTopRightPosition(shape);
 
         const deleteButtonGroup = this.container.group().addClass('cvat_interaction_delete_button') as SVG.G;
-        const circleBg = deleteButtonGroup.circle(r * 2)
+        const circleBg = deleteButtonGroup
+            .circle(r * 2)
             .fill('#ff3333')
             .stroke({ color: '#ffffff', width: this.effectiveStrokeWidth })
             .center(x + DELETE_BUTTON_OFFSET / scale, y - DELETE_BUTTON_OFFSET / scale);
 
         const p = [3, 7].map((val) => (val / 10) * r * 2);
-        deleteButtonGroup.path(`M ${p[0]} ${p[0]} L ${p[1]} ${p[1]} M ${p[1]} ${p[0]} L ${p[0]} ${p[1]}`)
+        deleteButtonGroup
+            .path(`M ${p[0]} ${p[0]} L ${p[1]} ${p[1]} M ${p[1]} ${p[0]} L ${p[0]} ${p[1]}`)
             .stroke({ color: '#ffffff', width: this.effectiveStrokeWidth })
-            .center(x + DELETE_BUTTON_OFFSET / scale, y - DELETE_BUTTON_OFFSET / scale).fill('none');
+            .center(x + DELETE_BUTTON_OFFSET / scale, y - DELETE_BUTTON_OFFSET / scale)
+            .fill('none');
 
         deleteButtonGroup.on('mouseover.interaction', () => {
             circleBg.stroke({ color: '#ffffff', width: this.effectiveStrokeWidth * 1.5 });
@@ -448,10 +452,7 @@ export class InteractionHandlerImpl implements InteractionHandler {
     }
 
     private onMouseMove = (e: MouseEvent): void => {
-        const [x, y] = translateToSVG(
-            this.container.node as unknown as SVGSVGElement,
-            [e.clientX, e.clientY],
-        );
+        const [x, y] = translateToSVG(this.container.node as unknown as SVGSVGElement, [e.clientX, e.clientY]);
         this.lastMousePosition = { x, y };
         this.crosshair.move(x, y);
 
@@ -465,11 +466,13 @@ export class InteractionHandlerImpl implements InteractionHandler {
             const [cx, cy] = [lastPoint.cx(), lastPoint.cy()];
             const threshold = 5;
             if (Math.hypot(cx - x, cy - y) > threshold) {
-                this.notify(false, [{
-                    points: translateFromCanvas(this.geometry.offset, [x, y]),
-                    shapeType: 'points',
-                    type: 'positive' as const,
-                }]);
+                this.notify(false, [
+                    {
+                        points: translateFromCanvas(this.geometry.offset, [x, y]),
+                        shapeType: 'points',
+                        type: 'positive' as const,
+                    },
+                ]);
             }
         }
     };
@@ -479,10 +482,7 @@ export class InteractionHandlerImpl implements InteractionHandler {
             return;
         }
 
-        const [x, y] = translateToSVG(
-            this.container.node as unknown as SVGSVGElement,
-            [e.clientX, e.clientY],
-        );
+        const [x, y] = translateToSVG(this.container.node as unknown as SVGSVGElement, [e.clientX, e.clientY]);
         if (this.command === 'draw_box') {
             (this.currentRectangle as any).draw(e);
         } else if (this.command === 'draw_points') {
@@ -499,18 +499,17 @@ export class InteractionHandlerImpl implements InteractionHandler {
                 color = 'red';
             }
 
-            const point = this.container.circle(this.effectivePointSize * 2)
+            const point = this.container
+                .circle(this.effectivePointSize * 2)
                 .fill('white')
                 .stroke(color)
                 .addClass('cvat_interaction_point')
                 .center(x, y);
 
-            const pointCanBeRemoved = (): boolean => (
-                this.settings.removalStrategy === 'any' || (
-                    this.settings.removalStrategy === 'last' &&
-                    this.allPrompts.indexOf(point) === this.allPrompts.length - 1
-                )
-            );
+            const pointCanBeRemoved = (): boolean =>
+                this.settings.removalStrategy === 'any' ||
+                (this.settings.removalStrategy === 'last' &&
+                    this.allPrompts.indexOf(point) === this.allPrompts.length - 1);
 
             point.on('mouseenter.interaction', () => {
                 if (pointCanBeRemoved()) {
@@ -542,9 +541,8 @@ export class InteractionHandlerImpl implements InteractionHandler {
     public transform(geometry: Geometry): void {
         this.geometry = geometry;
         this.effectiveStrokeWidth = consts.BASE_STROKE_WIDTH / this.geometry.scale;
-        this.effectivePointSize = (
-            this.configuration.controlPointsSize ?? consts.BASE_POINT_SIZE
-        ) / this.geometry.scale;
+        this.effectivePointSize =
+            (this.configuration.controlPointsSize ?? consts.BASE_POINT_SIZE) / this.geometry.scale;
 
         if (this.currentRectangle) {
             this.currentRectangle.stroke({ width: this.effectiveStrokeWidth });

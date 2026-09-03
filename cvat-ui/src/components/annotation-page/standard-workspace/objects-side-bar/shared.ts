@@ -17,10 +17,7 @@ export function getObjectStateColor(state: ObjectState, colorBy: ColorBy): {
 
         color = color.slice(1);
         if (color.length === 3) {
-            color = color
-                .split('')
-                .map((ch) => ch + ch)
-                .join('');
+            color = color.split('').map((ch) => ch + ch).join('');
         }
 
         if (!/^([0-9a-f]{6})$/i.test(color)) {

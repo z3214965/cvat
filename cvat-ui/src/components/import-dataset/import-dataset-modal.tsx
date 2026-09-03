@@ -26,8 +26,7 @@ import { importActions, importDatasetAsync } from 'actions/import-actions';
 import Space from 'antd/lib/space';
 import Switch from 'antd/lib/switch';
 import {
-    getCore, Job, Loader, Project, Storage, StorageData, StorageLocation,
-    Task,
+    getCore, Job, Loader, Project, Storage, StorageData, StorageLocation, Task, DimensionType,
 } from 'cvat-core-wrapper';
 import StorageField from 'components/storage/storage-field';
 import { createAction, ActionUnion } from 'utils/redux';
@@ -410,10 +409,7 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                         message.error('导入数据集仅支持ZIP存档格式');
                     } else if (isAnnotation() &&
                                 !selectedLoader.format.toLowerCase().split(', ').includes(_file.name.split('.')[_file.name.split('.').length - 1])) {
-                        message.error(
-                            `仅支持 ${selectedLoader.name} 格式 ` +
-                                `仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`,
-                        );
+                        message.error(`仅支持 ${selectedLoader.name} 格式, 仅可使用后缀为 ${selectedLoader.format.toLowerCase()} 的文件`);
                     } else {
                         dispatch(reducerActions.setFile(_file));
                     }
@@ -629,23 +625,26 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                             )}
                     </Select>
                 </Form.Item>
-                <Space className='cvat-modal-import-switch-conv-mask-to-poly-container'>
-                    <Form.Item
-                        name='convMaskToPoly'
-                        valuePropName='checked'
-                        className='cvat-modal-import-switch-conv-mask-to-poly'
-                    >
-                        <Switch
-                            onChange={(value: boolean) => {
-                                dispatch(reducerActions.setConvMaskToPoly(value));
-                            }}
-                        />
-                    </Form.Item>
-                    <Text strong>将 masks 转换为多边形</Text>
-                    <CVATTooltip title='此配置项仅适用于 masks 类标注格式'>
-                        <QuestionCircleOutlined />
-                    </CVATTooltip>
-                </Space>
+                {
+                    instance?.dimension !== DimensionType.DIMENSION_1D &&
+                    <Space className='cvat-modal-import-switch-conv-mask-to-poly-container'>
+                        <Form.Item
+                            name='convMaskToPoly'
+                            valuePropName='checked'
+                            className='cvat-modal-import-switch-conv-mask-to-poly'
+                        >
+                            <Switch
+                                onChange={(value: boolean) => {
+                                    dispatch(reducerActions.setConvMaskToPoly(value));
+                                }}
+                            />
+                        </Form.Item>
+                        <Text strong>将 masks 转换为多边形</Text>
+                        <CVATTooltip title='此配置项仅适用于 masks 类标注格式'>
+                            <QuestionCircleOutlined />
+                        </CVATTooltip>
+                    </Space>
+                }
                 <Space className='cvat-modal-import-switch-use-default-storage-container'>
                     <Form.Item
                         name='useDefaultSettings'

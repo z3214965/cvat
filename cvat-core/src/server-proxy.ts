@@ -11,17 +11,25 @@ import { ChunkQuality } from 'cvat-data';
 import './axios-config';
 import { axiosTusHttpStack } from './axios-tus';
 import {
-    SerializedLabel, SerializedAnnotationFormats, ProjectsFilter,
-    SerializedProject, SerializedTask, TasksFilter, SerializedUser, SerializedOrganization,
+    SerializedLabel, SerializedAnnotationFormats,
+    SerializedProject, SerializedTask, SerializedUser, SerializedOrganization,
     SerializedAbout, SerializedRemoteFile, SerializedUserAgreement, SerializedFunctionRequest,
-    SerializedRegister, JobsFilter, SerializedJob, SerializedGuide, SerializedAsset, SerializedAPISchema,
+    SerializedRegister, SerializedJob, SerializedGuide, SerializedAsset, SerializedAPISchema,
     SerializedInvitationData, SerializedCloudStorage, SerializedFramesMetaData, SerializedCollection,
-    SerializedQualitySettingsData, APIQualitySettingsFilter, SerializedQualityConflictData, APIQualityConflictsFilter,
-    SerializedQualityReportData, APIQualityReportsFilter, APIAnalyticsEventsFilter, APIConsensusSettingsFilter,
     SerializedRequest, SerializedJobValidationLayout, SerializedTaskValidationLayout, SerializedConsensusSettingsData,
-    SerializedApiToken, APIApiTokensFilter,
+    SerializedApiToken, SerializedUserGrowthData,
 } from './server-response-types';
-import { APIApiTokenModifiableFields } from './server-request-types';
+import {
+    SerializedQualityConflictData, SerializedQualityReportData,
+    SerializedQualityRequirementData, SerializedQualityRequirementSaveData,
+    SerializedQualitySettingsData, SerializedQualitySettingsSaveData,
+} from './quality/server-response-types';
+import {
+    APIApiTokenModifiableFields, APIUserGrowthDataModifiableFields,
+    ProjectsFilter, TasksFilter, JobsFilter,
+    APIQualitySettingsFilter, APIQualityConflictsFilter, APIQualityReportsFilter,
+    APIAnalyticsEventsFilter, APIConsensusSettingsFilter, APIApiTokensFilter, APIQualityRequirementsFilter,
+} from './server-request-types';
 import { PaginatedResource, SerializedModel, UpdateStatusData } from './core-types';
 import { Storage } from './storage';
 import { SerializedEvent } from './event';
@@ -43,6 +51,26 @@ type Params = {
 };
 
 type HealthCheckResponse = Record<string, string>;
+
+const totalBandwidthInfo = {
+    totalDownloadBytes: 0,
+    totalDownloadTimeMs: 0,
+    totalDownloadRetries: 0,
+};
+
+// A download may start and finish while the page is visible but be throttled while it is hidden.
+// Track visibility transitions to exclude such downloads from bandwidth telemetry.
+let pageVisibilityCounter = 0;
+
+function isPageVisible(): boolean {
+    return typeof document === 'undefined' || document.visibilityState === 'visible';
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+        pageVisibilityCounter++;
+    });
+}
 
 tus.defaultOptions.storeFingerprintForResuming = false;
 
@@ -293,7 +321,11 @@ class WorkerWrappedAxios {
             if (e.data.id in requests) {
                 try {
                     if (e.data.isSuccess) {
-                        requests[e.data.id].resolve({ data: e.data.responseData, headers: e.data.headers });
+                        requests[e.data.id].resolve({
+                            data: e.data.responseData,
+                            headers: e.data.headers,
+                            telemetry: e.data.telemetry,
+                        });
                     } else {
                         let response: AxiosResponse | undefined;
                         let code: AxiosError['code'];
@@ -1324,19 +1356,16 @@ async function createTask(
     });
 
     async function bulkUpload(taskId, files) {
-        const fileBulks = files.reduce(
-            (fileGroups, file) => {
-                const lastBulk = fileGroups[fileGroups.length - 1];
-                if (chunkSize - lastBulk.size >= file.size) {
-                    lastBulk.files.push(file);
-                    lastBulk.size += file.size;
-                } else {
-                    fileGroups.push({ files: [file], size: file.size });
-                }
-                return fileGroups;
-            },
-            [{ files: [], size: 0 }],
-        );
+        const fileBulks = files.reduce((fileGroups, file) => {
+            const lastBulk = fileGroups[fileGroups.length - 1];
+            if (chunkSize - lastBulk.size >= file.size) {
+                lastBulk.files.push(file);
+                lastBulk.size += file.size;
+            } else {
+                fileGroups.push({ files: [file], size: file.size });
+            }
+            return fileGroups;
+        }, [{ files: [], size: 0 }]);
         const totalBulks = fileBulks.length;
         let currentChunkNumber = 0;
         while (currentChunkNumber < totalBulks) {
@@ -1632,6 +1661,34 @@ async function updateUser(id: number, userData: Partial<SerializedUser>): Promis
     return response.data;
 }
 
+async function getGrowthData(userId: number): Promise<SerializedUserGrowthData[]> {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.get(`${backendAPI}/growth`, {
+            params: { user_id: userId, ...enableOrganization() },
+        });
+        return response.data.results;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
+async function updateGrowthData(
+    id: number,
+    growthData: APIUserGrowthDataModifiableFields,
+): Promise<SerializedUserGrowthData> {
+    const { backendAPI } = config;
+
+    try {
+        const response = await Axios.patch(`${backendAPI}/growth/${id}`, growthData, {
+            params: enableOrganization(),
+        });
+        return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
 export const PREVIEW_DEFAULT = Symbol('preview-default');
 export type PreviewResponse = Blob | typeof PREVIEW_DEFAULT | null;
 
@@ -1687,6 +1744,8 @@ async function getImageContext(jid: number, frame: number): Promise<ArrayBuffer>
 
 async function getData(jid: number, chunk: number, quality: ChunkQuality): Promise<ArrayBuffer> {
     const { backendAPI } = config;
+    const pageWasVisible = isPageVisible();
+    const pageVisibilityVersionAtStart = pageVisibilityCounter;
 
     try {
         const response = await (workerAxios as any).get(`${backendAPI}/jobs/${jid}/data`, {
@@ -1699,10 +1758,29 @@ async function getData(jid: number, chunk: number, quality: ChunkQuality): Promi
             responseType: 'arraybuffer',
         });
 
+        const pageWasVisibleThroughoutDownload = pageWasVisible &&
+            isPageVisible() && pageVisibilityCounter === pageVisibilityVersionAtStart;
+
+        if (response.telemetry && pageWasVisibleThroughoutDownload) {
+            totalBandwidthInfo.totalDownloadBytes += response.telemetry.chunkSizeBytes;
+            totalBandwidthInfo.totalDownloadTimeMs += response.telemetry.downloadTimeMs;
+            totalBandwidthInfo.totalDownloadRetries += response.telemetry.retries;
+        }
+
         return response.data;
     } catch (errorData) {
         throw generateError(errorData);
     }
+}
+
+function getAndResetBandwidthInfo(): typeof totalBandwidthInfo {
+    const result = { ...totalBandwidthInfo };
+
+    totalBandwidthInfo.totalDownloadBytes = 0;
+    totalBandwidthInfo.totalDownloadTimeMs = 0;
+    totalBandwidthInfo.totalDownloadRetries = 0;
+
+    return result;
 }
 
 interface AudioChunkResponse {
@@ -1866,13 +1944,17 @@ async function uploadAnnotations(
 
 async function saveEvents(events: {
     events: SerializedEvent[];
-    previous_event?: SerializedEvent;
     timestamp: string;
-}): Promise<void> {
+    previous_event?: SerializedEvent;
+}, options: { keepalive?: boolean } = {}): Promise<void> {
     const { backendAPI } = config;
 
     try {
-        await Axios.post(`${backendAPI}/events`, events);
+        await Axios.post(`${backendAPI}/events`, events, options.keepalive ? {
+            // The fetch adapter can keep this best-effort request alive while the page is being unloaded.
+            adapter: 'fetch',
+            fetchOptions: { keepalive: true },
+        } : undefined);
     } catch (errorData) {
         throw generateError(errorData);
     }
@@ -1889,36 +1971,32 @@ function exportEvents(params: APIAnalyticsEventsFilter): Promise<string> {
     }
 
     const promise = new Promise<string>((resolve, reject) => {
-        Axios.get(`${backendAPI}/events`, { params })
-            .then((response) => {
-                const paramsWithQuery = {
-                    ...params,
-                    query_id: response.data.query_id,
-                };
+        Axios.get(`${backendAPI}/events`, { params }).then((response) => {
+            const paramsWithQuery = {
+                ...params,
+                query_id: response.data.query_id,
+            };
 
-                const checkCallback = () => {
-                    Axios.get(`${backendAPI}/events`, { params: paramsWithQuery })
-                        .then((checkResponse) => {
-                            if (checkResponse.status === 202) {
-                                setTimeout(checkCallback, 10000);
-                            } else if (checkResponse.status === 201) {
-                                const paramsObject = new URLSearchParams(paramsWithQuery as any);
-                                paramsObject.set('action', 'download');
-                                resolve(`${backendAPI}/events?${paramsObject.toString()}`);
-                            } else {
-                                reject(new Error(`接收到无效的API状态码： ${checkResponse.status}`));
-                            }
-                        })
-                        .catch((error: unknown) => {
-                            reject(error);
-                        });
-                };
+            const checkCallback = () => {
+                Axios.get(`${backendAPI}/events`, { params: paramsWithQuery }).then((checkResponse) => {
+                    if (checkResponse.status === 202) {
+                        setTimeout(checkCallback, 10000);
+                    } else if (checkResponse.status === 201) {
+                        const paramsObject = new URLSearchParams(paramsWithQuery as any);
+                        paramsObject.set('action', 'download');
+                        resolve(`${backendAPI}/events?${paramsObject.toString()}`);
+                    } else {
+                        reject(new Error(`接收到无效的API状态码： ${checkResponse.status}`));
+                    }
+                }).catch((error: unknown) => {
+                    reject(error);
+                });
+            };
 
-                setTimeout(checkCallback, 2000);
-            })
-            .catch((error: unknown) => {
-                reject(error);
-            });
+            setTimeout(checkCallback, 2000);
+        }).catch((error: unknown) => {
+            reject(error);
+        });
     });
 
     eventsExportRequests[key] = { promise };
@@ -2469,7 +2547,7 @@ async function getQualitySettings(
 
 async function updateQualitySettings(
     settingsID: number,
-    settingsData: SerializedQualitySettingsData,
+    settingsData: SerializedQualitySettingsSaveData,
 ): Promise<SerializedQualitySettingsData> {
     const params = enableOrganization();
     const { backendAPI } = config;
@@ -2480,6 +2558,86 @@ async function updateQualitySettings(
         });
 
         return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
+async function getQualityRequirements(
+    filter: APIQualityRequirementsFilter,
+    aggregate?: boolean,
+): Promise<PaginatedResource<SerializedQualityRequirementData>> {
+    const { backendAPI } = config;
+
+    let response = null;
+    try {
+        if (aggregate) {
+            response = {
+                data: await fetchAll<SerializedQualityRequirementData & { id: number }>(
+                    `${backendAPI}/quality/settings/requirements`, {
+                        ...filter,
+                        ...enableOrganization(),
+                    },
+                ),
+            };
+        } else {
+            response = await Axios.get(`${backendAPI}/quality/settings/requirements`, {
+                params: {
+                    ...filter,
+                },
+            });
+        }
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+
+    response.data.results.count = response.data.count;
+    return response.data.results;
+}
+
+async function createQualityRequirement(
+    requirementData: SerializedQualityRequirementSaveData,
+): Promise<SerializedQualityRequirementData> {
+    const params = enableOrganization();
+    const { backendAPI } = config;
+
+    try {
+        const response = await Axios.post(`${backendAPI}/quality/settings/requirements`, requirementData, {
+            params,
+        });
+
+        return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
+async function updateQualityRequirement(
+    requirementID: number,
+    requirementData: SerializedQualityRequirementSaveData,
+): Promise<SerializedQualityRequirementData> {
+    const params = enableOrganization();
+    const { backendAPI } = config;
+
+    try {
+        const response = await Axios.patch(
+            `${backendAPI}/quality/settings/requirements/${requirementID}`,
+            requirementData,
+            { params },
+        );
+
+        return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
+async function deleteQualityRequirement(requirementID: number): Promise<void> {
+    const params = enableOrganization();
+    const { backendAPI } = config;
+
+    try {
+        await Axios.delete(`${backendAPI}/quality/settings/requirements/${requirementID}`, { params });
     } catch (errorData) {
         throw generateError(errorData);
     }
@@ -2590,6 +2748,7 @@ export default Object.freeze({
         userAgreements,
         installedApps,
         apiSchema: getApiSchema,
+        getAndResetBandwidthInfo,
     }),
 
     projects: Object.freeze({
@@ -2639,6 +2798,11 @@ export default Object.freeze({
         get: getUsers,
         self: getSelf,
         update: updateUser,
+    }),
+
+    growth: Object.freeze({
+        get: getGrowthData,
+        update: updateGrowthData,
     }),
 
     apiTokens: Object.freeze({
@@ -2739,6 +2903,12 @@ export default Object.freeze({
             settings: Object.freeze({
                 get: getQualitySettings,
                 update: updateQualitySettings,
+            }),
+            requirements: Object.freeze({
+                get: getQualityRequirements,
+                create: createQualityRequirement,
+                update: updateQualityRequirement,
+                delete: deleteQualityRequirement,
             }),
         }),
     }),

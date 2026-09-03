@@ -139,7 +139,7 @@ export default function CloudStorageItemComponent(props: Readonly<Props>): JSX.E
                             <Text type='secondary'>创建 </Text>
                             {owner ? <Text type='secondary'>{`通过 ${owner.username}`}</Text> : null}
                             <Text type='secondary'> 在 </Text>
-                            <Text type='secondary'>{dayjs(createdDate).format('MMMM Do YYYY')}</Text>
+                            <Text type='secondary'>{dayjs(createdDate).format('YYYY年M月D日')}</Text>
                         </Paragraph>
                         <Paragraph>
                             <Text type='secondary'>最后更新 </Text>

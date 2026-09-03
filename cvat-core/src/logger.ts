@@ -135,13 +135,38 @@ class Logger {
         const result = await PluginRegistry.apiWrapper.call(this, Logger.prototype.save);
         return result;
     }
+
+    public saveCriticalEvents(): void {
+        // Critical page-exit delivery must start synchronously, so this path intentionally bypasses plugin wrappers
+        // and does not read or update the regular event collection, save lock, or lastSentEvent chain.
+
+        const bandwidthInfo = serverProxy.server.getAndResetBandwidthInfo();
+        if (!bandwidthInfo.totalDownloadBytes) {
+            return;
+        }
+
+        const event = makeEvent(EventScope.debugInfo, {
+            obj_name: 'chunk_download_bandwidth',
+            ...bandwidthInfo,
+            client_id: this.clientID,
+            is_active: this.isActiveChecker(),
+        });
+        event.validatePayload();
+
+        serverProxy.events.save({
+            events: [event.dump()],
+            timestamp: new Date().toISOString(),
+        }, { keepalive: true }).catch(() => {});
+    }
 }
 
 Object.defineProperties(Logger.prototype.configure, {
     implementation: {
         writable: false,
         enumerable: false,
-        value: async function implementation(this: Logger, isActiveChecker: () => boolean) {
+        value: async function implementation(
+            this: Logger, isActiveChecker: () => boolean,
+        ) {
             if (typeof isActiveChecker !== 'function') {
                 throw new ArgumentError('参数 isActiveChecker 必须是可调用的函数');
             }
@@ -155,7 +180,7 @@ Object.defineProperties(Logger.prototype.log, {
     implementation: {
         writable: false,
         enumerable: false,
-        value: async function implementation(
+        value: function implementation(
             this: Logger,
             scope: EventScope,
             payload: JSONEventPayload,
@@ -231,8 +256,8 @@ Object.defineProperties(Logger.prototype.save, {
                 this.collection = [];
                 await serverProxy.events.save({
                     events: collectionToSend.map((event) => event.dump()),
-                    previous_event: this.lastSentEvent?.dump(),
                     timestamp: new Date().toISOString(),
+                    previous_event: this.lastSentEvent?.dump(),
                 });
 
                 this.lastSentEvent = collectionToSend[collectionToSend.length - 1];

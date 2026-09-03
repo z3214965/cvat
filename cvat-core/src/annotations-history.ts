@@ -10,18 +10,59 @@ const MAX_HISTORY_LENGTH = 32;
 interface ActionItem {
     action: HistoryActions;
     clientIds: number[];
-    frame: number;
+    frame: number | null;
     undo: () => void;
     redo: () => void;
+}
+
+class HistoryTransaction implements ActionItem {
+    public action: HistoryActions;
+    public frame: number | null = null;
+    private actions: ActionItem[] = [];
+
+    constructor(action: HistoryActions) {
+        this.action = action;
+    }
+
+    public get clientIds(): number[] {
+        return [...new Set(this.actions.flatMap((action) => action.clientIds))];
+    }
+
+    public get empty(): boolean {
+        return !this.actions.length;
+    }
+
+    public add(action: ActionItem): void {
+        if (!this.actions.length) {
+            this.frame = action.frame;
+        } else if (this.frame !== action.frame) {
+            throw new Error('事务内的所有历史操作，必须作用于同一个帧');
+        }
+        this.actions.push(action);
+    }
+
+    public async undo(): Promise<void> {
+        for (let index = this.actions.length - 1; index >= 0; index--) {
+            await this.actions[index].undo();
+        }
+    }
+
+    public async redo(): Promise<void> {
+        for (const action of this.actions) {
+            await action.redo();
+        }
+    }
 }
 
 export default class AnnotationHistory {
     private frozen: boolean;
     private _undo: ActionItem[];
     private _redo: ActionItem[];
+    private transaction: HistoryTransaction | null;
 
     constructor() {
         this.frozen = false;
+        this.transaction = null;
         this.clear();
     }
 
@@ -30,8 +71,8 @@ export default class AnnotationHistory {
     }
 
     public get(): {
-        undo: [HistoryActions, number | null][],
-        redo: [HistoryActions, number | null][],
+        undo: [HistoryActions, number | null][];
+        redo: [HistoryActions, number | null][];
     } {
         return {
             undo: this._undo.map((undo) => [undo.action, undo.frame]),
@@ -56,9 +97,35 @@ export default class AnnotationHistory {
             frame,
         };
 
+        if (this.transaction) {
+            this.transaction.add(actionItem);
+            return;
+        }
+
         this._undo = this._undo.slice(-MAX_HISTORY_LENGTH + 1);
         this._undo.push(actionItem);
         this._redo = [];
+    }
+
+    public beginTransaction(action: HistoryActions): void {
+        if (this.transaction) throw new Error('已有另一个历史事务正在执行中。');
+        this.transaction = new HistoryTransaction(action);
+    }
+
+    public endTransaction(): void {
+        const { transaction } = this;
+        this.transaction = null;
+        if (!transaction || transaction.empty) return;
+
+        this._undo = this._undo.slice(-MAX_HISTORY_LENGTH + 1);
+        this._undo.push(transaction);
+        this._redo = [];
+    }
+
+    public async abortTransaction(): Promise<void> {
+        const { transaction } = this;
+        this.transaction = null;
+        await transaction?.undo();
     }
 
     public async undo(count: number): Promise<number[]> {

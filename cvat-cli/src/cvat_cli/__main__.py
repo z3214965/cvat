@@ -7,9 +7,9 @@ import argparse
 import logging
 import sys
 
-import urllib3.exceptions
 from cvat_sdk import exceptions
 from cvat_sdk.core.exceptions import AuthStoreError
+import urllib3.exceptions
 
 from ._internal.commands_all import COMMANDS
 from ._internal.common import (
@@ -19,6 +19,7 @@ from ._internal.common import (
     configure_logger,
 )
 from ._internal.utils import popattr
+
 
 logger = logging.getLogger(__name__)
 

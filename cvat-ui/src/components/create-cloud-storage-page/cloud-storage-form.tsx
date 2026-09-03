@@ -207,8 +207,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
     useEffect(() => {
         if (cloudStorageId && cloudStorage.credentialsType !== CredentialsType.ANONYMOUS_ACCESS) {
             notification.info({
-                message: `出于安全考虑，您的凭据已被隐藏，并由假值代替，在更新云存储时这些假值不会被考虑在内。
-                            如果您想替换原始凭据，只需输入新的凭据即可。`,
+                message: `出于安全考虑，您的凭据已被隐藏，并由假值代替，在更新云存储时这些假值不会被考虑在内。如果您想替换原始凭据，只需输入新的凭据即可。`,
                 className: 'cvat-notification-update-info-cloud-storage',
                 duration: 15,
             });
@@ -560,7 +559,7 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
                 >
                     <Select onSelect={(value: CredentialsType) => onChangeCredentialsType(value)}>
                         <Select.Option value={CredentialsType.ACCOUNT_NAME_TOKEN_PAIR}>
-                            账户名称和 SAS 令牌
+                            账户名称和SAS令牌
                         </Select.Option>
                         <Select.Option value={CredentialsType.ANONYMOUS_ACCESS}>匿名访问</Select.Option>
                         <Select.Option value={CredentialsType.CONNECTION_STRING}>连接字符串</Select.Option>

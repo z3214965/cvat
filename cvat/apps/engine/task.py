@@ -3,28 +3,27 @@
 #
 # SPDX-License-Identifier: MIT
 
+from collections.abc import Callable, Iterable, Iterator, Sequence
 import concurrent.futures
+from contextlib import closing
+from copy import deepcopy
+from datetime import UTC, datetime, timedelta
 import fnmatch
 import itertools
 import os
-import shutil
-from collections.abc import Callable, Iterable, Iterator, Sequence
-from contextlib import closing
-from copy import deepcopy
-from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePath, PurePosixPath
+import shutil
 from typing import Any, NamedTuple, TypeAlias
-from urllib import parse as urlparse
-from urllib import request as urlrequest
+from urllib import parse as urlparse, request as urlrequest
 
 import attrs
 import av
-import requests
-import rq
 from django.conf import settings
 from django.db import transaction
 from django.forms.models import model_to_dict
+import requests
 from rest_framework.serializers import ValidationError
+import rq
 
 from cvat.apps.engine import field_validation, models
 from cvat.apps.engine.log import ServerLogManager
@@ -66,6 +65,7 @@ from utils.dataset_manifest.core import (
 from utils.dataset_manifest.utils import find_related_images
 
 from .cloud_provider import HeaderFirstMediaDownloader
+
 
 slogger = ServerLogManager(__name__)
 
@@ -280,8 +280,8 @@ def _count_files(data: dict[str, Any]) -> dict[str, list[str]]:
                 continue
             else:
                 slogger.glob.warn(
-                    "Skip '{}' file (its mime type doesn't "
-                    "correspond to supported MIME file type)".format(full_path)
+                    f"Skip '{full_path}' file (its mime type doesn't "
+                    "correspond to supported MIME file type)"
                 )
 
     counter = {media_type: [] for media_type in MEDIA_TYPES.keys()}
@@ -324,12 +324,12 @@ def _validate_data(counter: dict[str, list[str]], *, manifest_files: list[str] =
                     "File with meta information can only be uploaded with video/images/archives"
                 )
 
-    if unique_entries == 1 and multiple_entries > 0 or unique_entries > 1:
+    if (unique_entries == 1 and multiple_entries > 0) or unique_entries > 1:
         unique_types = ", ".join([k for k, v in MEDIA_TYPES.items() if v["unique"]])
         multiply_types = ", ".join([k for k, v in MEDIA_TYPES.items() if not v["unique"]])
-        count = ", ".join(["{} {}(s)".format(len(v), k) for k, v in counter.items()])
-        raise ValueError("Only one {} or many {} can be used simultaneously, \
-            but {} found.".format(unique_types, multiply_types, count))
+        count = ", ".join([f"{len(v)} {k}(s)" for k, v in counter.items()])
+        raise ValueError(f"Only one {unique_types} or many {multiply_types} can be used simultaneously, \
+            but {count} found.")
 
     if unique_entries == 0 and multiple_entries == 0:
         raise ValueError("No media data found")
@@ -347,7 +347,7 @@ def _validate_data(counter: dict[str, list[str]], *, manifest_files: list[str] =
 
 
 def _validate_job_file_mapping(db_task: models.Task, data: dict[str, Any]) -> JobFileMapping | None:
-    job_file_mapping = data.get("job_file_mapping", None)
+    job_file_mapping = data.get("job_file_mapping")
 
     if job_file_mapping is None:
         return None
@@ -408,10 +408,7 @@ def _validate_validation_params(
         and not is_backup_restore
     ):
         raise ValidationError(
-            'validation mode "{}" can only be used with "{}" sorting'.format(
-                models.ValidationMode.GT_POOL.value,
-                models.SortingMethod.RANDOM.value,
-            )
+            f'validation mode "{models.ValidationMode.GT_POOL.value}" can only be used with "{models.SortingMethod.RANDOM.value}" sorting'
         )
 
     for incompatible_key in ["job_file_mapping", "overlap"]:
@@ -420,10 +417,7 @@ def _validate_validation_params(
 
         if data.get(incompatible_key):
             raise ValidationError(
-                'validation mode "{}" cannot be used with "{}"'.format(
-                    models.ValidationMode.GT_POOL.value,
-                    incompatible_key,
-                )
+                f'validation mode "{models.ValidationMode.GT_POOL.value}" cannot be used with "{incompatible_key}"'
             )
 
     return params
@@ -449,7 +443,7 @@ def _validate_manifest(
         storage_client = db_cloud_storage.get_client()
         # check that cloud storage manifest file exists and is up to date
         if not full_manifest_path.exists() or (
-            datetime.fromtimestamp(full_manifest_path.stat().st_mtime, tz=timezone.utc)
+            datetime.fromtimestamp(full_manifest_path.stat().st_mtime, tz=UTC)
             < storage_client.get_file_last_modified(manifest_file)
         ):
             storage_client.download_file(manifest_file, full_manifest_path)
@@ -467,9 +461,7 @@ def _validate_scheme(url):
 
     if parsed_url.scheme not in ALLOWED_SCHEMES:
         raise ValueError(
-            "Unsupported URL scheme: {}. Only http and https are supported".format(
-                parsed_url.scheme
-            )
+            f"Unsupported URL scheme: {parsed_url.scheme}. Only http and https are supported"
         )
 
 
@@ -490,13 +482,13 @@ def _download_data(
         for url in urls:
             name = os.path.basename(urlrequest.url2pathname(urlparse.urlparse(url).path))
             if name in local_files:
-                raise _FailedToDownloadFileError("filename collision: {}".format(name))
+                raise _FailedToDownloadFileError(f"filename collision: {name}")
 
             _validate_scheme(url)
 
-            slogger.glob.info("Downloading: {}".format(url))
+            slogger.glob.info(f"Downloading: {url}")
 
-            update_status_callback("{} is being downloaded..".format(url))
+            update_status_callback(f"{url} is being downloaded..")
 
             try:
                 response = session.get(
@@ -538,7 +530,7 @@ def _read_dataset_manifest(path: Path, *, create_index: bool = False) -> ImageMa
 
     if not is_dataset_manifest(path):
         raise ValidationError(
-            "Can't recognize a dataset manifest file in the uploaded file '{}'".format(path.name)
+            f"Can't recognize a dataset manifest file in the uploaded file '{path.name}'"
         )
 
     return ImageManifestManager(path, create_index=create_index)
@@ -570,7 +562,7 @@ def _restore_file_order_from_manifest(
             "Mismatching files: {}{}. "
             "Read more: https://docs.cvat.ai/docs/manual/advanced/dataset_manifest/".format(
                 ", ".join(mismatching_display),
-                f" (and {remaining_count} more). " if 0 < remaining_count else "",
+                f" (and {remaining_count} more). " if remaining_count > 0 else "",
             )
         )
 
@@ -620,7 +612,7 @@ def _create_task_manifest_from_cloud_data(
     regular_images, related_images = find_related_images(
         sorted_media,
         # backward compatibility, deprecated in https://github.com/cvat-ai/cvat/pull/9757
-        is_scene_path=(lambda p: not "related_images" in p.parts),
+        is_scene_path=(lambda p: "related_images" not in p.parts),
     )
     sorted_media = [f for f in sorted_media if f in regular_images]
 
@@ -757,9 +749,7 @@ def _allocate_honeypots(
 
                 if unknown_requested_frames:
                     raise ValidationError(
-                        "Unknown validation frames requested: {}".format(
-                            format_list(sorted(unknown_requested_frames))
-                        )
+                        f"Unknown validation frames requested: {format_list(sorted(unknown_requested_frames))}"
                     )
             case _:
                 assert False
@@ -799,7 +789,7 @@ def _allocate_honeypots(
         )
         rng.shuffle(non_pool_frames)
 
-        validation_frame_counts = {f: 0 for f in pool_frames}
+        validation_frame_counts = dict.fromkeys(pool_frames, 0)
         frame_selector = HoneypotFrameSelector(validation_frame_counts, rng=rng)
 
         # Don't use the same rng as for frame ordering to simplify random_seed maintenance in future
@@ -892,9 +882,7 @@ def _create_validation_jobs(
         validation_params and validation_params["mode"] != models.ValidationMode.GT
     ):
         raise ValidationError(
-            "Only the '{}' validation mode is available in '{}' tasks.".format(
-                models.ValidationMode.GT, models.MediaType.AUDIO
-            )
+            f"Only the '{models.ValidationMode.GT}' validation mode is available in '{models.MediaType.AUDIO}' tasks."
         )
 
     if db_task.media_type == models.MediaType.POINT_CLOUD and (
@@ -992,11 +980,9 @@ def _create_validation_jobs(
                 case models.JobFrameSelectionMethod.MANUAL:
                     if not images:
                         raise ValidationError(
-                            "{} validation frame selection method at task creation "
+                            f"{models.JobFrameSelectionMethod.MANUAL} validation frame selection method at task creation "
                             "is only available for image-based tasks. "
-                            "Please create the GT job after the task is created.".format(
-                                models.JobFrameSelectionMethod.MANUAL
-                            )
+                            "Please create the GT job after the task is created."
                         )
 
                     validation_frames: list[int] = []
@@ -1012,9 +998,7 @@ def _create_validation_jobs(
 
                     if unknown_requested_frames:
                         raise ValidationError(
-                            "Unknown validation frames requested: {}".format(
-                                format_list(sorted(unknown_requested_frames))
-                            )
+                            f"Unknown validation frames requested: {format_list(sorted(unknown_requested_frames))}"
                         )
                 case _:
                     assert (
@@ -1435,9 +1419,7 @@ def _collect_image_dataset_descriptors(
                 image_size = (image_info["width"], image_info["height"])
             elif is_data_in_cloud:
                 raise ValidationError(
-                    "Can't find image '{}' width or height info in the manifest".format(
-                        manifest_image_path
-                    )
+                    f"Can't find image '{manifest_image_path}' width or height info in the manifest"
                 )
 
         if not image_size:
@@ -1623,9 +1605,7 @@ def initialize_task(
     # we should also handle this case because files from the share source have not been downloaded yet
     if data["copy_data"]:
         manifest_root = settings.SHARE_ROOT
-    elif db_data.storage in {models.StorageChoice.LOCAL, models.StorageChoice.SHARE}:
-        manifest_root = upload_dir
-    elif is_data_in_cloud and is_backup_restore:
+    elif db_data.storage in {models.StorageChoice.LOCAL, models.StorageChoice.SHARE} or (is_data_in_cloud and is_backup_restore):
         manifest_root = upload_dir
     elif is_data_in_cloud:
         manifest_root = db_data.cloud_storage.get_storage_dirname()
@@ -1906,11 +1886,11 @@ def initialize_task(
                 # Sorting with manifest is required for zip
                 isinstance(extractor, MEDIA_TYPES["zip"]["extractor"])
                 # Sorting with manifest is optional for non-video
-                or (manifest_file or manifest)
+                or ((manifest_file or manifest)
                 and not isinstance(
                     extractor,
                     (MEDIA_TYPES["video"]["extractor"], MEDIA_TYPES["audio"]["extractor"]),
-                )
+                ))
             )
         )
     ):
@@ -1925,12 +1905,10 @@ def initialize_task(
                     os.path.join(manifest_root, manifest_file)
                 ):
                     raise FileNotFoundError(
-                        "Can't find upload manifest file '{}' "
+                        f"Can't find upload manifest file '{manifest_file or os.path.basename(db_data.get_manifest_path())}' "
                         "in the uploaded files. When the 'predefined' sorting method is used, "
                         "this file is required in the input files. "
-                        "Read more: https://docs.cvat.ai/docs/manual/advanced/dataset_manifest/".format(
-                            manifest_file or os.path.basename(db_data.get_manifest_path())
-                        )
+                        "Read more: https://docs.cvat.ai/docs/manual/advanced/dataset_manifest/"
                     )
 
                 manifest = _read_dataset_manifest(
@@ -2039,11 +2017,7 @@ def initialize_task(
         )
 
     slogger.glob.info(
-        "Saved media for Data #{}: media type '{}', {} frames".format(
-            db_data.id,
-            db_task.media_type,
-            db_data.size,
-        )
+        f"Saved media for Data #{db_data.id}: media type '{db_task.media_type}', {db_data.size} frames"
     )
 
     _create_segments_and_jobs(
@@ -2062,7 +2036,11 @@ def initialize_task(
     if not (is_data_in_cloud and is_backup_restore):
         _create_task_preview(db_task)
 
-    _move_to_backing_cs_if_configured(db_data)
+    # TODO: remove the condition.
+    # We don't yet have production experience with videos in backing CS,
+    # so let's be cautious and not move them automatically.
+    if db_task.mode != models.TaskMode.INTERPOLATION:
+        _move_to_backing_cs_if_configured(db_data)
 
 
 def _create_task_preview(db_task: models.Task):
@@ -2089,9 +2067,7 @@ def _create_static_chunks(
 
             status_message = "CVAT is preparing data chunks"
             if not progress:
-                status_message = "{} {}".format(
-                    status_message, progress_animation[self._call_counter]
-                )
+                status_message = f"{status_message} {progress_animation[self._call_counter]}"
 
             rq_job_meta = ImportRQMeta.for_job(self._rq_job)
             rq_job_meta.status = status_message
@@ -2236,9 +2212,9 @@ def _create_static_chunks(
                 progress_updater.update_progress(segment_idx / len(db_segments))
 
 
-def _move_to_backing_cs_if_configured(db_data):
+def _move_to_backing_cs_if_configured(db_data: models.Data) -> None:
     backing_cs_id = settings.DEFAULT_BACKING_CS_ID
-    if backing_cs_id is not None and db_data.supports_backing_cs():
+    if backing_cs_id is not None:
         try:
             backing_cs = models.CloudStorage.objects.get(pk=backing_cs_id)
         except models.CloudStorage.DoesNotExist:
@@ -2246,4 +2222,5 @@ def _move_to_backing_cs_if_configured(db_data):
                 f"Cloud storage #{backing_cs_id} (configured as default backing CS) does not exist"
             )
         else:
-            db_data.move_to_backing_cs(backing_cs)
+            if db_data.supports_backing_cs(backing_cs):
+                db_data.move_to_backing_cs(backing_cs)

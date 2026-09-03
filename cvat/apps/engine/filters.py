@@ -3,10 +3,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-import json
-import operator
 from collections.abc import Iterable, Iterator
 from functools import reduce
+import json
+import operator
 from textwrap import dedent
 from typing import Any, TypeAlias
 
@@ -15,14 +15,14 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _
-from django_filters import FilterSet
-from django_filters import filters as djf
+from django_filters import FilterSet, filters as djf
 from django_filters.filterset import BaseFilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.exceptions import ValidationError
 
 from cvat.apps.engine.types import ExtendedRequest
+
 
 DEFAULT_FILTER_FIELDS_ATTR = "filter_fields"
 DEFAULT_LOOKUP_MAP_ATTR = "lookup_fields"
@@ -39,7 +39,7 @@ def get_lookup_fields(view, fields: Iterator[str] | None = None) -> dict[str, st
 
 class SearchFilter(filters.SearchFilter):
     def get_search_fields(self, view, request: ExtendedRequest):
-        search_fields = getattr(view, "search_fields") or []
+        search_fields = view.search_fields or []
         return get_lookup_fields(view, search_fields).values()
 
     def get_schema_fields(self, view):
@@ -196,7 +196,7 @@ class JsonLogicFilter(filters.BaseFilterBackend):
         try:
             rules = json.loads(json_rules)
             if raise_on_empty and not rules:
-                raise ValidationError(f"filter shouldn't be empty")
+                raise ValidationError("filter shouldn't be empty")
         except json.decoder.JSONDecodeError as e:
             raise ValidationError(f"filter: can't parse filter expression: {e}") from e
 
@@ -208,7 +208,7 @@ class JsonLogicFilter(filters.BaseFilterBackend):
         try:
             q_object = self._build_Q(parsed_rules, lookup_fields)
         except FilterParsingError as e:
-            raise ValidationError(f"filter: {str(e)}") from e
+            raise ValidationError(f"filter: {e!s}") from e
 
         return queryset.filter(q_object)
 
@@ -514,9 +514,8 @@ class NonModelJsonLogicFilter(JsonLogicFilter, _NestedAttributeHandler):
     def _apply_filter(self, rules, lookup_fields, obj):
         op, args = next(iter(rules.items()))
         if op in ["or", "and"]:
-            return reduce(
-                {"or": any, "and": all}[op],
-                [self._apply_filter(arg, lookup_fields, obj) for arg in args],
+            return {"or": any, "and": all}[op](
+                self._apply_filter(arg, lookup_fields, obj) for arg in args
             )
         elif op == "!":
             return not self._apply_filter(args, lookup_fields, obj)

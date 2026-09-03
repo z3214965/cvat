@@ -14,7 +14,7 @@ import Icon from '@ant-design/icons';
 import { MenuProps } from 'antd/lib/menu';
 
 import { MainMenuIcon } from 'icons';
-import { Job, JobState } from 'cvat-core-wrapper';
+import { Job, JobState, JobStateCH } from 'cvat-core-wrapper';
 import { usePlugins } from 'utils/hooks';
 
 import { openAnnotationsActionModal } from 'components/annotation-page/annotations-actions/annotations-actions-modal';
@@ -121,7 +121,7 @@ function AnnotationMenuComponent(props: Props): JSX.Element {
 
     menuItems.push([{
         key: Actions.REMOVE_ANNOTATIONS,
-        label: 'Remove annotations',
+        label: '删除标注',
         onClick: () => setRemoveAnnotationsConfirmOpen(true),
     }, 30]);
 
@@ -145,22 +145,22 @@ function AnnotationMenuComponent(props: Props): JSX.Element {
         label: '改变作业状态',
         children: [{
             key: `state:${JobState.NEW}`,
-            label: JobState.NEW,
+            label: JobStateCH[JobState.NEW],
             className: computeClassName(JobState.NEW),
             onClick: changeJobState(JobState.NEW),
         }, {
             key: `state:${JobState.IN_PROGRESS}`,
-            label: JobState.IN_PROGRESS,
+            label: JobStateCH[JobState.IN_PROGRESS],
             className: computeClassName(JobState.IN_PROGRESS),
             onClick: changeJobState(JobState.IN_PROGRESS),
         }, {
             key: `state:${JobState.REJECTED}`,
-            label: JobState.REJECTED,
+            label: JobStateCH[JobState.REJECTED],
             className: computeClassName(JobState.REJECTED),
             onClick: changeJobState(JobState.REJECTED),
         }, {
             key: `state:${JobState.COMPLETED}`,
-            label: JobState.COMPLETED,
+            label: JobStateCH[JobState.COMPLETED],
             className: computeClassName(JobState.COMPLETED),
             onClick: changeJobState(JobState.COMPLETED),
         }],

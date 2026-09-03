@@ -147,8 +147,8 @@ function AllocationTable(props: Readonly<Props>): JSX.Element | null {
             dataIndex: 'active',
             key: 'actions',
             filters: [
-                { text: 'Active', value: true },
-                { text: 'Excluded', value: false },
+                { text: '启用', value: true },
+                { text: '已排除', value: false },
             ],
             align: 'center' as const,
             sorter: sorter('active'),

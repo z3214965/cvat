@@ -487,7 +487,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                                 _resolve();
                                 notification.info({
                                     message: '任务参数已自动更新',
-                                    description: '排序方式已更新为Honeypots 质量方法仅支持随机排序',
+                                    description: '排序方式已更新为 Honeypots 质量方法仅支持随机排序',
                                 });
                             });
                         } else {
@@ -665,10 +665,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
 
                 notification.info({
                     message: '任务已创建',
-                    description:
-                        `完成: ${countCompleted}, 失败: ${countFailed},${countCancelled ?
-                            ` 取消: ${countCancelled},` :
-                            ''} 总计: ${countAll}, `,
+                    description: `完成: ${countCompleted}, 失败: ${countFailed},${countCancelled ? ` 取消: ${countCancelled},` : ''} 总计: ${countAll}`,
                     className: 'cvat-notification-create-task-success',
                 });
             });

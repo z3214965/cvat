@@ -68,6 +68,8 @@ function LayerHeader(props: LayerHeaderProps): JSX.Element {
                         type='text'
                         size='small'
                         icon={<SelectOutlined />}
+                        aria-pressed={selected}
+                        disabled={selected}
                         onClick={(): void => selectLayer(zOrder)}
                     />
                 </CVATTooltip>

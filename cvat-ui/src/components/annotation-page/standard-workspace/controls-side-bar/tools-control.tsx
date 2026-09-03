@@ -1031,9 +1031,7 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
 
                         const numOfObjects = trackableObjects.clientIDs.length;
                         hideMessage = message.loading({
-                            content: `${tracker.name}: ${numOfObjects} ${
-                                numOfObjects > 1 ? '个对象' : '个对象'
-                            } 被追踪...`,
+                            content: `${tracker.name}: ${numOfObjects} ${ numOfObjects > 1 ? '个对象' : '个对象' } 被追踪...`,
                             duration: 0,
                             className: 'cvat-tracking-notice',
                         });

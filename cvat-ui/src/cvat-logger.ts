@@ -14,7 +14,11 @@ const { EventScope } = core.enums;
 
 const ignoredSources = ['snippet://', 'chrome-extension://'];
 
-export function logError(error: unknown, save: boolean, extras: { type: string } & Record<string, unknown>): void {
+export function logError(
+    error: unknown,
+    save: boolean,
+    extras: { type: string } & Record<string, unknown>,
+): void {
     if (!(error instanceof Error)) {
         console.warn('捕获到未知错误类型', error);
         return;

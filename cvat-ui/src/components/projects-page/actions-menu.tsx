@@ -59,6 +59,12 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
     }), shallowEqual);
 
     const isBulkMode = selectedIds.length > 1;
+    const isExportDatasetDisabled = isBulkMode &&
+        new Set(
+            currentProjects
+                .filter((project) => selectedIds.includes(project.id))
+                .map((project) => project.dimension),
+        ).size > 1;
     const {
         dropdownOpen,
         editField,
@@ -168,12 +174,8 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
     const onDeleteProject = useCallback((): void => {
         const projectsToDelete = currentProjects.filter((project) => selectedIds.includes(project.id));
         Modal.confirm({
-            title: isBulkMode ?
-                `删除所选中的 ${projectsToDelete.length} 项目` :
-                `项目 #${projectInstance.id} 将要被删除`,
-            content: isBulkMode ?
-                '所有选定项目的相关数据(包括图片和标注)都将丢失。是否继续？' :
-                '所有相关数据(图片、标注)都将丢失。是否继续？',
+            title: isBulkMode ? `删除所选中的 ${projectsToDelete.length} 项目` : `项目 #${projectInstance.id} 将要被删除`,
+            content: isBulkMode ? '所有选定项目的相关数据(包括图片和标注)都将丢失。是否继续？' : '所有相关数据(图片、标注)都将丢失。是否继续？',
             className: 'cvat-modal-confirm-remove-project',
             onOk: () => {
                 dispatch(makeBulkOperationAsync<Project>(
@@ -221,6 +223,7 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
             onBackupProject,
             onDeleteProject,
             selectedIds,
+            isExportDatasetDisabled,
             t,
         }, props);
     }

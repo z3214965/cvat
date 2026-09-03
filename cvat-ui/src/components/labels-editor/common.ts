@@ -18,6 +18,35 @@ export type LabelOptColor = SerializedLabel;
 const core = getCore();
 let id = 0;
 
+// Number attributes store a [minimum, maximum, step] triple in "values"
+// instead of a list of options.
+export function validateNumberAttributeValues(values: string[]): void {
+    if (values.length !== 3) {
+        throw new Error('需要填写3个数值');
+    }
+
+    const trimmed = values.map((value: string) => value.trim());
+    const numbers = trimmed.map((value: string): number => (value.length ? Number(value) : NaN));
+    const invalidIndex = numbers.findIndex((number: number) => !Number.isFinite(number));
+    if (invalidIndex !== -1) {
+        throw new Error(`"${trimmed [invalidIndex]}"不是有效数字`);
+    }
+
+    const [min, max, step] = numbers;
+
+    if (min >= max) {
+        throw new Error('最小值必须小于最大值');
+    }
+
+    if (max - min < step) {
+        throw new Error('步长必须小于最大值与最小值的差值');
+    }
+
+    if (step <= 0) {
+        throw new Error('步长必须为正数');
+    }
+}
+
 function validateParsedAttribute(attr: SerializedAttribute): void {
     if (typeof attr !== 'object' || attr === null) {
         throw new Error('属性必须是JSON对象');
@@ -54,8 +83,14 @@ function validateParsedAttribute(attr: SerializedAttribute): void {
     }
 
     const attrValues = attr.values.map((value: string) => value.trim());
-    if (new Set(attrValues).size !== attrValues.length) {
-        throw new Error(`属性: "${attr.name}": 属性值必须唯一`);
+    if (attr.input_type.toLowerCase() === 'number') {
+        try {
+            validateNumberAttributeValues(attrValues);
+        } catch (error: any) {
+            throw new Error(`属性："${attr.name}"：${error.message}`);
+        }
+    } else if (new Set(attrValues).size !== attrValues.length) {
+        throw new Error(`属性："${attr.name}"：属性值不能重复`);
     }
 
     if (attr.default_value) {
@@ -133,7 +168,7 @@ export function validateParsedLabel(label: SerializedLabel): void {
             const refersToId = +match[1];
             if (!sublabelIds.includes(refersToId)) {
                 throw new Error(
-                    `标签 "${label.name}": SVG 骨架引用了 ID 为 ${refersToId} 的子标签, 这在子标签数组中并不存在`,
+                    `标签 "${label.name}": SVG骨架引用了 ID为 ${refersToId} 的子标签, 这在子标签数组中并不存在`,
                 );
             }
         }

@@ -27,12 +27,25 @@ export enum JobStage {
     ACCEPTANCE = 'acceptance',
 }
 
+export const JobStageNames: Record<JobStage, string> = {
+    [JobStage.ANNOTATION]: '标注',
+    [JobStage.VALIDATION]: '验证',
+    [JobStage.ACCEPTANCE]: '验收',
+};
+
 export enum JobState {
     NEW = 'new',
     IN_PROGRESS = 'in progress',
     COMPLETED = 'completed',
     REJECTED = 'rejected',
 }
+
+export const JobStateCH: Record<JobState, string> = {
+    [JobState.NEW]: '待处理',
+    [JobState.IN_PROGRESS]: '进行中',
+    [JobState.REJECTED]: '已驳回',
+    [JobState.COMPLETED]: '已完成',
+};
 
 export enum JobType {
     ANNOTATION = 'annotation',
@@ -151,7 +164,9 @@ export enum HistoryActions {
     CHANGED_COLOR = 'Changed color',
     CHANGED_HIDDEN = 'Changed hidden',
     CHANGED_SOURCE = 'Changed source',
+    CHANGED_SKELETON = 'Changed skeleton',
     CHANGED_AUDIO_POSITION = 'Changed audio position',
+    CHANGED_AUDIO_INTERVALS = 'Changed audio intervals',
     MERGED_OBJECTS = 'Merged objects',
     JOINED_OBJECTS = 'Joined objects',
     SLICED_OBJECT = 'Sliced object',

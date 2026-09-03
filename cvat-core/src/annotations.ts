@@ -15,8 +15,8 @@ import { ArgumentError } from './exceptions';
 import { getFramesMeta, getJobFramesMetaSync } from './frames';
 import { JobType } from './enums';
 
-const jobCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver; }>();
-const taskCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver; }>();
+const jobCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver }>();
+const taskCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver }>();
 
 // save history separately as not all history actions are related to annotations (e.g. delete, restore frame are not)
 const jobHistoryCache = new WeakMap<Task | Job, AnnotationsHistory>();
@@ -49,7 +49,9 @@ export function getCollection(session): AnnotationsCollection {
         return collection.get(session).collection;
     }
 
-    throw new InstanceNotInitializedError('会话尚未初始化，请先调用 annotations.get() 或 annotations.clear({ reload: true})');
+    throw new InstanceNotInitializedError(
+        '会话尚未初始化，请先调用 annotations.get() 或 annotations.clear({ reload: true})',
+    );
 }
 
 export function getSaver(session): AnnotationsSaver {
@@ -60,7 +62,9 @@ export function getSaver(session): AnnotationsSaver {
         return collection.get(session).saver;
     }
 
-    throw new InstanceNotInitializedError('会话尚未初始化，请在操作前调用 annotations.get() 或 annotations.clear({ reload: true})');
+    throw new InstanceNotInitializedError(
+        '会话尚未初始化，请在操作前调用 annotations.get() 或 annotations.clear({ reload: true})',
+    );
 }
 
 export function getHistory(session): AnnotationsHistory {
@@ -97,9 +101,10 @@ async function getAnnotationsFromServer(session: Job | Task): Promise<void> {
             dimension: session.dimension,
             replicasCount: session instanceof Job ? session.replicasCount : undefined,
             framesInfo: {
-                isFrameDeleted: session instanceof Job ?
-                    (frame: number) => !!getJobFramesMetaSync(session.id).deletedFrames[frame] :
-                    (frame: number) => !!frameMeta.deletedFrames[frame],
+                isFrameDeleted:
+                    session instanceof Job
+                        ? (frame: number) => !!getJobFramesMetaSync(session.id).deletedFrames[frame]
+                        : (frame: number) => !!frameMeta.deletedFrames[frame],
                 ...frameMeta.frames.reduce((acc, frameInfo, idx) => {
                     // keep only static information
                     acc[frameNumbers[idx]] = {
@@ -200,14 +205,32 @@ export async function exportDataset(
 
     let result = null;
     if (instance instanceof Task) {
-        result = await serverProxy.tasks
-            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
+        result = await serverProxy.tasks.exportDataset(
+            instance.id,
+            format,
+            saveImages,
+            useDefaultSettings,
+            targetStorage,
+            name,
+        );
     } else if (instance instanceof Job) {
-        result = await serverProxy.jobs
-            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
+        result = await serverProxy.jobs.exportDataset(
+            instance.id,
+            format,
+            saveImages,
+            useDefaultSettings,
+            targetStorage,
+            name,
+        );
     } else {
-        result = await serverProxy.projects
-            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
+        result = await serverProxy.projects.exportDataset(
+            instance.id,
+            format,
+            saveImages,
+            useDefaultSettings,
+            targetStorage,
+            name,
+        );
     }
 
     return result;
@@ -220,9 +243,9 @@ export function importDataset(
     sourceStorage: Storage,
     file: File | string,
     options: {
-        convMaskToPoly?: boolean,
-        importMode?: 'replace' | 'append',
-        updateStatusCallback?: (message: string, progress: number) => void,
+        convMaskToPoly?: boolean;
+        importMode?: 'replace' | 'append';
+        updateStatusCallback?: (message: string, progress: number) => void;
     } = {},
 ): Promise<string> {
     const updateStatusCallback = options.updateStatusCallback || (() => {});
@@ -263,32 +286,23 @@ export function importDataset(
     }
 
     if (instance instanceof Project) {
-        return serverProxy.projects
-            .importDataset(
-                instance.id,
-                format,
-                useDefaultSettings,
-                sourceStorage,
-                file,
-                {
-                    updateStatusCallback,
-                    convMaskToPoly,
-                },
-            );
+        return serverProxy.projects.importDataset(instance.id, format, useDefaultSettings, sourceStorage, file, {
+            updateStatusCallback,
+            convMaskToPoly,
+        });
     }
 
     const instanceType = instance instanceof Task ? 'task' : 'job';
-    return serverProxy.annotations
-        .uploadAnnotations(
-            instanceType,
-            instance.id,
-            format,
-            useDefaultSettings,
-            sourceStorage,
-            file,
-            {
-                convMaskToPoly,
-                importMode,
-            },
-        );
+    return serverProxy.annotations.uploadAnnotations(
+        instanceType,
+        instance.id,
+        format,
+        useDefaultSettings,
+        sourceStorage,
+        file,
+        {
+            convMaskToPoly,
+            importMode,
+        },
+    );
 }

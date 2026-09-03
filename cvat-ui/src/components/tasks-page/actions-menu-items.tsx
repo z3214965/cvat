@@ -26,6 +26,7 @@ interface MenuItemsData {
     onDeleteTask: () => void;
     startEditField: (key: string) => void;
     selectedIds: number[];
+    isExportDatasetDisabled: boolean;
     t: (key: string) => string;
 }
 
@@ -49,6 +50,7 @@ export default function TaskActionsItems(menuItemsData: MenuItemsData, taskMenuP
         onRunAutoAnnotation,
         onMoveTaskToProject,
         onDeleteTask,
+        isExportDatasetDisabled,
         t,
     } = menuItemsData;
 

@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 
-import logging
 from collections.abc import Iterable, Sequence
+import logging
 from typing import Any, TypeVar
 
 from django.conf import settings
 from django.db import DatabaseError, connection
 from django.db.models import Manager, Model, QuerySet
-from psycopg2 import Error as PsycopgError
-from psycopg2 import sql
+from psycopg2 import Error as PsycopgError, sql
 from psycopg2.errors import LockNotAvailable
+
 
 _ModelT = TypeVar("_ModelT", bound=Model)
 _QuerysetT = TypeVar("_QuerysetT", bound=QuerySet)
@@ -21,15 +21,16 @@ _logger = logging.getLogger(__name__)
 
 
 __all__ = (
-    "get_or_404",
-    "find_psycopg_cause",
-    "is_lock_timeout_error",
-    "bulk_create",
-    "is_prefetched",
-    "is_field_cached",
     "add_prefetch_fields",
+    "bulk_create",
+    "clear_prefetched_relation_cache",
+    "find_psycopg_cause",
     "get_cached",
     "get_object_by_id_for_share",
+    "get_or_404",
+    "is_field_cached",
+    "is_lock_timeout_error",
+    "is_prefetched",
 )
 
 
@@ -119,6 +120,12 @@ def bulk_create(
         update_fields=update_fields,
         unique_fields=unique_fields,
     )
+
+
+def clear_prefetched_relation_cache(instance: Model, relation_name: str) -> None:
+    prefetched_objects_cache = getattr(instance, "_prefetched_objects_cache", None)
+    if prefetched_objects_cache is not None:
+        prefetched_objects_cache.pop(relation_name, None)
 
 
 def is_prefetched(queryset: QuerySet, field: str) -> bool:

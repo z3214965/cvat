@@ -9,10 +9,11 @@ export function readLatestFrameStorage(): Map<number, number> {
     try {
         latestFrameStorage = JSON.parse(localStorage.getItem('latestFrameStorage') || '[]');
         if (
-            !Array.isArray(latestFrameStorage) ||
-            latestFrameStorage.some(
-                (item) => !Array.isArray(item) || !Number.isInteger(item[0]) || !Number.isInteger(item[1]),
-            )
+            !Array.isArray(latestFrameStorage) || latestFrameStorage.some((item) => (
+                !Array.isArray(item) ||
+                !Number.isInteger(item[0]) ||
+                !Number.isInteger(item[1])
+            ))
         ) {
             throw new Error('local存储的格式不正确');
         }

@@ -278,7 +278,7 @@ function ToLayerItem(props: Readonly<ItemProps>): JSX.Element {
             }}
             className='cvat-object-item-menu-move-to-layer'
         >
-            移动到图层...
+            移动到图层
         </Button>
     );
 }

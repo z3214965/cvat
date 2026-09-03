@@ -4,12 +4,13 @@
 # SPDX-License-Identifier: MIT
 
 
-import math
 from collections.abc import Sequence
 from functools import partial
+import math
 from typing import Any
 from unittest import mock
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from cvat.apps.dataset_manager import task as task_module
@@ -468,7 +469,7 @@ class AnnotationIRTest(TestCase):
 
 class TestTaskAnnotation(TestCase):
     def test_reads_ordered_jobs(self):
-        user = models.User.objects.create_superuser(username="admin", email="", password="")
+        user = get_user_model().objects.create_superuser(username="admin", email="", password="")
         for dimension in [DimensionType.DIM_2D, DimensionType.DIM_3D]:
             with self.subTest(dimension=dimension):
                 db_data = models.Data.objects.create(size=31, stop_frame=30, image_quality=50)

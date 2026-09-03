@@ -14,7 +14,6 @@ from dj_rest_auth.serializers import (
     PasswordResetSerializer,
 )
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
@@ -22,6 +21,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from cvat.apps.iam.forms import ResetPasswordFormEx
+from cvat.apps.iam.models import User
 from cvat.apps.iam.password_validation import (
     DEFAULT_MAX_PASSWORD_LENGTH,
     DEFAULT_MIN_PASSWORD_LENGTH,
@@ -128,7 +128,7 @@ class PasswordResetSerializerEx(PasswordResetSerializer):
         if hasattr(settings, "UI_HOST") and settings.UI_HOST:
             domain = settings.UI_HOST
             if hasattr(settings, "UI_PORT") and settings.UI_PORT:
-                domain += ":{}".format(settings.UI_PORT)
+                domain += f":{settings.UI_PORT}"
         return {"domain_override": domain}
 
 
@@ -180,10 +180,10 @@ class LoginSerializerEx(LoginSerializer):
     def get_auth_user_using_allauth(self, username, email, password):
 
         def is_email_authentication():
-            return allauth_settings.LOGIN_METHODS == {allauth_settings.LoginMethod.EMAIL}
+            return {allauth_settings.LoginMethod.EMAIL} == allauth_settings.LOGIN_METHODS
 
         def is_username_authentication():
-            return allauth_settings.LOGIN_METHODS == {allauth_settings.LoginMethod.USERNAME}
+            return {allauth_settings.LoginMethod.USERNAME} == allauth_settings.LOGIN_METHODS
 
         # check that the server settings match the request
         if is_username_authentication() and not username and email:

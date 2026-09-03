@@ -5,33 +5,33 @@
 
 from __future__ import annotations
 
-import mimetypes
-import os
-import re
-import shutil
-import string
-import textwrap
-import uuid
-import warnings
 from collections import OrderedDict
 from collections.abc import Iterable, Sequence
 from contextlib import closing
 from copy import copy
 from datetime import datetime
 from inspect import isclass
+import mimetypes
+import os
 from pathlib import Path
+import re
+import shutil
+import string
 from tempfile import NamedTemporaryFile
+import textwrap
 from typing import Any, cast
 from urllib.parse import urlparse
+import uuid
+import warnings
 
-import django_rq
 from django.conf import settings
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import Count, Prefetch, prefetch_related_objects
 from django.utils import timezone
 from django.utils.functional import cached_property
+import django_rq
 from drf_spectacular.utils import OpenApiExample, extend_schema_field, extend_schema_serializer
 from numpy import random
 from PIL import Image
@@ -63,12 +63,14 @@ from cvat.apps.engine.utils import (
     parse_specific_attributes,
     take_by,
 )
+from cvat.apps.iam.models import User
 from cvat.apps.iam.permissions import get_iam_context
 from cvat.apps.organizations.models import Organization
 from cvat.apps.webhooks.models import Webhook
 from cvat.utils import django_database as db_utils
 from cvat.utils.paths import problem_with_untrusted_path
 from utils.dataset_manifest import ImageManifestManager
+
 
 slogger = ServerLogManager(__name__)
 
@@ -123,7 +125,7 @@ class WriteOnceMixin:
         if not isinstance(write_once_fields, (list, tuple)):
             raise TypeError(
                 "The `write_once_fields` option must be a list or tuple. "
-                "Got {}.".format(type(write_once_fields).__name__)
+                f"Got {type(write_once_fields).__name__}."
             )
 
         for field_name in write_once_fields:
@@ -264,7 +266,7 @@ class OrgTransferableMixin:
         update_fields: list[str],
     ):
         update_date = timezone.now()
-        request = cast(ExtendedRequest, self.context["request"])
+        request = cast("ExtendedRequest", self.context["request"])
         organization_id = validated_data["organization_id"]
         organization_slug = None
 
@@ -666,21 +668,15 @@ class LabelSerializer(SublabelSerializer):
             if str(models.LabelType.SKELETON) in [db_label.type, updated_type]:
                 # do not permit changing types from/to skeleton
                 logger.warning(
-                    "Label id {} ({}): an attempt to change label type from {} to {}. "
-                    "Changing from or to '{}' is not allowed, the type won't be changed.".format(
-                        db_label.id,
-                        db_label.name,
-                        db_label.type,
-                        updated_type,
-                        str(models.LabelType.SKELETON),
-                    )
+                    f"Label id {db_label.id} ({db_label.name}): an attempt to change label type from {db_label.type} to {updated_type}. "
+                    f"Changing from or to '{models.LabelType.SKELETON!s}' is not allowed, the type won't be changed."
                 )
             else:
                 db_label.type = updated_type
 
             db_label.name = validated_data.get("name") or db_label.name
 
-            logger.info("Label id {} ({}) was updated".format(db_label.id, db_label.name))
+            logger.info(f"Label id {db_label.id} ({db_label.name}) was updated")
         else:
             try:
                 db_label = models.Label.create(
@@ -691,7 +687,7 @@ class LabelSerializer(SublabelSerializer):
                 )
             except models.InvalidLabel as exc:
                 raise exceptions.ValidationError(str(exc)) from exc
-            logger.info("New {} label was created".format(db_label.name))
+            logger.info(f"New {db_label.name} label was created")
 
             cls.update_labels(sublabels, parent_instance=parent_instance, parent_label=db_label)
 
@@ -708,7 +704,7 @@ class LabelSerializer(SublabelSerializer):
             db_label.delete()
             return None
 
-        if not validated_data.get("color", None):
+        if not validated_data.get("color"):
             other_label_colors = [
                 label.color
                 for label in parent_instance.label_set.exclude(id=db_label.id).order_by("id")
@@ -742,7 +738,7 @@ class LabelSerializer(SublabelSerializer):
                 raise serializers.ValidationError("Deleted attribute must have an ID")
 
             db_attr = get_db_attr(attr_id)
-            logger.info("{} attribute for {} label was deleted".format(db_attr.name, db_label.name))
+            logger.info(f"{db_attr.name} attribute for {db_label.name} label was deleted")
             db_attr.delete()
 
         if label_exists:
@@ -760,11 +756,11 @@ class LabelSerializer(SublabelSerializer):
                 )
             if created:
                 logger.info(
-                    "New {} attribute for {} label was created".format(db_attr.name, db_label.name)
+                    f"New {db_attr.name} attribute for {db_label.name} label was created"
                 )
             else:
                 logger.info(
-                    "{} attribute for {} label was updated".format(db_attr.name, db_label.name)
+                    f"{db_attr.name} attribute for {db_label.name} label was updated"
                 )
 
                 cls._update_attribute(db_attr, attr)
@@ -1175,41 +1171,41 @@ class JobWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
         child=serializers.IntegerField(min_value=0),
         required=False,
         allow_empty=False,
-        help_text=textwrap.dedent("""\
-            The list of frame ids. Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.MANUAL)),
+        help_text=textwrap.dedent(f"""\
+            The list of frame ids. Applicable only to the "{models.JobFrameSelectionMethod.MANUAL}" frame selection method
+        """),
     )
     frame_count = serializers.IntegerField(
         min_value=1,
         required=False,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The number of frames included in the GT job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_UNIFORM)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_UNIFORM}" frame selection method
+        """),
     )
     frame_share = serializers.FloatField(
         required=False,
         validators=[field_validation.validate_share],
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The share of frames included in the GT job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_UNIFORM)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_UNIFORM}" frame selection method
+        """),
     )
     frames_per_job_count = serializers.IntegerField(
         min_value=1,
         required=False,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The number of frames included in the GT job from each annotation job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_PER_JOB)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_PER_JOB}" frame selection method
+        """),
     )
     frames_per_job_share = serializers.FloatField(
         required=False,
         validators=[field_validation.validate_share],
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The share of frames included in the GT job from each annotation job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_PER_JOB)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_PER_JOB}" frame selection method
+        """),
     )
     random_seed = serializers.IntegerField(
         min_value=0,
@@ -1264,9 +1260,7 @@ class JobWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
 
         if "frames" in attrs and frame_selection_method != models.JobFrameSelectionMethod.MANUAL:
             raise serializers.ValidationError(
-                '"frames" can only be used when "frame_selection_method" is "{}"'.format(
-                    models.JobFrameSelectionMethod.MANUAL
-                )
+                f'"frames" can only be used when "frame_selection_method" is "{models.JobFrameSelectionMethod.MANUAL}"'
             )
 
         return super().validate(attrs)
@@ -1379,9 +1373,7 @@ class JobWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
                 invalid_ids = unique_frames.difference(range(task_size))
                 if invalid_ids:
                     raise serializers.ValidationError(
-                        "The following frames do not exist in the task: {}".format(
-                            format_list(tuple(map(str, sorted(invalid_ids))))
-                        )
+                        f"The following frames do not exist in the task: {format_list(tuple(map(str, sorted(invalid_ids))))}"
                     )
 
                 task_frame_provider = TaskFrameProvider(task)
@@ -1481,9 +1473,9 @@ class JobValidationLayoutWriteSerializer(serializers.Serializer):
         child=serializers.IntegerField(min_value=0),
         required=False,
         allow_empty=False,
-        help_text=textwrap.dedent("""\
-            The list of frame ids. Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.MANUAL)),
+        help_text=textwrap.dedent(f"""\
+            The list of frame ids. Applicable only to the "{models.JobFrameSelectionMethod.MANUAL}" frame selection method
+        """),
     )
 
     def __init__(
@@ -1591,45 +1583,35 @@ class JobValidationLayoutWriteSerializer(serializers.Serializer):
             if requested_normal_frames:
                 raise serializers.ValidationError(
                     "Could not update honeypot frames: "
-                    "frames {} are not from the validation pool".format(
-                        format_list(tuple(map(str, sorted(requested_normal_frames))))
-                    )
+                    f"frames {format_list(tuple(map(str, sorted(requested_normal_frames))))} are not from the validation pool"
                 )
 
             if requested_inactive_frames:
                 raise serializers.ValidationError(
                     "Could not update honeypot frames: "
-                    "frames {} are disabled. Restore them in the validation pool first".format(
-                        format_list(tuple(map(str, sorted(requested_inactive_frames))))
-                    )
+                    f"frames {format_list(tuple(map(str, sorted(requested_inactive_frames))))} are disabled. Restore them in the validation pool first"
                 )
 
             if len(requested_frames) != segment_honeypots_count:
                 raise serializers.ValidationError(
                     "Could not update honeypot frames: "
                     "the number of honeypots must remain the same. "
-                    "Requested {}, current {}".format(
-                        len(requested_frames), segment_honeypots_count
-                    )
+                    f"Requested {len(requested_frames)}, current {segment_honeypots_count}"
                 )
 
         elif frame_selection_method == models.JobFrameSelectionMethod.RANDOM_UNIFORM:
             if len(task_active_validation_frames) < segment_honeypots_count:
                 raise serializers.ValidationError(
                     "Can't select validation frames: "
-                    "the remaining number of validation frames ({}) "
-                    "is less than the number of honeypots in a job ({}). "
-                    "Try to restore some validation frames".format(
-                        len(task_active_validation_frames), segment_honeypots_count
-                    )
+                    f"the remaining number of validation frames ({len(task_active_validation_frames)}) "
+                    f"is less than the number of honeypots in a job ({segment_honeypots_count}). "
+                    "Try to restore some validation frames"
                 )
 
             if bulk_context:
                 frame_selector = bulk_context.honeypot_frame_selector
             else:
-                active_validation_frame_counts = {
-                    validation_frame: 0 for validation_frame in task_active_validation_frames
-                }
+                active_validation_frame_counts = dict.fromkeys(task_active_validation_frames, 0)
                 for task_honeypot_frame in task_honeypot_frames:
                     real_frame = _to_rel_frame(db_frames[task_honeypot_frame].real_frame)
                     if real_frame in task_active_validation_frames:
@@ -1870,7 +1852,7 @@ class JobValidationLayoutReadSerializer(serializers.Serializer):
                 if not frame.is_placeholder:
                     continue
 
-                if not frame.frame in segment_frame_set:
+                if frame.frame not in segment_frame_set:
                     continue
 
                 segment_honeypot_frames.append(
@@ -1929,9 +1911,9 @@ class TaskValidationLayoutWriteSerializer(serializers.Serializer):
     honeypot_real_frames = serializers.ListField(
         child=serializers.IntegerField(min_value=0),
         required=False,
-        help_text=textwrap.dedent("""\
-            The list of frame ids. Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.MANUAL)),
+        help_text=textwrap.dedent(f"""\
+            The list of frame ids. Applicable only to the "{models.JobFrameSelectionMethod.MANUAL}" frame selection method
+        """),
     )
 
     def validate(self, attrs):
@@ -1972,9 +1954,7 @@ class TaskValidationLayoutWriteSerializer(serializers.Serializer):
             )
             if unknown_requested_disabled_frames:
                 raise serializers.ValidationError(
-                    "Unknown frames requested for exclusion from the validation set: {}".format(
-                        format_list(tuple(map(str, sorted(unknown_requested_disabled_frames))))
-                    )
+                    f"Unknown frames requested for exclusion from the validation set: {format_list(tuple(map(str, sorted(unknown_requested_disabled_frames))))}"
                 )
 
             gt_job_meta_serializer = JobDataMetaWriteSerializer(
@@ -2035,7 +2015,7 @@ class TaskValidationLayoutWriteSerializer(serializers.Serializer):
                 )
         elif frame_selection_method == models.JobFrameSelectionMethod.RANDOM_UNIFORM:
             # Reset distribution for active validation frames
-            active_validation_frame_counts = {f: 0 for f in active_validation_frames}
+            active_validation_frame_counts = dict.fromkeys(active_validation_frames, 0)
             frame_selector = HoneypotFrameSelector(active_validation_frame_counts)
             bulk_context.honeypot_frame_selector = frame_selector
 
@@ -2401,43 +2381,43 @@ class ValidationParamsSerializer(serializers.ModelSerializer):
         child=serializers.CharField(max_length=MAX_FILENAME_LENGTH),
         required=False,
         allow_empty=False,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The list of file names to be included in the validation set.
-            Applicable only to the "{}" frame selection method.
+            Applicable only to the "{models.JobFrameSelectionMethod.MANUAL}" frame selection method.
             Can only be used for images.
-        """.format(models.JobFrameSelectionMethod.MANUAL)),
+        """),
     )
     frame_count = serializers.IntegerField(
         min_value=1,
         required=False,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The number of frames to be included in the validation set.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_UNIFORM)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_UNIFORM}" frame selection method
+        """),
     )
     frame_share = serializers.FloatField(
         required=False,
         validators=[field_validation.validate_share],
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The share of frames to be included in the validation set.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_UNIFORM)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_UNIFORM}" frame selection method
+        """),
     )
     frames_per_job_count = serializers.IntegerField(
         min_value=1,
         required=False,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The number of frames to be included in the validation set from each annotation job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_PER_JOB)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_PER_JOB}" frame selection method
+        """),
     )
     frames_per_job_share = serializers.FloatField(
         required=False,
         validators=[field_validation.validate_share],
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             The share of frames to be included in the validation set from each annotation job.
-            Applicable only to the "{}" frame selection method
-        """.format(models.JobFrameSelectionMethod.RANDOM_PER_JOB)),
+            Applicable only to the "{models.JobFrameSelectionMethod.RANDOM_PER_JOB}" frame selection method
+        """),
     )
     random_seed = serializers.IntegerField(
         min_value=0,
@@ -2507,9 +2487,7 @@ class ValidationParamsSerializer(serializers.ModelSerializer):
             and attrs["frame_selection_method"] != models.JobFrameSelectionMethod.MANUAL
         ):
             raise serializers.ValidationError(
-                '"frames" can only be used when "frame_selection_method" is "{}"'.format(
-                    models.JobFrameSelectionMethod.MANUAL
-                )
+                f'"frames" can only be used when "frame_selection_method" is "{models.JobFrameSelectionMethod.MANUAL}"'
             )
 
         if frames := attrs.get("frames"):
@@ -2666,9 +2644,9 @@ class DataSerializer(serializers.ModelSerializer):
         default=list,
         allow_empty=True,
         write_only=True,
-        help_text=textwrap.dedent("""\
+        help_text=textwrap.dedent(f"""\
             Allows to specify file order for client_file uploads.
-            Only valid with the "{}" sorting method selected.
+            Only valid with the "{models.SortingMethod.PREDEFINED}" sorting method selected.
 
             To state that the input files are sent in the correct order,
             pass an empty list.
@@ -2676,7 +2654,7 @@ class DataSerializer(serializers.ModelSerializer):
             If you want to send files in an arbitrary order
             and reorder them afterwards on the server,
             pass the list of file names in the required order.
-        """.format(models.SortingMethod.PREDEFINED)),
+        """),
     )
     validation_params = ValidationParamsSerializer(allow_null=True, required=False)
 
@@ -3330,7 +3308,7 @@ class TaskWriteSerializer(WriteOnceMixin, serializers.ModelSerializer, OrgTransf
         )
 
     def _validate_org_transferring(self, attrs: dict[str, Any]):
-        if "project_id" in attrs.keys():
+        if "project_id" in attrs:
             raise serializers.ValidationError(
                 "A task cannot be moved into a project and into an organization at the same time"
             )
@@ -3748,9 +3726,7 @@ class DataMetaWriteSerializer(serializers.ModelSerializer):
         )
         if unknown_requested_deleted_frames:
             raise serializers.ValidationError(
-                "Unknown frames {} requested for removal".format(
-                    format_list(tuple(map(str, sorted(unknown_requested_deleted_frames))))
-                )
+                f"Unknown frames {format_list(tuple(map(str, sorted(unknown_requested_deleted_frames))))} requested for removal"
             )
 
         validation_layout = getattr(self.instance, "validation_layout", None)
@@ -3803,9 +3779,7 @@ class JobDataMetaWriteSerializer(serializers.ModelSerializer):
         unknown_deleted_frames = set(deleted_frames) - segment_rel_frame_set
         if unknown_deleted_frames:
             raise serializers.ValidationError(
-                "Frames {} do not belong to the job".format(
-                    format_list(list(map(str, unknown_deleted_frames)))
-                )
+                f"Frames {format_list(list(map(str, unknown_deleted_frames)))} do not belong to the job"
             )
 
         updated_deleted_validation_frames = None
@@ -4477,17 +4451,13 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
             if file_status == Status.NOT_FOUND:
                 raise serializers.ValidationError(
                     {
-                        "manifests": "The '{}' file does not exist on '{}' cloud storage".format(
-                            manifest, storage.name
-                        )
+                        "manifests": f"The '{manifest}' file does not exist on '{storage.name}' cloud storage"
                     }
                 )
             elif file_status == Status.FORBIDDEN:
                 raise serializers.ValidationError(
                     {
-                        "manifests": "The '{}' file does not available on '{}' cloud storage. Access denied".format(
-                            manifest, storage.name
-                        )
+                        "manifests": f"The '{manifest}' file does not available on '{storage.name}' cloud storage. Access denied"
                     }
                 )
 
@@ -4560,13 +4530,11 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
         elif storage_status == Status.FORBIDDEN:
             field = "credentials"
             message = (
-                "Cannot create resource {} with specified credentials. Access forbidden.".format(
-                    storage.name
-                )
+                f"Cannot create resource {storage.name} with specified credentials. Access forbidden."
             )
         else:
             field = "resource"
-            message = "The resource {} not found. It may have been deleted.".format(storage.name)
+            message = f"The resource {storage.name} not found. It may have been deleted."
         if temporary_file:
             os.remove(temporary_file)
         slogger.glob.error(message)
@@ -4652,13 +4620,11 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
         elif storage_status == Status.FORBIDDEN:
             field = "credentials"
             message = (
-                "Cannot update resource {} with specified credentials. Access forbidden.".format(
-                    storage.name
-                )
+                f"Cannot update resource {storage.name} with specified credentials. Access forbidden."
             )
         else:
             field = "resource"
-            message = "The resource {} not found. It may have been deleted.".format(storage.name)
+            message = f"The resource {storage.name} not found. It may have been deleted."
         if temporary_file:
             os.remove(temporary_file)
         slogger.glob.error(message)
@@ -4691,12 +4657,12 @@ def _update_related_storages(
         if not new_conf:
             if (
                 not workspace_transferring
-                or workspace_transferring
+                or (workspace_transferring
                 and (
                     not storage_instance
-                    or storage_instance
-                    and not storage_instance.cloud_storage_id
-                )
+                    or (storage_instance
+                    and not storage_instance.cloud_storage_id)
+                ))
             ):
                 continue
 

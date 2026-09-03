@@ -36,12 +36,13 @@ from .models import (
     Location,
     Project,
     Task,
-    User,
 )
+
 
 if TYPE_CHECKING:
     from rest_framework.viewsets import ViewSet
 
+    from cvat.apps.iam.models import User
     from cvat.apps.iam.permissions import IamContext
 
 
@@ -515,7 +516,7 @@ class ProjectPermission(
     ):
         params = {}
 
-        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+        if scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
             DownloadExportedExtension.extend_params_with_rq_job_details(
                 request=request, params=params
             )
@@ -541,7 +542,7 @@ class ProjectPermission(
                 "organization": {"id": self.obj.organization_id},
             }
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
+            if self.scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
                 self.extend_resource_with_rq_job_details(data)
 
             if self.scope in (
@@ -803,7 +804,7 @@ class TaskPermission(
     ):
         params = {}
 
-        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+        if scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
             DownloadExportedExtension.extend_params_with_rq_job_details(
                 request=request, params=params
             )
@@ -846,7 +847,7 @@ class TaskPermission(
                 ),
             }
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
+            if self.scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
                 self.extend_resource_with_rq_job_details(data)
 
             if self.scope in (
@@ -1062,7 +1063,7 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
     ):
         params = {}
 
-        if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == scope:
+        if scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
             DownloadExportedExtension.extend_params_with_rq_job_details(
                 request=request, params=params
             )
@@ -1100,7 +1101,7 @@ class JobPermission(OpenPolicyAgentPermission, DownloadExportedExtension):
                 ),
             }
 
-            if DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE == self.scope:
+            if self.scope == DownloadExportedExtension.Scopes.DOWNLOAD_EXPORTED_FILE:
                 self.extend_resource_with_rq_job_details(data)
 
             if self.scope in (self.Scopes.EXPORT_ANNOTATIONS, self.Scopes.EXPORT_DATASET):
@@ -1349,7 +1350,7 @@ class LabelPermission(OpenPolicyAgentPermission):
         permissions = []
         for scope in cls.get_scopes(request, view, obj):
             if scope in [Scopes.DELETE, Scopes.UPDATE, Scopes.VIEW]:
-                obj = cast(Label, obj)
+                obj = cast("Label", obj)
 
                 # Access rights are the same as in the owning objects
                 # Job assignees are not supposed to work with separate labels.

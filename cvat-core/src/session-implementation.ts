@@ -524,6 +524,16 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
         },
     });
 
+    Object.defineProperty(Job.prototype.annotations.bulkSave, 'implementation', {
+        value: function bulkSaveImplementation(
+            this: JobClass,
+            states: Parameters<typeof JobClass.prototype.annotations.bulkSave>[0],
+        ): ReturnType<typeof JobClass.prototype.annotations.bulkSave> {
+            getCollection(this).bulkSave(states);
+            return Promise.resolve();
+        },
+    });
+
     Object.defineProperty(Job.prototype.annotations.statistics, 'implementation', {
         value: function statisticsImplementation(
             this: JobClass,
@@ -1136,7 +1146,9 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
     });
 
     Object.defineProperty(Task.prototype.frames.chunk, 'implementation', {
-        value: function chunkImplementation(this: TaskClass): ReturnType<typeof TaskClass.prototype.frames.chunk> {
+        value: function chunkImplementation(
+            this: TaskClass,
+        ): ReturnType<typeof TaskClass.prototype.frames.chunk> {
             throw new Error('暂未对任务实现该功能');
         },
     });
@@ -1325,6 +1337,16 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
             position: Parameters<typeof TaskClass.prototype.annotations.selectInterval>[1],
         ): ReturnType<typeof TaskClass.prototype.annotations.selectInterval> {
             return Promise.resolve(getCollection(this).selectInterval(intervalStates, position));
+        },
+    });
+
+    Object.defineProperty(Task.prototype.annotations.bulkSave, 'implementation', {
+        value: function bulkSaveImplementation(
+            this: TaskClass,
+            states: Parameters<typeof TaskClass.prototype.annotations.bulkSave>[0],
+        ): ReturnType<typeof TaskClass.prototype.annotations.bulkSave> {
+            getCollection(this).bulkSave(states);
+            return Promise.resolve();
         },
     });
 

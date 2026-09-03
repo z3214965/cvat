@@ -170,7 +170,7 @@ class GlobalErrorBoundary extends React.PureComponent<Props, State> {
                                 ) : (
                                     <li>
                                         {/* eslint-disable-next-line */}
-                                        <a onClick={() => window.location.reload()}>刷新 </a>
+                                        <a onClick={() => window.location.reload()}>刷新</a>
                                         页面
                                     </li>
                                 )}

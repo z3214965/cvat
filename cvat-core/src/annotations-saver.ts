@@ -46,83 +46,70 @@ const JSON_SERIALIZER_KEYS = [
     'outside',
 ];
 
-const sortAttributes = (attributes: { spec_id: number }[]): { spec_id: number }[] => (
-    attributes.sort(({ spec_id: specID1 }, { spec_id: specID2 }) => specID1 - specID2)
-);
+const sortAttributes = (attributes: { spec_id: number }[]): { spec_id: number }[] =>
+    attributes.sort(({ spec_id: specID1 }, { spec_id: specID2 }) => specID1 - specID2);
 
-const sortTrackedShapes = (shapes: SerializedTrack['shapes']): SerializedTrack['shapes'] => (
-    shapes.sort(({ frame: frame1 }, { frame: frame2 }) => frame1 - frame2)
-);
+const sortTrackedShapes = (shapes: SerializedTrack['shapes']): SerializedTrack['shapes'] =>
+    shapes.sort(({ frame: frame1 }, { frame: frame2 }) => frame1 - frame2);
 
-const isTheSameAttributes = (
-    a: { spec_id: number }[],
-    b: { spec_id: number }[],
-): boolean => (
-    JSON.stringify(sortAttributes(a)) === JSON.stringify(sortAttributes(b))
-);
+const isTheSameAttributes = (a: { spec_id: number }[], b: { spec_id: number }[]): boolean =>
+    JSON.stringify(sortAttributes(a)) === JSON.stringify(sortAttributes(b));
 
-const isTheSamePoints = (
-    a: number[] | undefined,
-    b: number[] | undefined,
-): boolean => (
+const isTheSamePoints = (a: number[] | undefined, b: number[] | undefined): boolean =>
     (a === undefined && b === undefined) ||
-    (a.length === b.length && a.every((coord, index) => coord.toFixed(1) === b[index].toFixed(1)))
-);
+    (a.length === b.length && a.every((coord, index) => coord.toFixed(1) === b[index].toFixed(1)));
 
-const isTheSameTrackedShapes = (
-    a: SerializedTrack['shapes'],
-    b: SerializedTrack['shapes'],
-): boolean => {
+const isTheSameTrackedShapes = (a: SerializedTrack['shapes'], b: SerializedTrack['shapes']): boolean => {
     const sortedA = sortTrackedShapes(a);
     const sortedB = sortTrackedShapes(b);
 
-    return sortedA.length === sortedB.length &&
+    return (
+        sortedA.length === sortedB.length &&
         sortedA.every((shape, index) => {
             // The server can extend tracked shape attributes with defaults or previous mutable values.
             // During 504 recovery, only attributes sent by the client must be preserved for matching.
-            const receivedAttributes = sortedB[index].attributes.filter((attr) => (
-                shape.attributes.some((sentAttr) => sentAttr.spec_id === attr.spec_id)
-            ));
+            const receivedAttributes = sortedB[index].attributes.filter((attr) =>
+                shape.attributes.some((sentAttr) => sentAttr.spec_id === attr.spec_id),
+            );
 
-            return shape.frame === sortedB[index].frame &&
+            return (
+                shape.frame === sortedB[index].frame &&
                 shape.type === sortedB[index].type &&
                 shape.occluded === sortedB[index].occluded &&
                 shape.outside === sortedB[index].outside &&
                 shape.z_order === sortedB[index].z_order &&
                 shape.rotation === sortedB[index].rotation &&
                 isTheSamePoints(shape.points, sortedB[index].points) &&
-                isTheSameAttributes(shape.attributes, receivedAttributes);
-        });
+                isTheSameAttributes(shape.attributes, receivedAttributes)
+            );
+        })
+    );
 };
 
-const isTheSameTag = (
-    a: SerializedCollection['tags'][number],
-    b: SerializedCollection['tags'][number],
-): boolean => (
+const isTheSameTag = (a: SerializedCollection['tags'][number], b: SerializedCollection['tags'][number]): boolean =>
     a.label_id === b.label_id &&
     a.frame === b.frame &&
     a.group === b.group &&
     a.source === b.source &&
-    isTheSameAttributes(a.attributes, b.attributes)
-);
+    isTheSameAttributes(a.attributes, b.attributes);
 
 const isTheSameInterval = (
     a: SerializedCollection['intervals'][number],
     b: SerializedCollection['intervals'][number],
-): boolean => (
+): boolean =>
     a.label_id === b.label_id &&
     a.start === b.start &&
     a.stop === b.stop &&
     a.group === b.group &&
     a.source === b.source &&
-    isTheSameAttributes(a.attributes, b.attributes)
-);
+    isTheSameAttributes(a.attributes, b.attributes);
 
 const isTheSameShape = (
     a: Omit<SerializedCollection['shapes'][number], 'elements'>,
     b: Omit<SerializedCollection['shapes'][number], 'elements'>,
 ): boolean => {
-    const isSame = a.label_id === b.label_id &&
+    const isSame =
+        a.label_id === b.label_id &&
         a.frame === b.frame &&
         a.group === b.group &&
         a.source === b.source &&
@@ -134,8 +121,11 @@ const isTheSameShape = (
         isTheSamePoints(a.points, b.points);
 
     if ('elements' in a && Array.isArray(a.elements) && 'elements' in b && Array.isArray(b.elements)) {
-        return isSame && a.elements.length === b.elements.length &&
-            a.elements.every((element, index) => isTheSameShape(element, b.elements[index]));
+        return (
+            isSame &&
+            a.elements.length === b.elements.length &&
+            a.elements.every((element, index) => isTheSameShape(element, b.elements[index]))
+        );
     }
 
     return isSame;
@@ -144,26 +134,27 @@ const isTheSameShape = (
 type SerializedTrackLike = Omit<SerializedTrack, 'elements'> & {
     elements?: SerializedTrackLike[];
 };
-const isTheSameTrack = (
-    a: SerializedTrackLike,
-    b: SerializedTrackLike,
-): boolean => {
-    const isSame = a.label_id === b.label_id &&
+const isTheSameTrack = (a: SerializedTrackLike, b: SerializedTrackLike): boolean => {
+    const isSame =
+        a.label_id === b.label_id &&
         a.group === b.group &&
         a.source === b.source &&
         isTheSameAttributes(a.attributes, b.attributes) &&
         isTheSameTrackedShapes(a.shapes, b.shapes);
 
     if ('elements' in a && Array.isArray(a.elements) && 'elements' in b && Array.isArray(b.elements)) {
-        return isSame && a.elements.length === b.elements.length &&
-            a.elements.every((element, index) => isTheSameTrack(element, b.elements[index]));
+        return (
+            isSame &&
+            a.elements.length === b.elements.length &&
+            a.elements.every((element, index) => isTheSameTrack(element, b.elements[index]))
+        );
     }
 
     return isSame;
 };
 
 const isTheSameObject = (
-    type: typeof COLLECTION_KEYS[number],
+    type: (typeof COLLECTION_KEYS)[number],
     left: CollectionObject,
     right: CollectionObject,
 ): boolean => {
@@ -193,10 +184,7 @@ const isTheSameObject = (
     }
 };
 
-function removeIDFromObject<T extends CollectionObject>(
-    object: T,
-    property: 'id' | 'clientID',
-): T {
+function removeIDFromObject<T extends CollectionObject>(object: T, property: 'id' | 'clientID'): T {
     delete object[property];
     if ('shapes' in object && Array.isArray(object.shapes)) {
         for (const shape of object.shapes) {
@@ -217,10 +205,10 @@ export default class AnnotationsSaver {
     private collection: any;
     private hash: string;
     private initialObjects: {
-        shapes: Map<number, SerializedCollection['shapes'][0]>,
-        tracks: Map<number, SerializedCollection['tracks'][0]>,
-        tags: Map<number, SerializedCollection['tags'][0]>,
-        intervals: Map<number, SerializedCollection['intervals'][0]>,
+        shapes: Map<number, SerializedCollection['shapes'][0]>;
+        tracks: Map<number, SerializedCollection['tracks'][0]>;
+        tags: Map<number, SerializedCollection['tags'][0]>;
+        intervals: Map<number, SerializedCollection['intervals'][0]>;
     };
 
     constructor(collection, session: Task | Job) {
@@ -250,7 +238,10 @@ export default class AnnotationsSaver {
         return JSON.stringify(exported);
     }
 
-    async _request(data: SerializedCollection, action: 'put' | 'create' | 'update' | 'delete'): Promise<SerializedCollection> {
+    async _request(
+        data: SerializedCollection,
+        action: 'put' | 'create' | 'update' | 'delete',
+    ): Promise<SerializedCollection> {
         const collection = await serverProxy.annotations.updateAnnotations(this.sessionType, this.id, data, action);
         return collection;
     }
@@ -303,7 +294,8 @@ export default class AnnotationsSaver {
                 if (Number.isInteger(object.id) && this.initialObjects[objectType].has(object.id)) {
                     const exportedHash = JSON.stringify(object, JSON_SERIALIZER_KEYS);
                     const initialHash = JSON.stringify(
-                        this.initialObjects[objectType].get(object.id), JSON_SERIALIZER_KEYS,
+                        this.initialObjects[objectType].get(object.id),
+                        JSON_SERIALIZER_KEYS,
                     );
 
                     if (exportedHash !== initialHash) {
@@ -341,7 +333,8 @@ export default class AnnotationsSaver {
         const indexesLength = COLLECTION_KEYS.reduce((acc, type) => acc + indexes[type].length, 0);
         if (indexesLength !== savedLength) {
             throw new DataError(
-                '服务端返回的对象数量与客户端发送的不一致' + `(已保存数量: ${savedLength} vs 提交数量: ${indexesLength}).`,
+                '服务端返回的对象数量与客户端发送的不一致' +
+                    `(已保存数量: ${savedLength} vs 提交数量: ${indexesLength}).`,
             );
         }
 
@@ -382,9 +375,12 @@ export default class AnnotationsSaver {
     }
 
     async save(onUpdateArg?: (message: string) => void): Promise<void> {
-        const onUpdate = typeof onUpdateArg === 'function' ? onUpdateArg : (message) => {
-            console.log(message);
-        };
+        const onUpdate =
+            typeof onUpdateArg === 'function'
+                ? onUpdateArg
+                : (message) => {
+                      console.log(message);
+                  };
 
         const exported = this.collection.export();
         const { flush } = this.collection;
@@ -421,7 +417,7 @@ export default class AnnotationsSaver {
             // but we implemented a workaround here
 
             const findPair = (
-                key: typeof COLLECTION_KEYS[number],
+                key: (typeof COLLECTION_KEYS)[number],
                 objectToSave: CollectionObject,
                 serverCollection: SerializedCollection,
             ): CollectionObject | null => {
@@ -430,20 +426,23 @@ export default class AnnotationsSaver {
                 const { label_id: labelID } = objectToSave;
 
                 // optimization to avoid stringifying each object in collection
-                const potentialObjects = serverObjects.filter(
-                    (object) => {
-                        const isPotential = object.label_id === labelID && !existingIDs.includes(object.id);
-                        if (key === 'intervals') {
-                            return isPotential && ['start', 'stop'].every((property) => object[property] === objectToSave[property]);
-                        }
+                const potentialObjects = serverObjects.filter((object) => {
+                    const isPotential = object.label_id === labelID && !existingIDs.includes(object.id);
+                    if (key === 'intervals') {
+                        return (
+                            isPotential &&
+                            ['start', 'stop'].every((property) => object[property] === objectToSave[property])
+                        );
+                    }
 
-                        if (key === 'shapes' || key === 'tags') {
-                            return isPotential && ['frame'].every((property) => object[property] === objectToSave[property]);
-                        }
+                    if (key === 'shapes' || key === 'tags') {
+                        return (
+                            isPotential && ['frame'].every((property) => object[property] === objectToSave[property])
+                        );
+                    }
 
-                        return isPotential;
-                    },
-                );
+                    return isPotential;
+                });
 
                 return potentialObjects.find((object) => isTheSameObject(key, objectToSave, object)) ?? null;
             };
@@ -472,8 +471,10 @@ export default class AnnotationsSaver {
                                     return await this._delete(requestBody);
                                 }
                                 case 'create': {
-                                    const serverCollection = await serverProxy.annotations
-                                        .getAnnotations(this.sessionType, this.id);
+                                    const serverCollection = await serverProxy.annotations.getAnnotations(
+                                        this.sessionType,
+                                        this.id,
+                                    );
                                     const foundPairs: SerializedCollection = {
                                         shapes: [],
                                         tracks: [],

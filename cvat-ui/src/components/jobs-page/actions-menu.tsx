@@ -63,6 +63,8 @@ function JobActionsComponent(
     if (selectedIds.includes(jobInstance.id)) {
         jobsToAct = allJobs.filter((m) => selectedIds.includes(m.id));
     }
+    const isExportAnnotationsDisabled = isBulkMode &&
+        new Set(jobsToAct.map((job) => job.dimension)).size > 1;
 
     const {
         dropdownOpen,
@@ -107,12 +109,8 @@ function JobActionsComponent(
 
     const onDeleteJob = useCallback(() => {
         Modal.confirm({
-            title: isBulkMode ?
-                `删除所选择的 ${jobsToAct.length} 作业` :
-                `作业 #${jobInstance.id} 将要被删除`,
-            content: isBulkMode ?
-                '所有选定作业的所有相关数据(标注)都将丢失。是否继续？' :
-                '所有相关数据(标注)都将丢失。是否继续？',
+            title: isBulkMode ? `删除所选择的 ${jobsToAct.length} 作业` : `作业 #${jobInstance.id} 将要被删除`,
+            content: isBulkMode ? '所有选定作业的所有相关数据(标注)都将丢失。是否继续？' : '所有相关数据(标注)都将丢失。是否继续？',
             className: 'cvat-modal-confirm-delete-job',
             onOk: () => {
                 setTimeout(() => {
@@ -233,6 +231,7 @@ function JobActionsComponent(
             onGoToParent: jobInstance.parentJobId ? onGoToParent : null,
             onGoToReplicas: jobInstance.replicasCount > 0 ? onGoToReplicas : null,
             jobsToAct,
+            isExportAnnotationsDisabled,
             t,
         }, props);
     }

@@ -470,8 +470,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                             }
                                         }}
                                     />
-                                    <Text> 帧开始 </Text>
-                                    <Text> 截止到第 </Text>
+                                    <Text> 至该帧 </Text>
                                     <InputNumber
                                         value={frameTo}
                                         min={frameFrom}
@@ -489,7 +488,6 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                             }
                                         }}
                                     />
-                                    <Text> 帧 </Text>
                                 </Col>
                             </Row>
                         </Col>

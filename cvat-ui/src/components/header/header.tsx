@@ -251,8 +251,7 @@ function HeaderComponent(props: Props): JSX.Element {
                         <Text type='secondary'>{` ${about.packageVersion.ui}`}</Text>
                     </p>
                     <Row justify='space-around'>
-                        { aboutLinks.sort((item1, item2) => item1[1] - item2[1])
-                            .map((item) => item[0]) }
+                        { aboutLinks.sort((item1, item2) => item1[1] - item2[1]).map((item) => item[0]) }
                     </Row>
                 </div>
             ),

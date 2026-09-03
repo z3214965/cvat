@@ -195,8 +195,21 @@ function FiltersModalComponent(): JSX.Element {
                     },
                 },
                 occluded: {
-                    label: '被遮挡',
+                    label: '遮挡',
                     type: 'boolean',
+                },
+                source: {
+                    label: '来源',
+                    type: 'select',
+                    fieldSettings: {
+                        listValues: [
+                            { value: 'auto', title: '自动' },
+                            { value: 'semi-auto', title: '半自动' },
+                            { value: 'manual', title: '人工标注' },
+                            { value: 'file', title: '文件导入' },
+                            { value: 'consensus', title: '共识标注' },
+                        ],
+                    },
                 },
                 width: {
                     label: '宽',

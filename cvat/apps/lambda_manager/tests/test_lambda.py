@@ -4,18 +4,17 @@
 # SPDX-License-Identifier: MIT
 
 import base64
+from collections import Counter
 import io
+from itertools import groupby
 import json
 import os
-from collections import Counter
-from itertools import groupby
 from unittest import mock, skip
 
-import requests
-from django.contrib.auth.models import User
 from django.core.signing import TimestampSigner
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from PIL import Image
+import requests
 from rest_framework import status
 
 from cvat.apps.engine.tests.utils import (
@@ -26,6 +25,8 @@ from cvat.apps.engine.tests.utils import (
     generate_image_file,
     get_paginated_collection,
 )
+from cvat.apps.iam.models import User
+
 
 LAMBDA_ROOT_PATH = "/api/lambda"
 LAMBDA_FUNCTIONS_PATH = f"{LAMBDA_ROOT_PATH}/functions"
@@ -273,7 +274,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         )
 
         response = self._get_request(
-            f"/api/jobs",
+            "/api/jobs",
             query_params={"task_id": self.assigneed_to_user_task["id"]},
             user=self.admin,
         )
@@ -1590,7 +1591,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = self.task_rel_frame_range
         self.assertEqual(
-            {frame: 1 for frame in requested_frame_range},
+            dict.fromkeys(requested_frame_range, 1),
             {
                 frame: len(list(group))
                 for frame, group in groupby(annotations["shapes"], key=lambda a: a["frame"])
@@ -1670,7 +1671,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = range(job["start_frame"], job["stop_frame"] + 1)
         self.assertEqual(
-            {frame: 1 for frame in requested_frame_range},
+            dict.fromkeys(requested_frame_range, 1),
             {
                 frame: len(list(group))
                 for frame, group in groupby(annotations["shapes"], key=lambda a: a["frame"])
@@ -1763,7 +1764,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
         self.assertEqual(len(annotations["tracks"]), 0)
 
         self.assertEqual(
-            {frame: 1 for frame in requested_frame_range},
+            dict.fromkeys(requested_frame_range, 1),
             Counter(a["frame"] for a in annotations["shapes"]),
         )
 
@@ -1871,7 +1872,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = self.task_rel_frame_range
         self.assertEqual(
-            {frame: 1 for frame in requested_frame_range},
+            dict.fromkeys(requested_frame_range, 1),
             Counter(a["frame"] for a in annotations["shapes"]),
         )
 

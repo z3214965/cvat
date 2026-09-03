@@ -4,41 +4,41 @@
 # SPDX-License-Identifier: MIT
 
 
-import copy
-import io
-import json
-import logging
-import os
-import random
-import shutil
-import tempfile
-import xml.etree.ElementTree as ET
-import zipfile
 from collections import defaultdict
 from collections.abc import Sequence
 from contextlib import ExitStack
+import copy
 from datetime import timedelta
 from enum import Enum
 from glob import glob
+import io
 from io import BytesIO, IOBase
 from itertools import product
+import json
+import logging
+import os
 from pathlib import Path, PurePath
 from pprint import pformat
+import random
+import shutil
+import tempfile
 from time import sleep
 from typing import BinaryIO
 from unittest import mock
+import xml.etree.ElementTree as ET
+import zipfile
 
 import av
-import django_rq
-import numpy as np
 from azure.core.exceptions import HttpResponseError, ServiceRequestError
 from botocore.exceptions import ClientError, EndpointConnectionError
 from django.conf import settings
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import CommandError, call_command
 from django.http import FileResponse, HttpResponse
 from django.test import SimpleTestCase, override_settings
+import django_rq
+import numpy as np
 from pdf2image import convert_from_bytes
 from PIL import Image
 from pycocotools import coco as coco_loader
@@ -86,11 +86,13 @@ from cvat.apps.engine.tests.utils import (
     get_paginated_collection,
 )
 from cvat.apps.engine.utils import extract_with_patool
+from cvat.apps.iam.models import User
 from cvat.apps.redis_handler.serializers import RequestStatus
 from utils.dataset_manifest import ImageManifestManager, VideoManifestManager
 from utils.dataset_manifest.utils import MemOpenable, PcdReader, find_related_images
 
 from .utils import ASSETS_DIR, check_annotation_response, compare_objects
+
 
 # suppress av warnings
 logging.getLogger("libav").setLevel(logging.ERROR)
@@ -151,13 +153,13 @@ def create_db_task(data):
     db_task.data = db_data
     db_task.save()
 
-    if not labels is None:
+    if labels is not None:
         for label_data in labels:
             attributes = label_data.pop("attributes", None)
             db_label = Label(task=db_task, **label_data)
             db_label.save()
 
-            if not attributes is None:
+            if attributes is not None:
                 for attribute_data in attributes:
                     db_attribute = AttributeSpec(label=db_label, **attribute_data)
                     db_attribute.save()
@@ -185,13 +187,13 @@ def create_db_project(data):
     shutil.rmtree(db_project.get_dirname(), ignore_errors=True)
     os.makedirs(db_project.get_dirname())
 
-    if not labels is None:
+    if labels is not None:
         for label_data in labels:
             attributes = label_data.pop("attributes", None)
             db_label = Label(project=db_project, **label_data)
             db_label.save()
 
-            if not attributes is None:
+            if attributes is not None:
                 for attribute_data in attributes:
                     db_attribute = AttributeSpec(label=db_label, **attribute_data)
                     db_attribute.save()
@@ -1907,6 +1909,11 @@ class _CloudStorageTestBase(ApiTestBase):
             def upload_file(self, file_path: Path, key: str | None = None, /) -> None:
                 self._files[key] = file_path.read_bytes()
 
+            def get_file_stream(self, key: str, /, *, offset: int) -> tuple[BytesIO, int]:
+                stream = io.BytesIO(self._files[key])
+                stream.seek(offset)
+                return stream, len(self._files[key])
+
             def bulk_delete(self, files: Sequence[str]) -> None:
                 for key in files:
                     del self._files[key]
@@ -2101,10 +2108,12 @@ class ProjectCloudBackupAPINoStaticChunksTestCase(ProjectBackupAPITestCase, _Clo
         if cls.MAKE_LIGHTWEIGHT_BACKUP or settings.MEDIA_CACHE_ALLOW_STATIC_CACHE:
             # should not load anything from CS anymore
 
-            def disabled(*args):
+            def disabled(*args, **kwargs):
                 raise RuntimeError("Disabled!")
 
             cls.mock_aws._download_fileobj_to_stream = disabled
+            cls.mock_aws._download_range_of_bytes = disabled
+            cls.mock_aws.get_file_stream = disabled
 
     def _compare_tasks(self, original_task, imported_task):
         super()._compare_tasks(original_task, imported_task)
@@ -5079,7 +5088,7 @@ class TaskDataAPITestCase(ApiTestBase):
                 current_function_name() + " file order mismatch", use_cache=use_cache
             ):
                 task_spec = task_spec_common.copy()
-                task_spec["name"] = task_spec["name"] + f" mismatching file order"
+                task_spec["name"] = task_spec["name"] + " mismatching file order"
                 task_data_copy = task_data.copy()
                 task_data_copy[f"server_files[{len(images)}]"] = "images_manifest.jsonl"
                 self._test_api_v2_tasks_id_data_spec(
@@ -5350,11 +5359,11 @@ class TaskDataAPITestCase(ApiTestBase):
                     else:
                         storage_method = StorageMethodChoice.FILE_SYSTEM
 
-                    task_data[f"client_files[0]"] = es.enter_context(open(archive_path, "rb"))
+                    task_data["client_files[0]"] = es.enter_context(open(archive_path, "rb"))
 
                     kwargs = {}
                     if manifest:
-                        task_data[f"client_files[1]"] = es.enter_context(open(manifest_path))
+                        task_data["client_files[1]"] = es.enter_context(open(manifest_path))
                     else:
                         kwargs.update(
                             {
@@ -6002,7 +6011,7 @@ class JobAnnotationAPITestCase(ApiTestBase):
         return response
 
     def _check_response(self, response, data):
-        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             check_annotation_response(self, response, data)
 
     def _run_api_v2_jobs_id_annotations(self, owner, assignee, annotator):
@@ -6259,7 +6268,7 @@ class JobAnnotationAPITestCase(ApiTestBase):
         self._check_response(response, data)
 
         data = response.data
-        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -6698,7 +6707,7 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
         self._check_response(response, data)
 
         data = response.data
-        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -7195,10 +7204,7 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
             ]:
                 annotations["shapes"] += rectangle_shapes_wo_attrs
 
-            elif annotation_format == "Ultralytics YOLO Segmentation 1.0":
-                annotations["shapes"] = polygon_shapes_wo_attrs
-
-            elif annotation_format == "COCO 1.0":
+            elif annotation_format == "Ultralytics YOLO Segmentation 1.0" or annotation_format == "COCO 1.0":
                 annotations["shapes"] = polygon_shapes_wo_attrs
 
             elif annotation_format == "Segmentation mask 1.1":
@@ -7696,17 +7702,13 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
                     self.assertEqual(len(tags), 1)
                     meta = etree_to_dict(tags[0])["meta"]
                     self.assertEqual(meta["task"]["name"], task["name"])
-        elif format_name == "PASCAL VOC 1.1":
-            self.assertTrue(zipfile.is_zipfile(content))
-        elif format_name in [
+        elif format_name == "PASCAL VOC 1.1" or format_name in [
             "YOLO 1.1",
             "Ultralytics YOLO Detection 1.0",
             "Ultralytics YOLO Segmentation 1.0",
             "Ultralytics YOLO Oriented Bounding Boxes 1.0",
             "Ultralytics YOLO Pose 1.0",
-        ]:
-            self.assertTrue(zipfile.is_zipfile(content))
-        elif format_name in ["Kitti Raw Format 1.0", "Sly Point Cloud Format 1.0"]:
+        ] or format_name in ["Kitti Raw Format 1.0", "Sly Point Cloud Format 1.0"]:
             self.assertTrue(zipfile.is_zipfile(content))
         elif format_name in ["COCO 1.0", "COCO Keypoints 1.0"]:
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -8198,6 +8200,7 @@ class TaskChangeCloudStorageTestCase(_CloudStorageTestBase):
 
 class TaskBackingCloudStorageTestCase(_CloudStorageTestBase, ExportApiTestBase):
     _IMAGE_PATHS = ["test_1.jpg", "test_2.jpg", "related_images/test_1_jpg/context_1.jpg"]
+    _VIDEO_PATH = "test.mp4"
 
     @classmethod
     def setUpTestData(cls):
@@ -8205,7 +8208,7 @@ class TaskBackingCloudStorageTestCase(_CloudStorageTestBase, ExportApiTestBase):
         cls.client = APIClient()
         cls.cloud_storage_id = cls._create_cloud_storage()
 
-    def _create_local_task(self):
+    def _create_local_task(self, *, mode=TaskMode.ANNOTATION):
         data = {
             "name": "my local task #1",
             "owner_id": self.owner.id,
@@ -8214,61 +8217,74 @@ class TaskBackingCloudStorageTestCase(_CloudStorageTestBase, ExportApiTestBase):
             "labels": [{"name": "person"}],
         }
 
-        f = io.BytesIO()
-        with zipfile.ZipFile(f, "w") as zip_file:
-            for p in self._IMAGE_PATHS:
-                zip_file.writestr(p, generate_random_image_file(p)[1].getbuffer())
+        if mode == TaskMode.ANNOTATION:
+            media_file = io.BytesIO()
+            with zipfile.ZipFile(media_file, "w") as zip_file:
+                for p in self._IMAGE_PATHS:
+                    zip_file.writestr(p, generate_random_image_file(p)[1].getbuffer())
 
-        f.seek(0)
-        f.name = "test.zip"
+            media_file.seek(0)
+            media_file.name = "test.zip"
+        else:
+            self.assertEqual(mode, TaskMode.INTERPOLATION)
+            media_file = generate_video_file(self._VIDEO_PATH)[1]
 
-        image_data = {"client_files[0]": f, "image_quality": 75}
+        image_data = {"client_files[0]": media_file, "image_quality": 75}
         return self._create_task(data, image_data)
 
     def test_can_move_to_backing_cs(self):
-        # Set up task.
-        task = self._create_local_task()
-        task_id = task["id"]
+        for mode in (TaskMode.ANNOTATION, TaskMode.INTERPOLATION):
+            with self.subTest(mode=mode):
+                # Set up task.
+                task = self._create_local_task(mode=mode)
+                task_id = task["id"]
 
-        data = Data.objects.get(task__id=task_id)
-        upload_dir = data.get_upload_dirname()
+                data = Data.objects.get(task__id=task_id)
+                upload_dir = data.get_upload_dirname()
 
-        self.assertTrue(data.images.exists())
-        self.assertTrue(data.related_files.exists())
+                def local_path(rel_path):
+                    return upload_dir / rel_path
 
-        def local_path(rel_path):
-            return upload_dir / rel_path
+                def cloud_key(rel_path):
+                    return PurePath(f"data/{data.id}/raw", rel_path).as_posix()
 
-        def cloud_key(rel_path):
-            return PurePath(f"data/{data.id}/raw", rel_path).as_posix()
+                if mode == TaskMode.ANNOTATION:
+                    self.assertTrue(data.images.exists())
+                    self.assertTrue(data.related_files.exists())
+                    media = [(p, local_path(p).read_bytes()) for p in self._IMAGE_PATHS]
+                else:
+                    self.assertTrue(hasattr(data, "video"))
+                    media = [(self._VIDEO_PATH, local_path(self._VIDEO_PATH).read_bytes())]
 
-        images = [(p, local_path(p).read_bytes()) for p in self._IMAGE_PATHS]
-        self.assertTrue(local_path(Data.MANIFEST_FILENAME).exists())
+                self.assertTrue(local_path(Data.MANIFEST_FILENAME).exists())
 
-        # Move the task to backing cloud storage.
-        with self.captureOnCommitCallbacks(execute=True):
-            data.move_to_backing_cs(CloudStorage.objects.get(id=self.cloud_storage_id))
+                # Move the task to backing cloud storage.
+                with self.captureOnCommitCallbacks(execute=True):
+                    data.move_to_backing_cs(CloudStorage.objects.get(id=self.cloud_storage_id))
 
-        self.assertEqual(data.local_storage_backing_cs_id, self.cloud_storage_id)
+                self.assertEqual(data.local_storage_backing_cs_id, self.cloud_storage_id)
 
-        for image_rel_path, image_bytes in images:
-            self.assertFalse(local_path(image_rel_path).exists())
-            self.assertEqual(self.mock_aws.retrieve_file(cloud_key(image_rel_path)), image_bytes)
-        self.assertFalse(local_path("related_images").exists())
+                for media_rel_path, media_bytes in media:
+                    self.assertFalse(local_path(media_rel_path).exists())
+                    self.assertEqual(
+                        self.mock_aws.retrieve_file(cloud_key(media_rel_path)), media_bytes
+                    )
 
-        # The manifest should still be in the local FS.
-        self.assertTrue(local_path(Data.MANIFEST_FILENAME).exists())
-        self.assertFalse(self.mock_aws.file_exists(cloud_key(Data.MANIFEST_FILENAME)))
+                self.assertFalse(local_path("related_images").exists())
 
-        # Move the task back.
-        with self.captureOnCommitCallbacks(execute=True):
-            data.move_from_backing_cs()
+                # The manifest should still be in the local FS.
+                self.assertTrue(local_path(Data.MANIFEST_FILENAME).exists())
+                self.assertFalse(self.mock_aws.file_exists(cloud_key(Data.MANIFEST_FILENAME)))
 
-        self.assertEqual(data.local_storage_backing_cs_id, None)
+                # Move the task back.
+                with self.captureOnCommitCallbacks(execute=True):
+                    data.move_from_backing_cs()
 
-        for image_rel_path, image_bytes in images:
-            self.assertEqual(local_path(image_rel_path).read_bytes(), image_bytes)
-            self.assertFalse(self.mock_aws.file_exists(cloud_key(image_rel_path)))
+                self.assertEqual(data.local_storage_backing_cs_id, None)
+
+                for media_rel_path, media_bytes in media:
+                    self.assertEqual(local_path(media_rel_path).read_bytes(), media_bytes)
+                    self.assertFalse(self.mock_aws.file_exists(cloud_key(media_rel_path)))
 
     def test_creation_with_default_backing_cs(self):
         with (
@@ -8377,9 +8393,8 @@ class TaskBackingCloudStorageTestCase(_CloudStorageTestBase, ExportApiTestBase):
         task = self._create_local_task()
         task_id = task["id"]
 
-        with self.settings(DEFAULT_BACKING_CS_ID=None):
-            with self.assertRaises(CommandError):
-                call_command("movetasktobackingcs", str(task_id))
+        with self.settings(DEFAULT_BACKING_CS_ID=None), self.assertRaises(CommandError):
+            call_command("movetasktobackingcs", str(task_id))
 
         with self.settings(DEFAULT_BACKING_CS_ID=self.cloud_storage_id):
             call_command("movetasktobackingcs", str(task_id))

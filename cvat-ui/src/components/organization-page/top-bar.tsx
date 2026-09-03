@@ -314,7 +314,7 @@ function OrganizationTopBar(props: Readonly<Props>): JSX.Element {
                                 {contact.location}
                             </Text>
                         </div>
-                        <Text type='secondary'>{`创建 ${dayjs(createdDate).format('MMMM Do YYYY')}`}</Text>
+                        <Text type='secondary'>{`创建 ${dayjs(createdDate).format('YYYY年M月D日')}`}</Text>
                         <Text type='secondary'>{`更新 ${dayjs(updatedDate).fromNow()}`}</Text>
                     </div>
                 </Col>
@@ -338,7 +338,7 @@ function OrganizationTopBar(props: Readonly<Props>): JSX.Element {
                                             <>
                                                 <Text>请确认是否离开该组织</Text>
                                                 <Text strong>{` ${organizationInstance.slug}`}</Text>
-                                                <Text>。你将不再拥有访问组织数据的权限</Text>
+                                                <Text>你将不再拥有访问组织数据的权限</Text>
                                             </>
                                         ),
                                         okText: '离开',

@@ -6,7 +6,7 @@
 from datetime import timedelta
 from unittest import mock
 
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 from django.test import override_settings
 from django.utils import timezone
 from rest_framework import status
@@ -14,6 +14,7 @@ from rest_framework import status
 from cvat.apps.access_tokens.cron import clear_unusable_access_tokens
 from cvat.apps.access_tokens.models import AccessToken
 from cvat.apps.engine.tests.utils import ApiTestBase, mock_method
+from cvat.apps.iam.models import User
 
 
 def create_db_users(cls: type[ApiTestBase]):
@@ -56,7 +57,7 @@ class AccessTokenAutomationTest(ApiTestBase):
             token_id = response.json()["id"]
 
         response = self._post_request(
-            "/api/auth/access_tokens", user=self.admin, data={"name": f"test extra token"}
+            "/api/auth/access_tokens", user=self.admin, data={"name": "test extra token"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(b"You have reached the maximum allowed number" in response.content)
@@ -66,7 +67,7 @@ class AccessTokenAutomationTest(ApiTestBase):
 
         # Revoked tokens should not be counted
         response = self._post_request(
-            "/api/auth/access_tokens", user=self.admin, data={"name": f"test extra token"}
+            "/api/auth/access_tokens", user=self.admin, data={"name": "test extra token"}
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AccessToken.objects.filter(owner=self.admin).count(), 3)

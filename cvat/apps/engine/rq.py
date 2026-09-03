@@ -11,23 +11,22 @@ from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 from uuid import UUID
 
 import attrs
-import django_rq
 from django.conf import settings
 from django.db.models import Model
 from django.utils import timezone
+import django_rq
 from django_rq.queues import DjangoRQ, get_redis_connection
 from redis.client import Pipeline
-from rq.job import Dependency as RQDependency
-from rq.job import Job as RQJob
+from rq.job import Dependency as RQDependency, Job as RQJob
 from rq.registry import BaseRegistry as RQBaseRegistry
 
 from cvat.apps.engine.utils import take_by
 from cvat.apps.redis_handler.apps import SELECTOR_TO_QUEUE
 from cvat.apps.redis_handler.rq import RequestId, RequestIdWithOptionalSubresource
 
-if TYPE_CHECKING:
-    from django.contrib.auth.models import User
 
+if TYPE_CHECKING:
+    from cvat.apps.iam.models import User
     from cvat.apps.redis_handler.background import AbstractRequestManager
 
 
@@ -500,10 +499,10 @@ def update_org_related_data_in_rq_jobs(
 ):
     def is_rq_job_related(job_meta: BaseRQMeta):
         return (
-            project_id
-            and job_meta.project_id == project_id
-            or task_id
-            and job_meta.task_id == task_id
+            (project_id
+            and job_meta.project_id == project_id)
+            or (task_id
+            and job_meta.task_id == task_id)
         )
 
     assert (project_id or task_id) and not (project_id and task_id)
