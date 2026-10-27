@@ -117,7 +117,7 @@ function modelData({
 
 const samPlugin: SAMPlugin = {
     name: 'Segment Anything',
-    description: 'Handles non-default SAM serverless function output',
+    description: '处理 SAM 无服务函数的非默认输出',
     cvat: {
         jobs: {
             get: {

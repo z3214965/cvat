@@ -10,7 +10,7 @@ import notification from 'antd/lib/notification';
 import Button from 'antd/lib/button';
 
 import './styles.scss';
-import { Job } from 'cvat-core-wrapper';
+import { DimensionType, Job, LabelType } from 'cvat-core-wrapper';
 import AttributeAnnotationWorkspace from 'components/annotation-page/attribute-annotation-workspace/attribute-annotation-workspace';
 import SingleShapeWorkspace from 'components/annotation-page/single-shape-workspace/single-shape-workspace';
 import ReviewAnnotationsWorkspace from 'components/annotation-page/review-workspace/review-workspace';
@@ -21,12 +21,14 @@ import FiltersModalComponent from 'components/annotation-page/top-bar/filters-mo
 import { JobNotFoundComponent } from 'components/common/not-found';
 import StatisticsModalComponent from 'components/annotation-page/top-bar/statistics-modal';
 import AnnotationTopBarContainer from 'containers/annotation-page/top-bar/top-bar';
+import PolySimplifyController from 'containers/annotation-page/standard-workspace/poly-simplify-controller';
 import AudioAnnotationPage from 'audio/components/annotation-page/audio-annotation-page';
 import { Workspace } from 'reducers';
 import { usePrevious } from 'utils/hooks';
 import EventRecorder from 'utils/event-recorder';
 import { readLatestFrame } from 'utils/remember-latest-frame';
 import { EventScope } from 'cvat-core/src/enums';
+import { filterApplicableForType } from 'utils/filter-applicable-labels';
 import SearchFramesModal from './top-bar/search-modal';
 
 interface Props {
@@ -159,6 +161,9 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 {workspace === Workspace.TAGS && <TagAnnotationWorkspace />}
                 {workspace === Workspace.REVIEW && <ReviewAnnotationsWorkspace />}
             </Layout.Content>
+            {job.dimension === DimensionType.DIMENSION_2D &&
+                [Workspace.STANDARD, Workspace.REVIEW].includes(workspace) &&
+                <PolySimplifyController key={workspace} />}
             <FiltersModalComponent />
             <StatisticsModalComponent />
             <SearchFramesModal />

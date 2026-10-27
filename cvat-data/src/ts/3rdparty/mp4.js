@@ -907,12 +907,12 @@ var Broadway = (function broadway() {
       };
     };
 
-    var infoStrPre = "Click canvas to load and play - ";
+    var infoStrPre = "点击画布加载并播放 -";
     var infoStr = "";
     if (useWorkers){
-      infoStr += "worker thread ";
+      infoStr += "工作线程 ";
     }else{
-      infoStr += "main thread ";
+      infoStr += "主线程 ";
     };
 
     this.player = new MP4Player(new Stream(src), useWorkers, webgl, render);

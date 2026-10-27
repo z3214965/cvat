@@ -3,18 +3,18 @@
 #
 # SPDX-License-Identifier: MIT
 
-from io import BytesIO
 import itertools
 import json
 import os.path as osp
 import tempfile
 import zipfile
+from io import BytesIO
 
 import datumaro
+import numpy as np
 from datumaro.components.annotation import Mask
 from datumaro.components.dataset import Dataset, DatasetItem
 from django.contrib.auth.models import Group
-import numpy as np
 from rest_framework import status
 
 import cvat.apps.dataset_manager as dm

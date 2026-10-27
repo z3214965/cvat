@@ -38,6 +38,7 @@ export default function ProjectActionsItems(
         onDeleteProject,
         selectedIds = [],
         isExportDatasetDisabled,
+        isQualityControlDisabled,
     } = menuItemsData;
 
     const isBulkMode = selectedIds.length > 1;

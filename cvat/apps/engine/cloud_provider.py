@@ -5,24 +5,24 @@
 
 from __future__ import annotations
 
+import functools
+import io
+import json
+import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum
-import functools
-import io
 from io import BytesIO
-import json
-import os
 from pathlib import Path, PurePath
 from queue import Queue
 from typing import IO, Any, BinaryIO, Concatenate, ParamSpec, TypeVar
 
+import boto3
 from azure.core.exceptions import HttpResponseError, ServiceRequestError
 from azure.storage.blob import BlobServiceClient, ContainerClient
 from azure.storage.blob._list_blobs_helper import BlobPrefix
-import boto3
 from boto3.s3.transfer import TransferConfig
 from botocore.client import Config
 from botocore.exceptions import (
@@ -35,7 +35,8 @@ from botocore.handlers import disable_signing
 from django.conf import settings
 from google.api_core.exceptions import RetryError
 from google.cloud import storage
-from google.cloud.exceptions import Forbidden as GoogleCloudForbidden, NotFound as GoogleCloudNotFound
+from google.cloud.exceptions import Forbidden as GoogleCloudForbidden
+from google.cloud.exceptions import NotFound as GoogleCloudNotFound
 from PIL import Image, ImageFile
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rq import get_current_job
@@ -57,7 +58,6 @@ from utils.dataset_manifest.utils import (
     NamedOpenable,
     PcdReader,
 )
-
 
 slogger = ServerLogManager(__name__)
 
@@ -112,11 +112,11 @@ def validate_bucket_status(func):
             storage_status = self.get_status() if self is not None else None
             if storage_status == Status.FORBIDDEN:
                 raise PermissionDenied(
-                    f"The resource {self.name} is no longer available. Access forbidden."
+                    "The resource {} is no longer available. Access forbidden.".format(self.name)
                 )
             elif storage_status == Status.NOT_FOUND:
                 raise NotFound(
-                    f"The resource {self.name} not found. It may have been deleted."
+                    "The resource {} not found. It may have been deleted.".format(self.name)
                 )
             elif storage_status == Status.AVAILABLE:
                 raise
@@ -137,11 +137,13 @@ def validate_file_status(func):
                 file_status = self.get_file_status(key)
                 if file_status == Status.NOT_FOUND:
                     raise NotFound(
-                        f"The file '{key}' not found on the cloud storage '{self.name}'"
+                        "The file '{}' not found on the cloud storage '{}'".format(key, self.name)
                     )
                 elif file_status == Status.FORBIDDEN:
                     raise PermissionDenied(
-                        f"Access to the file '{key}' on the '{self.name}' cloud storage is denied"
+                        "Access to the file '{}' on the '{}' cloud storage is denied".format(
+                            key, self.name
+                        )
                     )
                 raise ValidationError(str(ex)) from ex
             else:
@@ -334,7 +336,7 @@ class CloudStorageClient(ABC):
         if self.prefix and (len(prefix) < len(self.prefix)):
             if prefix and "/" in self.prefix[len(prefix) :]:
                 next_layer_and_tail = self.prefix[prefix.find("/") + 1 :].split("/", maxsplit=1)
-                if len(next_layer_and_tail) == 2:
+                if 2 == len(next_layer_and_tail):
                     directory = (
                         next_layer_and_tail[0]
                         if not _use_flat_listing
@@ -362,6 +364,12 @@ class CloudStorageClient(ABC):
             last_slash = search_prefix.rindex("/")
             for f in content:
                 f["name"] = f["name"][last_slash + 1 :]
+
+        # Provider directories can become nameless after being made relative to search_prefix:
+        # key="/file", prefix="" -> directory="/" -> name=""
+        # key="dir//file", prefix="dir/" -> directory="dir//" -> name=""
+        # Empty names are rejected by the API and would make the whole listing fail.
+        content = [item for item in content if item["name"]]
 
         if _use_sort:
             content = sorted(content, key=lambda x: x["type"])
@@ -810,7 +818,7 @@ class S3CloudStorageClient(CloudStorageClient):
                     )
                     raise ValidationError(f"The {key} file is empty.")
                 else:
-                    slogger.glob.error(f"{ex!s}. Key: {key}, bucket: {self.name}")
+                    slogger.glob.error(f"{str(ex)}. Key: {key}, bucket: {self.name}")
             raise
 
     supports_streaming = True
@@ -898,7 +906,7 @@ class AzureBlobCloudStorageClient(CloudStorageClient):
     @property
     def account_url(self) -> str | None:
         if self._account_name:
-            return f"{self._account_name}.blob.core.windows.net"
+            return "{}.blob.core.windows.net".format(self._account_name)
         return None
 
     def _head(self):
@@ -1212,13 +1220,13 @@ class SubdirectoryCloudStorageClient(CloudStorageClient):
 
 class Credentials:
     __slots__ = (
-        "account_name",
-        "connection_string",
-        "credentials_type",
         "key",
-        "key_file_path",
         "secret_key",
         "session_token",
+        "account_name",
+        "key_file_path",
+        "credentials_type",
+        "connection_string",
     )
 
     def __init__(self, **credentials):
@@ -1226,9 +1234,9 @@ class Credentials:
         self.secret_key = credentials.get("secret_key", "")
         self.session_token = credentials.get("session_token", "")
         self.account_name = credentials.get("account_name", "")
-        self.key_file_path = credentials.get("key_file_path")
-        self.credentials_type = credentials.get("credentials_type")
-        self.connection_string = credentials.get("connection_string")
+        self.key_file_path = credentials.get("key_file_path", None)
+        self.credentials_type = credentials.get("credentials_type", None)
+        self.connection_string = credentials.get("connection_string", None)
 
     def convert_to_db(self):
         converted_credentials = {
@@ -1262,7 +1270,7 @@ class Credentials:
             instance.connection_string = value
         else:
             raise NotImplementedError(
-                f"Found {instance.credentials_type} not supported credentials type"
+                "Found {} not supported credentials type".format(instance.credentials_type)
             )
 
         return instance

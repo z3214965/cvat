@@ -7,10 +7,11 @@ import {
 } from 'cvat-core-wrapper';
 import {
     QualityRequirementAnnotationType, QualityRequirementAttributeComparator,
-    QualityRequirementMetric, QualityRequirementPointSizeBase,
+    QualityMetricAggregation, QualityRequirementMetric, QualityRequirementPointSizeBase,
     SerializedQualityRequirementAttributeComparison,
     SerializedQualityRequirementAttributeRule,
 } from 'cvat-core/src/quality/server-response-types';
+import { serializeQualityTargetMetric } from 'cvat-core/src/quality/quality-requirement-utils';
 import {
     buildRequirementsById,
     getRequirementEffectiveField,
@@ -34,7 +35,29 @@ export const ROOT_DEFAULTS = {
     panopticComparison: true,
 };
 
-export const METRIC_OPTIONS: QualityRequirementMetric[] = Object.values(QualityRequirementMetric);
+export const METRIC_OPTION_GROUPS: Array<{
+    label: string;
+    options: QualityRequirementMetric[];
+}> = [
+    {
+        label: '微平均',
+        options: Object.values(QualityRequirementMetric),
+    },
+    {
+        label: '宏平均',
+        options: Object.values(QualityRequirementMetric).map((metric) => serializeQualityTargetMetric({
+            metric,
+            aggregation: QualityMetricAggregation.MEAN,
+        })),
+    },
+    {
+        label: '最差标签',
+        options: Object.values(QualityRequirementMetric).map((metric) => serializeQualityTargetMetric({
+            metric,
+            aggregation: QualityMetricAggregation.LABEL,
+        })),
+    },
+];
 export const POINT_SIZE_BASE_OPTIONS: QualityRequirementPointSizeBase[] = Object.values(
     QualityRequirementPointSizeBase,
 );
@@ -738,12 +761,12 @@ export function validateJsonLogic(_: unknown, value: string | undefined): Promis
     try {
         const parsedValue = JSON.parse(value);
         if (!parsedValue || Array.isArray(parsedValue) || typeof parsedValue !== 'object') {
-            return Promise.reject(new Error('Filter must be a JSON logic object'));
+            return Promise.reject(new Error('筛选条件必须是JSON逻辑对象'));
         }
 
         return Promise.resolve();
     } catch (_error: unknown) {
-        return Promise.reject(new Error('Filter must be valid JSON logic'));
+        return Promise.reject(new Error('筛选条件必须是合法的JSON逻辑表达式'));
     }
 }
 

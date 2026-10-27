@@ -39,12 +39,10 @@ export default function BulkProgress(): JSX.Element | null {
             <>
                 {remainingItemsCount > 0 ? (
                     <>
-                        部分项目处理失败，你可对剩余
-                        {`${remainingItemsCount}个项目。`}
-                        重试该操作
+                        部分条目处理失败。你可以对剩余 {` ${remainingItemsCount} `} 个条目重试该操作。
                     </>
                 ) : (
-                    '批量操作过程中出错。'
+                    '批量操作时发生错误。'
                 )}
                 {remainingItemsCount > 0 && (
                     <>

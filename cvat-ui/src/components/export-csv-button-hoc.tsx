@@ -73,12 +73,12 @@ function createCSVExportButton<T, Q>(
                     return config.fetchPage(filteredQuery, page, pageSize);
                 },
                 filename,
-                resourceName: resourceTxt,
+                resourceName: config.resourceName,
                 onSuccess: (totalCount: number, exportedFilename: string) => {
                     notification.success({
                         message: '导出完成',
                         description: (
-                            `已成功将${totalCount}个${resourceTxt}导出到${exportedFilename}`
+                            `已成功将${totalCount}个${config.resourceName}导出到${exportedFilename}`
                         ),
                     });
                 },

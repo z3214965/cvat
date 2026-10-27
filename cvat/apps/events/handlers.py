@@ -5,6 +5,7 @@
 import traceback
 from typing import Any
 
+import rq
 from crum import get_current_request, get_current_user
 from django.db import DatabaseError
 from django.db.models import Model
@@ -13,11 +14,11 @@ from rest_framework.exceptions import NotAuthenticated
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.views import exception_handler as drf_exception_handler
-import rq
 
 from cvat.apps.access_tokens.models import AccessToken
 from cvat.apps.access_tokens.serializers import AccessTokenReadSerializer
 from cvat.apps.dataset_manager.tracks_counter import TracksCounter
+from cvat.apps.dataset_manager.util import LockNotAvailableError
 from cvat.apps.engine.models import (
     CloudStorage,
     Comment,
@@ -324,7 +325,6 @@ def get_cleaned_up_serializer(instance):
 
 
 from cvat.apps.engine.log import ServerLogManager
-
 
 slogger = ServerLogManager(__name__)
 
@@ -690,6 +690,8 @@ def exception_handler(exc: Exception, context) -> Response | None:
     if isinstance(exc, DatabaseError):
         if db_utils.is_lock_timeout_error(exc):
             exc = ResourceIsBusyApiException()
+    elif isinstance(exc, LockNotAvailableError):
+        exc = ResourceIsBusyApiException()
 
     return drf_exception_handler(exc=exc, context=context)
 

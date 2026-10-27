@@ -16,6 +16,7 @@ import Select from 'antd/lib/select';
 import Space from 'antd/lib/space';
 import Text from 'antd/lib/typography/Text';
 import CVATTooltip from 'components/common/cvat-tooltip';
+import config from 'config';
 import { QualityRequirement } from 'cvat-core-wrapper';
 import {
     QualityRequirementAnnotationType, QualityRequirementPointSizeBase,
@@ -23,6 +24,7 @@ import {
 import {
     ANNOTATION_TYPES,
     formatAnnotationType,
+    formatBaseMetric,
     formatMetric,
 } from './quality-requirements-utils';
 import QualityRequirementFilter from './quality-requirement-filter';
@@ -40,7 +42,7 @@ import {
     getPointSizeBaseDescription,
     hasLocalInheritedField,
     IOU_ANNOTATION_TYPES,
-    METRIC_OPTIONS,
+    METRIC_OPTION_GROUPS,
     OverridableFormFieldName,
     OVERRIDABLE_FORM_FIELDS,
     POINT_ANNOTATION_TYPES,
@@ -52,6 +54,17 @@ import {
     serializeRequirementValues,
     validateJsonLogic,
 } from './quality-requirement-form-utils';
+
+const targetMetricTooltip = (
+    <div>
+        <div>微平均根据所有标注计算一个分数。</div>
+        <div>宏平均取有效标签分数的平均值。</div>
+        <div>最差标签采用有效标签里最低的分数。</div>
+        <a href={config.QUALITY_TARGET_METRICS_GUIDE_URL} target='_blank' rel='noopener noreferrer'>
+            在文档中查看指标计算公式
+        </a>
+    </div>
+);
 
 export default function QualityRequirementForm(props: Readonly<QualityRequirementFormProps>): JSX.Element {
     const {
@@ -197,12 +210,12 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
 
             await onReload();
             notification.info({
-                message: requirement ? 'Requirement has been updated' : 'Requirement has been created',
+                message: requirement ? '需求已更新' : '需求已创建',
             });
             onCancel();
         } catch (error: unknown) {
             notification.error({
-                message: requirement ? 'Could not update requirement' : 'Could not create requirement',
+                message: requirement ? '无法更新需求' : '无法创建需求',
                 description: error instanceof Error ? error.message : '',
             });
             throw error;
@@ -391,7 +404,7 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
             label={renderOverrideControl(name, label)}
             tooltip={getTooltipDescription(description)}
             rules={[
-                { required: true, message: 'This field is required' },
+                { required: true, message: '此字段为必填项' },
                 {
                     validator: (_, value: number | null | undefined): Promise<void> => {
                         if (value === null || typeof value === 'undefined') {
@@ -400,7 +413,7 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
 
                         return value >= 0 && value <= 100 ?
                             Promise.resolve() :
-                            Promise.reject(new Error('Value must be from 0 to 100'));
+                            Promise.reject(new Error('数值范围必须在 0 到 100 之间'));
                     },
                 },
             ]}
@@ -437,13 +450,19 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                         <>
                             <Col span={12}>
                                 {renderPercentInput(
-                                    'pointSize', 'Point size (%)', requirementDescriptions.pointSize,
+                                    /* for points, the same threshold is applied to the OKS values */
+                                    'iouThreshold', 'OKS阈值（%）', requirementDescriptions.iouThreshold,
+                                )}
+                            </Col>
+                            <Col span={12}>
+                                {renderPercentInput(
+                                    'pointSize', '点大小（%）', requirementDescriptions.pointSize,
                                 )}
                             </Col>
                             <Col span={12}>
                                 <Form.Item
                                     name='pointSizeBase'
-                                    label={renderOverrideControl('pointSizeBase', 'Point size base')}
+                                    label={renderOverrideControl('pointSizeBase', '点尺寸基准')}
                                     tooltip={getTooltipDescription(
                                         getPointSizeBaseDescription(requirementDescriptions.pointSizeBase),
                                     )}
@@ -452,9 +471,9 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                                         {POINT_SIZE_BASE_OPTIONS.map((value) => (
                                             <Select.Option key={value} value={value}>
                                                 {value === QualityRequirementPointSizeBase.GROUP_BBOX_SIZE ? (
-                                                    'Group bbox size'
+                                                    '分组包围盒尺寸'
                                                 ) : (
-                                                    'Image size'
+                                                    '图像尺寸'
                                                 )}
                                             </Select.Option>
                                         ))}
@@ -466,14 +485,14 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                     {annotationType === 'polyline' && (
                         <Col span={12}>
                             {renderPercentInput(
-                                'lineThickness', 'Line thickness (%)', requirementDescriptions.lineThickness,
+                                'lineThickness', '线条粗细（%）', requirementDescriptions.lineThickness,
                             )}
                         </Col>
                     )}
                     {SEGMENTATION_ANNOTATION_TYPES.has(annotationType) && (
                         <Col span={12}>
                             {renderCheckbox(
-                                'panopticComparison', 'Panoptic comparison', requirementDescriptions.panopticComparison,
+                                'panopticComparison', '全景对比', requirementDescriptions.panopticComparison,
                             )}
                         </Col>
                     )}
@@ -484,13 +503,13 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                         <Row gutter={16}>
                             <Col span={12}>
                                 {renderCheckbox(
-                                    'matchOrientation', 'Match orientation', requirementDescriptions.matchOrientation,
+                                    'matchOrientation', '匹配方向', requirementDescriptions.matchOrientation,
                                 )}
                             </Col>
                             <Col span={12}>
                                 {renderPercentInput(
                                     'lineOrientationThreshold',
-                                    'Line orientation threshold (%)',
+                                    '线条方向阈值（%）',
                                     requirementDescriptions.lineOrientationThreshold,
                                 )}
                             </Col>
@@ -504,14 +523,14 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                             <Col span={12}>
                                 {renderCheckbox(
                                     'checkCoveredAnnotations',
-                                    'Check covered annotations',
+                                    '检查被遮挡标注',
                                     requirementDescriptions.checkCoveredAnnotations,
                                 )}
                             </Col>
                             <Col span={12}>
                                 {renderPercentInput(
                                     'objectVisibilityThreshold',
-                                    'Object visibility threshold (%)',
+                                    '目标可见度阈值（%）',
                                     requirementDescriptions.objectVisibilityThreshold,
                                 )}
                             </Col>
@@ -521,12 +540,12 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                 <Divider />
                 <Row gutter={16}>
                     <Col span={12}>
-                        {renderCheckbox('matchGroups', 'Match groups', requirementDescriptions.matchGroups)}
+                        {renderCheckbox('matchGroups', '匹配分组', requirementDescriptions.matchGroups)}
                     </Col>
                     <Col span={12}>
                         {renderPercentInput(
                             'groupMatchThreshold',
-                            'Min group match threshold (%)',
+                            '最小分组匹配阈值（%）',
                             requirementDescriptions.groupMatchThreshold,
                         )}
                     </Col>
@@ -555,7 +574,7 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
             </Row>
             <Row className='cvat-quality-requirement-form-header' align='middle'>
                 <Col>
-                    <Text strong>{requirement ? 'Edit requirement' : 'Create requirement'}</Text>
+                    <Text strong>{requirement ? '编辑需求' : '创建需求'}</Text>
                 </Col>
             </Row>
             <Form.Item
@@ -563,10 +582,10 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                 label='Name'
                 rules={[{
                     required: true,
-                    message: 'This field is required',
+                    message: '此字段为必填项',
                 }, {
                     max: 250,
-                    message: 'Name must be at most 250 characters',
+                    message: '名称最多250个字符',
                 }, {
                     validator: (_, value: string): Promise<void> => {
                         const trimmedValue = value?.trim();
@@ -575,26 +594,26 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                         ));
 
                         return duplicate ?
-                            Promise.reject(new Error('Requirement name must be unique')) :
+                            Promise.reject(new Error('需求名称必须唯一')) :
                             Promise.resolve();
                     },
                 }]}
             >
-                <Input placeholder='Sample requirement name' />
+                <Input placeholder='示例需求名称' />
             </Form.Item>
             <Form.Item
                 name='parentRequirement'
-                label='Parent requirement'
+                label='父级需求'
                 rules={[
                     ...(parentRequirementRequired ? [{
                         required: true,
-                        message: 'This field is required',
+                        message: '此字段为必填项',
                     }] : []),
                 ]}
             >
                 <Select
                     disabled
-                    placeholder='Parent requirement'
+                    placeholder='父级需求'
                     onChange={(value: number | null) => {
                         const nextValue = value ?? null;
                         form.setFieldsValue({ parentRequirement: nextValue });
@@ -612,8 +631,8 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                 <Col span={12}>
                     <Form.Item
                         name='annotationType'
-                        label='Target'
-                        rules={[{ required: true, message: 'This field is required' }]}
+                        label='目标类型'
+                        rules={[{ required: true, message: '此字段为必填项' }]}
                     >
                         <Select disabled>
                             {ANNOTATION_TYPES.map((value) => (
@@ -626,7 +645,7 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                 </Col>
                 <Col span={12}>
                     <Form.Item
-                        label='Filter'
+                        label='筛选条件'
                     >
                         <div className='cvat-quality-requirement-filter-control'>
                             <Form.Item
@@ -652,7 +671,7 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                                             markTouchedFields({ filter: '' });
                                         }}
                                     >
-                                        Clear filters
+                                        清除筛选条件
                                     </Button>
                                 )}
                             </Form.Item>
@@ -662,24 +681,36 @@ export default function QualityRequirementForm(props: Readonly<QualityRequiremen
                 <Col span={12}>
                     <Form.Item
                         name='metric'
-                        label={renderOverrideControl('metric', 'Target metric')}
-                        rules={[{ required: true, message: 'This field is required' }]}
+                        label={renderOverrideControl('metric', '目标指标')}
+                        tooltip={{
+                            title: targetMetricTooltip,
+                            overlayStyle: { maxWidth: 480 },
+                        }}
+                        rules={[{ required: true, message: '此字段为必填项' }]}
                     >
-                        <Select>
-                            {METRIC_OPTIONS.map((value) => (
-                                <Select.Option key={value} value={value}>
-                                    {formatMetric(value)}
-                                </Select.Option>
+                        <Select
+                            optionLabelProp='label'
+                            popupClassName='cvat-quality-target-metric-dropdown'
+                            virtual={false}
+                        >
+                            {METRIC_OPTION_GROUPS.map((group) => (
+                                <Select.OptGroup key={group.label} label={group.label}>
+                                    {group.options.map((value) => (
+                                        <Select.Option key={value} label={formatMetric(value)} value={value}>
+                                            {formatBaseMetric(value)}
+                                        </Select.Option>
+                                    ))}
+                                </Select.OptGroup>
                             ))}
                         </Select>
                     </Form.Item>
                 </Col>
                 <Col span={12}>
-                    {renderPercentInput('requiredScore', 'Target metric threshold (%)')}
+                    {renderPercentInput('requiredScore', '目标指标阈值（%）')}
                 </Col>
                 <Col span={12}>
                     <Form.Item name='enabled' valuePropName='checked'>
-                        <Checkbox>Enabled</Checkbox>
+                        <Checkbox>启用</Checkbox>
                     </Form.Item>
                 </Col>
             </Row>

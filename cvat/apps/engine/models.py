@@ -5,16 +5,16 @@
 
 from __future__ import annotations
 
+import datetime
+import re
+import shutil
+import uuid
 from abc import ABCMeta, abstractmethod
 from collections.abc import Collection, Iterable, Sequence
-import datetime
 from enum import Enum, IntEnum
 from functools import cached_property
 from pathlib import Path, PurePath
-import re
-import shutil
 from typing import TYPE_CHECKING, Any, ClassVar
-import uuid
 
 from dirtyfields import DirtyFieldsMixin
 from django.conf import settings
@@ -34,7 +34,6 @@ from cvat.apps.engine.lazy_list import LazyList
 from cvat.apps.engine.utils import parse_specific_attributes, take_by
 from cvat.apps.events.utils import cache_deleted
 from cvat.utils import django_database as db_utils
-
 
 if TYPE_CHECKING:
     from cvat.apps.engine.cloud_provider import CloudStorageClient
@@ -334,7 +333,7 @@ class CloudStorage(TimestampedModel):
         default_permissions = ()
 
     def __str__(self):
-        return f"{self.provider_type} {self.display_name} {self.id}"
+        return "{} {} {}".format(self.provider_type, self.display_name, self.id)
 
     def get_storage_dirname(self) -> Path:
         return settings.CLOUD_STORAGE_ROOT / str(self.id)
@@ -571,7 +570,7 @@ class Data(models.Model):
         else:
             assert False, f"Unexpected chunk type '{chunk_type}'"
 
-        return f"segment_{segment_id}-{chunk_number}.{ext}"
+        return "segment_{}-{}.{}".format(segment_id, chunk_number, ext)
 
     def get_static_segment_chunk_path(
         self, chunk_number: int, segment_id: int, quality: FrameQuality
@@ -1106,7 +1105,7 @@ class MyFileSystemStorage(FileSystemStorage):
 
     def get_available_name(self, name, max_length=None):
         if self.exists(name) or (max_length and len(name) > max_length):
-            raise OSError(f"`{name}` file already exists or its name is too long")
+            raise IOError("`{}` file already exists or its name is too long".format(name))
         return name
 
 
@@ -1726,6 +1725,11 @@ class Profile(models.Model):
         default=False,
         help_text=_("Designates whether the user can access analytics."),
     )
+    cvat_usage_reason = models.CharField(max_length=255, blank=True, default="")
+    primary_role = models.CharField(max_length=255, blank=True, default="")
+    planned_activities = models.JSONField(default=list, blank=True)
+    data_types = models.JSONField(default=list, blank=True)
+    discovery_source = models.CharField(max_length=255, blank=True, default="")
 
 
 class Issue(TimestampedModel, AssignableModel):
@@ -1793,7 +1797,7 @@ class Manifest(models.Model):
     )
 
     def __str__(self):
-        return f"{self.filename}"
+        return "{}".format(self.filename)
 
 
 class AnnotationGuide(TimestampedModel):

@@ -4,31 +4,34 @@
 # SPDX-License-Identifier: MIT
 
 
-from collections import defaultdict
-from collections.abc import Sequence
-from contextlib import ExitStack
 import copy
-from datetime import timedelta
-from enum import Enum
-from glob import glob
 import io
-from io import BytesIO, IOBase
-from itertools import product
 import json
 import logging
 import os
-from pathlib import Path, PurePath
-from pprint import pformat
 import random
 import shutil
+import tarfile
 import tempfile
+import xml.etree.ElementTree as ET
+import zipfile
+from collections import defaultdict
+from collections.abc import Sequence
+from contextlib import ExitStack
+from datetime import timedelta
+from enum import Enum
+from glob import glob
+from io import BytesIO, IOBase
+from itertools import product
+from pathlib import Path, PurePath
+from pprint import pformat
 from time import sleep
 from typing import BinaryIO
 from unittest import mock
-import xml.etree.ElementTree as ET
-import zipfile
 
 import av
+import django_rq
+import numpy as np
 from azure.core.exceptions import HttpResponseError, ServiceRequestError
 from botocore.exceptions import ClientError, EndpointConnectionError
 from django.conf import settings
@@ -37,8 +40,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import CommandError, call_command
 from django.http import FileResponse, HttpResponse
 from django.test import SimpleTestCase, override_settings
-import django_rq
-import numpy as np
 from pdf2image import convert_from_bytes
 from PIL import Image
 from pycocotools import coco as coco_loader
@@ -92,7 +93,6 @@ from utils.dataset_manifest import ImageManifestManager, VideoManifestManager
 from utils.dataset_manifest.utils import MemOpenable, PcdReader, find_related_images
 
 from .utils import ASSETS_DIR, check_annotation_response, compare_objects
-
 
 # suppress av warnings
 logging.getLogger("libav").setLevel(logging.ERROR)
@@ -153,13 +153,13 @@ def create_db_task(data):
     db_task.data = db_data
     db_task.save()
 
-    if labels is not None:
+    if not labels is None:
         for label_data in labels:
             attributes = label_data.pop("attributes", None)
             db_label = Label(task=db_task, **label_data)
             db_label.save()
 
-            if attributes is not None:
+            if not attributes is None:
                 for attribute_data in attributes:
                     db_attribute = AttributeSpec(label=db_label, **attribute_data)
                     db_attribute.save()
@@ -187,13 +187,13 @@ def create_db_project(data):
     shutil.rmtree(db_project.get_dirname(), ignore_errors=True)
     os.makedirs(db_project.get_dirname())
 
-    if labels is not None:
+    if not labels is None:
         for label_data in labels:
             attributes = label_data.pop("attributes", None)
             db_label = Label(project=db_project, **label_data)
             db_label.save()
 
-            if attributes is not None:
+            if not attributes is None:
                 for attribute_data in attributes:
                     db_attribute = AttributeSpec(label=db_label, **attribute_data)
                     db_attribute.save()
@@ -738,6 +738,11 @@ class UserAPITestCase(ApiTestBase):
         extra_check("last_login", data)
         extra_check("date_joined", data)
         extra_check("has_analytics_access", data)
+        extra_check("cvat_usage_reason", data)
+        extra_check("primary_role", data)
+        extra_check("planned_activities", data)
+        extra_check("data_types", data)
+        extra_check("discovery_source", data)
 
 
 class UserListAPITestCase(UserAPITestCase):
@@ -892,6 +897,80 @@ class UserPartialUpdateAPITestCase(UserAPITestCase):
         data = {"username": "annotator01", "first_name": "slave"}
         response = self._run_api_v2_users_id(self.user, self.annotator.id, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_api_v2_users_id_user_can_update_registration_survey(self):
+        data = {
+            "cvat_usage_reason": "work_project",
+            "primary_role": "ml_engineer",
+            "planned_activities": ["annotate_data", "review_quality"],
+            "data_types": ["images", "video"],
+            "discovery_source": "search_engine",
+        }
+
+        response = self._run_api_v2_users_id(self.user, self.user.id, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for field_name, value in data.items():
+            self.assertEqual(response.data[field_name], value)
+
+        self.user.profile.refresh_from_db()
+        for field_name, value in data.items():
+            self.assertEqual(getattr(self.user.profile, field_name), value)
+
+    def test_api_v2_users_id_user_can_clear_survey_text_fields(self):
+        answers = {
+            "cvat_usage_reason": "work_project",
+            "primary_role": "ml_engineer",
+            "discovery_source": "search_engine",
+        }
+        self.user.profile.refresh_from_db()
+        for field_name, value in answers.items():
+            self.assertEqual(getattr(self.user.profile, field_name), "")
+            setattr(self.user.profile, field_name, value)
+        self.user.profile.save(update_fields=answers.keys())
+
+        data = dict.fromkeys(answers, "")
+        response = self._run_api_v2_users_id(self.user, self.user.id, data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.profile.refresh_from_db()
+        for field_name in data:
+            self.assertEqual(response.data[field_name], "")
+            self.assertEqual(getattr(self.user.profile, field_name), "")
+
+    def test_api_v2_users_id_rejects_invalid_registration_survey_values(self):
+        invalid_payloads = (
+            {"cvat_usage_reason": None},
+            {"primary_role": None},
+            {"discovery_source": None},
+            {"cvat_usage_reason": "invalid"},
+            {"planned_activities": ["invalid"]},
+            {"data_types": ["not_sure", "images"]},
+            {"data_types": ["Custom one", "Custom two"]},
+            {"discovery_source": "other"},
+            {
+                "cvat_usage_reason": "teaching_or_coursework",
+                "primary_role": "project_manager",
+            },
+        )
+
+        for data in invalid_payloads:
+            with self.subTest(data=data):
+                response = self._run_api_v2_users_id(self.user, self.user.id, data)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_api_v2_users_id_invalid_survey_update_is_atomic(self):
+        old_username = self.user.username
+
+        response = self._run_api_v2_users_id(
+            self.user,
+            self.user.id,
+            {"username": "changed-name", "planned_activities": ["invalid"]},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, old_username)
 
     def test_api_v2_users_id_no_auth_partial(self):
         data = {"username": "user12"}
@@ -1967,9 +2046,9 @@ class _CloudStorageTestBase(ApiTestBase):
             "resource": "test",
             "display_name": "Bucket",
             "credentials_type": "KEY_SECRET_KEY_PAIR",
-            "key": "minio_access_key",
-            "secret_key": "minio_secret_key",
-            "specific_attributes": "endpoint_url=http://minio:9000",
+            "key": "moto_access_key",
+            "secret_key": "moto_secret_key",
+            "specific_attributes": "endpoint_url=http://moto:9000",
             "description": "Some description",
             "manifests": [],
         }
@@ -3739,10 +3818,7 @@ class TaskImportExportAPITestCase(ExportApiTestBase, ImportApiTestBase):
         self._run_api_v2_tasks_id_export_import(None)
 
     def test_can_remove_export_cache_automatically_after_successful_export(self):
-        from cvat.apps.dataset_manager.cron import (
-            cleanup_export_cache_directory,
-            clear_export_cache,
-        )
+        from cvat.apps.dataset_manager.cron import ExportCacheDirectoryCleaner
 
         self._create_tasks()
         task_id = self.tasks[0]["id"]
@@ -3756,13 +3832,8 @@ class TaskImportExportAPITestCase(ExportApiTestBase, ImportApiTestBase):
                 mock.patch(
                     "cvat.apps.dataset_manager.views.TTL_CONSTS", new={"task": TASK_CACHE_TTL}
                 ),
-                mock.patch(
-                    "cvat.apps.dataset_manager.cron.clear_export_cache",
-                    side_effect=clear_export_cache,
-                ) as mock_clear_export_cache,
             ):
-                cleanup_export_cache_directory()
-                mock_clear_export_cache.assert_not_called()
+                self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 0)
 
                 self._export_task_backup(
                     user,
@@ -3788,8 +3859,7 @@ class TaskImportExportAPITestCase(ExportApiTestBase, ImportApiTestBase):
                         new={"task": timedelta(seconds=0)},
                     ),
                 ):
-                    cleanup_export_cache_directory()
-                    mock_clear_export_cache.assert_called_once()
+                    self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 1)
                 self.assertFalse(os.path.exists(file_path))
                 queue.finished_job_registry.remove(rq_job_ids[0], delete_job=True)
 
@@ -4666,6 +4736,46 @@ class TaskDataAPITestCase(ApiTestBase):
             image_sizes,
         )
 
+    def test_irregular_files_are_deleted(self):
+        _, image_file = generate_random_image_file("image.jpg")
+
+        archive_file = BytesIO()
+        with tarfile.open(fileobj=archive_file, mode="w") as tar:
+            image_info = tarfile.TarInfo("image.jpg")
+            image_info.size = len(image_file.getbuffer())
+            tar.addfile(image_info, image_file)
+
+            symlink_info = tarfile.TarInfo("symlink.jpg")
+            symlink_info.type = tarfile.SYMTYPE
+            symlink_info.linkname = "image.jpg"
+            tar.addfile(symlink_info)
+
+            fifo_info = tarfile.TarInfo("pipe.jpg")
+            fifo_info.type = tarfile.FIFOTYPE
+            tar.addfile(fifo_info)
+
+        archive_file.name = "test.tar"
+        archive_file.seek(0)
+
+        response = self._create_task(self.admin, {"name": "symlink test"})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        task_id = response.data["id"]
+
+        response = self._run_api_v2_tasks_id_data_post(
+            task_id,
+            self.admin,
+            {"client_files[0]": archive_file, "image_quality": 75},
+        )
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+        response = self._get_task_creation_status(task_id, self.admin)
+        self.assertEqual(response.data["state"], "Finished")
+
+        upload_dir = Data.objects.get(task__id=task_id).get_upload_dirname()
+        jpegs = list(upload_dir.glob("*.jpg"))
+        self.assertEqual(len(jpegs), 1)
+        self.assertEqual(jpegs[0].name, "image.jpg")
+
     def _test_api_v2_tasks_id_data_create_can_use_cached_server_video(self, user):
         task_spec = {
             "name": "cached video task without copying #14",
@@ -5088,7 +5198,7 @@ class TaskDataAPITestCase(ApiTestBase):
                 current_function_name() + " file order mismatch", use_cache=use_cache
             ):
                 task_spec = task_spec_common.copy()
-                task_spec["name"] = task_spec["name"] + " mismatching file order"
+                task_spec["name"] = task_spec["name"] + f" mismatching file order"
                 task_data_copy = task_data.copy()
                 task_data_copy[f"server_files[{len(images)}]"] = "images_manifest.jsonl"
                 self._test_api_v2_tasks_id_data_spec(
@@ -5359,11 +5469,11 @@ class TaskDataAPITestCase(ApiTestBase):
                     else:
                         storage_method = StorageMethodChoice.FILE_SYSTEM
 
-                    task_data["client_files[0]"] = es.enter_context(open(archive_path, "rb"))
+                    task_data[f"client_files[0]"] = es.enter_context(open(archive_path, "rb"))
 
                     kwargs = {}
                     if manifest:
-                        task_data["client_files[1]"] = es.enter_context(open(manifest_path))
+                        task_data[f"client_files[1]"] = es.enter_context(open(manifest_path))
                     else:
                         kwargs.update(
                             {
@@ -5707,6 +5817,109 @@ class TaskDataAPITestCase(ApiTestBase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         assert b"not in canonical form" in response.content
 
+    @override_settings(MEDIA_CACHE_ALLOW_STATIC_CACHE=False)
+    def test_use_cache_false_falls_back_to_cache(self):
+        task_spec = {
+            "name": "task falls back to cache",
+            "owner_id": self.user.id,
+            "assignee_id": self.user.id,
+            "overlap": 0,
+            "segment_size": 100,
+            "labels": [
+                {"name": "car"},
+                {"name": "person"},
+            ],
+        }
+
+        images = copy.deepcopy(self._client_images["images"])
+        n = 3
+        image_sizes = self._client_images["image_sizes"][:n]
+        task_data = {
+            **{f"client_files[{i}]": images[i] for i in range(n)},
+            "image_quality": 75,
+            "use_cache": False,
+        }
+        self._test_api_v2_tasks_id_data_spec(
+            self.user,
+            task_spec,
+            task_data,
+            self.ChunkType.IMAGESET,
+            self.ChunkType.IMAGESET,
+            image_sizes,
+            expected_storage_method=StorageMethodChoice.CACHE.value,
+        )
+
+    def _create_task_from_local_pdf(self, user, **data_params) -> dict:
+        task_spec = {
+            "name": "pdf task with frame range",
+        }
+        response = self._create_task(user, task_spec)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        task_id = response.data["id"]
+
+        task_data = {
+            "client_files[0]": copy.deepcopy(self._client_pdf["pdf"]),
+            "image_quality": 70,
+            **data_params,
+        }
+        response = self._run_api_v2_tasks_id_data_post(task_id, user, task_data)
+        self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED, response.reason_phrase)
+
+        response = self._get_task_creation_status(task_id, user)
+        self.assertEqual(response.data["state"], "Finished", response.data.get("message"))
+
+        with ForceLogin(user, self.client):
+            response = self.client.get(f"/api/tasks/{task_id}/data/meta")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.json()
+
+    def test_can_create_task_from_pdf_without_stop_frame(self):
+        page_count = len(self._client_pdf["image_sizes"])
+
+        data_meta = self._create_task_from_local_pdf(self.admin)
+
+        self.assertEqual(data_meta["size"], page_count)
+        self.assertEqual(len(data_meta["frames"]), page_count)
+
+    def test_can_create_task_from_pdf_with_stop_frame(self):
+        # Check for regressions on https://github.com/cvat-ai/cvat/issues/11175
+
+        page_count = len(self._client_pdf["image_sizes"])
+
+        for stop_frame in [1, 4]:
+            assert stop_frame < page_count
+
+            with self.subTest(stop_frame=stop_frame):
+                data_meta = self._create_task_from_local_pdf(self.admin, stop_frame=stop_frame)
+
+                self.assertEqual(data_meta["size"], stop_frame + 1)
+                self.assertEqual(len(data_meta["frames"]), stop_frame + 1)
+                self.assertEqual(data_meta["stop_frame"], stop_frame)
+
+    def test_can_create_task_from_pdf_with_zero_stop_frame(self):
+        # Like for other media types, an explicit 0 means "up to the last frame"
+        page_count = len(self._client_pdf["image_sizes"])
+
+        data_meta = self._create_task_from_local_pdf(self.admin, stop_frame=0)
+
+        self.assertEqual(data_meta["size"], page_count)
+        self.assertEqual(data_meta["stop_frame"], page_count - 1)
+
+    def test_can_create_task_from_pdf_with_stop_frame_beyond_last_page(self):
+        page_count = len(self._client_pdf["image_sizes"])
+
+        data_meta = self._create_task_from_local_pdf(self.admin, stop_frame=page_count + 5)
+
+        self.assertEqual(data_meta["size"], page_count)
+        self.assertEqual(data_meta["stop_frame"], page_count - 1)
+
+    def test_can_create_task_from_pdf_with_start_and_stop_frame(self):
+        data_meta = self._create_task_from_local_pdf(self.admin, start_frame=1, stop_frame=3)
+
+        self.assertEqual(data_meta["size"], 3)
+        self.assertEqual(data_meta["start_frame"], 1)
+        self.assertEqual(data_meta["stop_frame"], 3)
+
 
 class JobAnnotationAPITestCase(ApiTestBase):
     @classmethod
@@ -6011,7 +6224,7 @@ class JobAnnotationAPITestCase(ApiTestBase):
         return response
 
     def _check_response(self, response, data):
-        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             check_annotation_response(self, response, data)
 
     def _run_api_v2_jobs_id_annotations(self, owner, assignee, annotator):
@@ -6268,7 +6481,7 @@ class JobAnnotationAPITestCase(ApiTestBase):
         self._check_response(response, data)
 
         data = response.data
-        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -6707,7 +6920,7 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
         self._check_response(response, data)
 
         data = response.data
-        if response.status_code not in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
+        if not response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED]:
             data["tags"][0]["label_id"] = task["labels"][0]["id"]
             data["shapes"][0]["points"] = [1, 2, 3.0, 100, 120, 1, 2, 4.0]
             data["shapes"][0]["type"] = "polygon"
@@ -7204,7 +7417,10 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
             ]:
                 annotations["shapes"] += rectangle_shapes_wo_attrs
 
-            elif annotation_format == "Ultralytics YOLO Segmentation 1.0" or annotation_format == "COCO 1.0":
+            elif annotation_format == "Ultralytics YOLO Segmentation 1.0":
+                annotations["shapes"] = polygon_shapes_wo_attrs
+
+            elif annotation_format == "COCO 1.0":
                 annotations["shapes"] = polygon_shapes_wo_attrs
 
             elif annotation_format == "Segmentation mask 1.1":
@@ -7702,13 +7918,17 @@ class TaskAnnotationAPITestCase(ExportApiTestBase, ImportApiTestBase, JobAnnotat
                     self.assertEqual(len(tags), 1)
                     meta = etree_to_dict(tags[0])["meta"]
                     self.assertEqual(meta["task"]["name"], task["name"])
-        elif format_name == "PASCAL VOC 1.1" or format_name in [
+        elif format_name == "PASCAL VOC 1.1":
+            self.assertTrue(zipfile.is_zipfile(content))
+        elif format_name in [
             "YOLO 1.1",
             "Ultralytics YOLO Detection 1.0",
             "Ultralytics YOLO Segmentation 1.0",
             "Ultralytics YOLO Oriented Bounding Boxes 1.0",
             "Ultralytics YOLO Pose 1.0",
-        ] or format_name in ["Kitti Raw Format 1.0", "Sly Point Cloud Format 1.0"]:
+        ]:
+            self.assertTrue(zipfile.is_zipfile(content))
+        elif format_name in ["Kitti Raw Format 1.0", "Sly Point Cloud Format 1.0"]:
             self.assertTrue(zipfile.is_zipfile(content))
         elif format_name in ["COCO 1.0", "COCO Keypoints 1.0"]:
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -8393,8 +8613,9 @@ class TaskBackingCloudStorageTestCase(_CloudStorageTestBase, ExportApiTestBase):
         task = self._create_local_task()
         task_id = task["id"]
 
-        with self.settings(DEFAULT_BACKING_CS_ID=None), self.assertRaises(CommandError):
-            call_command("movetasktobackingcs", str(task_id))
+        with self.settings(DEFAULT_BACKING_CS_ID=None):
+            with self.assertRaises(CommandError):
+                call_command("movetasktobackingcs", str(task_id))
 
         with self.settings(DEFAULT_BACKING_CS_ID=self.cloud_storage_id):
             call_command("movetasktobackingcs", str(task_id))

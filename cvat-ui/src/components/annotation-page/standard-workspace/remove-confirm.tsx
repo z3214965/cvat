@@ -44,7 +44,7 @@ export default function RemoveConfirmComponent(): JSX.Element | null {
                     <Text>
                         {
                             `您尝试移除的对象是一条轨迹。
-                            如果你继续操作，它会移除不同帧上的许多已绘制对象。
+                             如果你继续操作，它会移除不同帧上的许多已绘制对象。
                              如果你只想在这一帧隐藏它，请使用外部功能。
                             ${descriptionMessage}`
                         }

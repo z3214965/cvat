@@ -16,7 +16,7 @@ import config from 'config';
 import {
     DimensionType, Job, JobStage, JobState,
 } from 'cvat-core-wrapper';
-import { Workspace } from 'reducers';
+import { Workspace, WorkspaceCH } from 'reducers';
 
 import MDEditor from '@uiw/react-md-editor';
 import rehypeSanitize from 'rehype-sanitize';
@@ -168,14 +168,14 @@ function RightGroup(props: Props): JSX.Element {
                             }
                             return (
                                 <Select.Option disabled={ws !== Workspace.STANDARD3D} key={ws} value={ws}>
-                                    {ws}
+                                    {WorkspaceCH[ws]}
                                 </Select.Option>
                             );
                         }
                         if (ws !== Workspace.STANDARD3D) {
                             return (
                                 <Select.Option key={ws} value={ws}>
-                                    {ws}
+                                    {WorkspaceCH[ws]}
                                 </Select.Option>
                             );
                         }

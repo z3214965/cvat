@@ -5,7 +5,7 @@
 
 import { Canvas3d } from 'cvat-canvas3d/src/typescript/canvas3d';
 import {
-    Canvas, RectDrawingMethod, CuboidDrawingMethod, RenderData,
+    Canvas, RectDrawingMethod, CuboidDrawingMethod, RenderData, CanvasHistorySource,
 } from 'cvat-canvas-wrapper';
 import { OrientationVisibility } from 'cvat-canvas3d-wrapper';
 import {
@@ -19,6 +19,8 @@ import {
 import type { IntelligentScissors, OpenCVTracker } from 'utils/opencv-wrapper/opencv-wrapper';
 import { KeyMap, KeyMapItem } from 'utils/mousetrap-react';
 import { ImageFilter } from 'utils/image-processing';
+import { AudioRegionsOrdering } from 'audio/components/annotation-page/audio-workspace/utils/audio-interval';
+import type { AudioSeekRequest } from 'actions/audio-actions';
 
 export interface AudioState {
     player: {
@@ -29,8 +31,18 @@ export interface AudioState {
         zoom: number;
         volume: number;
         loop: boolean;
+        playbackRange: {
+            id: object;
+            start: number;
+            end: number;
+        } | null;
+        playbackRangeSource: {
+            rangeID: object;
+            intervalID: number;
+        } | null;
         fitIntervalRequest: { clientID: number } | null;
         intervals: AudioIntervalState[];
+        intervalsOrdering: AudioRegionsOrdering;
         activeIntervalID: number | null;
         hoveredIntervalID: number | null;
         interactingIntervalID: number | null;
@@ -45,8 +57,7 @@ export interface AudioState {
         waveformReady: boolean;
         activeLabelId: number | null;
         audioLoadRequest: object | null;
-        seekRequest: { time: number } | null;
-        playIntervalOnceRequest: { intervalID: number } | null;
+        seekRequest: AudioSeekRequest | null;
     };
 }
 
@@ -364,6 +375,9 @@ export interface PluginsState {
         };
     };
     callbacks: {
+        auth: {
+            onAuthenticationStart: (() => void)[];
+        };
         annotationPage: {
             header: {
                 menu: {
@@ -821,6 +835,7 @@ export interface NotificationsState {
 
 export enum ActiveControl {
     CURSOR = 'cursor',
+    SELECT = 'select',
     DRAG_CANVAS = 'drag_canvas',
     ZOOM_CANVAS = 'zoom_canvas',
     DRAW_RECTANGLE = 'draw_rectangle',
@@ -831,6 +846,7 @@ export enum ActiveControl {
     DRAW_MASK = 'draw_mask',
     DRAW_CUBOID = 'draw_cuboid',
     DRAW_SKELETON = 'draw_skeleton',
+    PASTE_SELECTION = 'paste_selection',
     GROUP = 'group',
     MERGE = 'merge',
     JOIN = 'join',
@@ -851,10 +867,18 @@ export enum StatesOrdering {
     LAYER = 'Layer',
     LABEL_NAME = 'Label name',
 }
+export const StatesOrderingCH: Record<StatesOrdering, string> = {
+    [StatesOrdering.ID_DESCENT]: 'ID - 降序',
+    [StatesOrdering.ID_ASCENT]: 'ID - 升序',
+    [StatesOrdering.UPDATED]: '更新时间',
+    [StatesOrdering.LAYER]: '图层',
+    [StatesOrdering.LABEL_NAME]: '标签名称',
+};
 
 export enum ContextMenuType {
     CANVAS_SHAPE = 'canvas_shape',
     CANVAS_SHAPE_POINT = 'canvas_shape_point',
+    CANVAS_SELECTION = 'canvas_selection',
 }
 
 export enum Rotation {
@@ -895,6 +919,11 @@ export interface AnnotationState {
             top: number;
             left: number;
         };
+        history: {
+            source?: CanvasHistorySource;
+            undoAction?: string;
+            redoAction?: string;
+        };
         instance: Canvas | Canvas3d | null;
         ready: boolean;
         activeControl: ActiveControl;
@@ -911,6 +940,7 @@ export interface AnnotationState {
             initialOpenGuide: boolean;
             defaultLabel: string | null;
             defaultPointsCount: number | null;
+            defaultRotated: boolean;
         };
         groundTruthInfo: {
             validationLayout: JobValidationLayout | null;
@@ -952,6 +982,7 @@ export interface AnnotationState {
         activeLabelID: number | null;
         activeObjectType: ObjectType;
         activeInitialState?: any;
+        copiedStates?: import('cvat-core-wrapper').SerializedData[];
         activeSimplifyPoly?: boolean;
     };
     editing: EditingState;
@@ -959,6 +990,7 @@ export interface AnnotationState {
         activatedStateID: number | null;
         activatedElementID: number | null;
         activatedAttributeID: number | null;
+        selectedStatesID: number[];
         highlightedConflict: QualityConflict | null;
         collapsed: Record<number, boolean>;
         collapsedAll: boolean;
@@ -1017,6 +1049,19 @@ export enum Workspace {
     REVIEW = 'Review',
     AUDIO = 'Audio annotation',
 }
+export const WorkspaceCH: Record<Workspace, string> = {
+    [Workspace.STANDARD3D]: '标准3D',
+    [Workspace.STANDARD]: '标准',
+    [Workspace.ATTRIBUTES]: '属性标注',
+    [Workspace.SINGLE_SHAPE]: '单形状标注',
+    [Workspace.TAGS]: '标签标注',
+    [Workspace.REVIEW]: '审核',
+    [Workspace.AUDIO]: '音频标注',
+}
+
+export function isMultiSelectionSupported(workspace: Workspace): boolean {
+    return workspace !== Workspace.STANDARD3D && workspace !== Workspace.AUDIO;
+}
 
 export enum GridColor {
     White = 'White',
@@ -1041,7 +1086,7 @@ export enum ColorBy {
     LABEL = 'Label',
 }
 
-export const ColorByNames: Record<ColorBy, string> = {
+export const ColorByCH: Record<ColorBy, string> = {
     [ColorBy.INSTANCE]: '标签',
     [ColorBy.GROUP]: '实例',
     [ColorBy.LABEL]: '组',
@@ -1154,6 +1199,7 @@ export interface OrganizationsQuery {
 
 export interface OrganizationState {
     current?: Organization | null;
+    currentRole: Membership['role'] | null;
     initialized: boolean;
     fetching: boolean;
     updating: boolean;

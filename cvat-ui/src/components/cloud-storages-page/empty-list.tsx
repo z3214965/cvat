@@ -37,7 +37,7 @@ export default function EmptyListComponent(props: Props): JSX.Element {
                         </Row>
                         <Row justify='center' align='middle'>
                             <Col>
-                                <Link to='/cloudstorages/create'>attach a new one</Link>
+                                <Link to='/cloudstorages/create'>新增一个</Link>
                             </Col>
                         </Row>
                     </>

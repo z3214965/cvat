@@ -23,3 +23,4 @@ class QualityControlConfig(AppConfig):
         load_app_iam_rules(self)
 
         # Define signals, apply schema customizations
+        from . import schema, signals  # pylint: disable=unused-import

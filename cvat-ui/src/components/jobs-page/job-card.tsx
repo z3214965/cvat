@@ -10,10 +10,11 @@ import Card from 'antd/lib/card';
 import Descriptions from 'antd/lib/descriptions';
 import { MoreOutlined } from '@ant-design/icons';
 
-import { Job, JobType, JobStage, JobStageNames, JobState, JobStateCH } from 'cvat-core-wrapper';
+import { Job, JobType, JobStage, JobStageCH, JobState, JobStateCH } from 'cvat-core-wrapper';
 import { useCardHeightHOC, useContextMenuClick } from 'utils/hooks';
 import Preview from 'components/common/preview';
 import { CombinedState } from 'reducers';
+import JobStageStateBadges from 'components/job-item/job-status-visuals';
 import JobActionsComponent from './actions-menu';
 
 const useCardHeight = useCardHeightHOC({
@@ -93,6 +94,9 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
                     </div>
                     {tag && <div className='cvat-job-page-list-item-type'>{tag}</div>}
                     <div className='cvat-job-page-list-item-dimension'>{job.dimension.toUpperCase()}</div>
+                    <div className='cvat-job-page-list-item-status'>
+                        <JobStageStateBadges stage={job.stage} state={job.state} />
+                    </div>
                 </>
             )}
             hoverable
@@ -100,17 +104,11 @@ function JobCardComponent(props: Readonly<Props>): JSX.Element {
             onContextMenuCapture={handleContextMenuCapture}
         >
             <Descriptions column={1} size='small'>
-                <Descriptions.Item label='阶段与状态'>
-                    {(() => {
-                        return `${JobStageNames[job.stage]} ${JobStateCH[job.state]}`;
-                    })()}
-                </Descriptions.Item>
-                <Descriptions.Item label='阶段与状态'>{`${job.stage} ${job.state}`}</Descriptions.Item>
-                <Descriptions.Item label='帧'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
+                <Descriptions.Item label='帧数'>{job.stopFrame - job.startFrame + 1}</Descriptions.Item>
                 {job.assignee ? (
-                    <Descriptions.Item label='负责人'>{job.assignee.username}</Descriptions.Item>
+                    <Descriptions.Item label='分配人'>{job.assignee.username}</Descriptions.Item>
                 ) : (
-                    <Descriptions.Item label='负责人'> </Descriptions.Item>
+                    <Descriptions.Item label='分配人'> </Descriptions.Item>
                 )}
             </Descriptions>
             <div

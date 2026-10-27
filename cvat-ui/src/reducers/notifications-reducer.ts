@@ -30,6 +30,7 @@ import { ConsensusActionTypes } from 'actions/consensus-actions';
 import { BulkActionsTypes } from 'actions/bulk-actions';
 import { getInstanceType } from 'actions/common';
 import { ResourceUpdateTypes } from 'utils/enums';
+import { getInstanceTypeText, getResourceText } from 'utils/conversion-txt';
 
 import config from 'config';
 import { NotificationsState } from '.';
@@ -327,9 +328,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         ...state.messages,
                         auth: {
                             ...state.messages.auth,
-                            registerDone: {
-                                message: `要使用您的账户，您需要确认邮箱地址。我们已向 ${action.payload.userEmail} 发送了一封包含确认链接的电子邮件。`,
-                            },
+                            message: `如需使用账号，请先验证邮箱地址。我们已向 ${action.payload.userEmail} 发送一封包含验证链接的邮件。`,
                         },
                     },
                 };

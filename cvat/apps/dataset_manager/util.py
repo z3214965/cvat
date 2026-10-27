@@ -3,26 +3,26 @@
 #
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Callable, Generator, Iterable
-from contextlib import contextmanager
-from copy import deepcopy
-from datetime import timedelta
-from enum import Enum
 import inspect
 import os
 import os.path as osp
 import re
 import tempfile
+import zipfile
+from collections.abc import Callable, Generator, Iterable
+from contextlib import contextmanager
+from copy import deepcopy
+from datetime import timedelta
+from enum import Enum
 from threading import Lock
 from typing import Any, Protocol
 from uuid import UUID
-import zipfile
 
 import attrs
+import django_rq
 from datumaro.util import to_snake_case
 from datumaro.util.os_util import make_file_name
 from django.conf import settings
-import django_rq
 from pottery import Redlock
 
 
@@ -466,12 +466,12 @@ def linear_sort_shapes(shapes: Iterable) -> list:
 
 def make_getter_by_frame_for_annotation_stream(
     gen: Iterable[dict],
-) -> Callable[[int], Generator[dict]]:
+) -> Callable[[int], Generator[dict, None, None]]:
     if isinstance(gen, list):
         gen = iter(gen)
     ann = None
 
-    def get(frame_index: int) -> Generator[dict]:
+    def get(frame_index: int) -> Generator[dict, None, None]:
         nonlocal ann
 
         while True:

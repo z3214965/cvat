@@ -172,7 +172,7 @@ class OpenCVControlComponent extends React.PureComponent<Props & DispatchToProps
                 const { width, height } = canvas;
                 const context = canvas.getContext('2d');
                 if (!context) {
-                    throw new Error('Canvas 上下文为空');
+                    throw new Error('Canvas上下文为空');
                 }
                 this.activeTool.setImage(context.getImageData(0, 0, width, height));
             }
@@ -283,7 +283,7 @@ class OpenCVControlComponent extends React.PureComponent<Props & DispatchToProps
         } catch (error: any) {
             notification.error({
                 description: error.toString(),
-                message: '发生了OpenCV.js处理错误',
+                message: '发生了 OpenCV.js 处理错误',
                 className: 'cvat-notification-notice-opencv-processing-error',
             });
         }
@@ -329,7 +329,7 @@ class OpenCVControlComponent extends React.PureComponent<Props & DispatchToProps
         } catch (error: any) {
             notification.error({
                 description: error.toString(),
-                message: '无法初始化OpenCV库',
+                message: '无法初始化 OpenCV 库',
             });
             this.setState({
                 initializationError: true,

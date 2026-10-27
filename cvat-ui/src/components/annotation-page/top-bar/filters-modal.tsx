@@ -249,7 +249,7 @@ function FiltersModalComponent(): JSX.Element {
                     fieldSettings: { min: 0 },
                 },
                 zOrder: {
-                    label: 'Z order',
+                    label: 'Z序',
                     type: 'number',
                 },
                 attr: {
@@ -274,7 +274,7 @@ function FiltersModalComponent(): JSX.Element {
             ...AntdConfig,
             fields: {
                 label: {
-                    label: 'Label',
+                    label: '标签',
                     type: 'select',
                     operators: ['select_equals', 'select_any_in'],
                     valueSources: ['value'] as 'value'[],
@@ -283,12 +283,12 @@ function FiltersModalComponent(): JSX.Element {
                     },
                 },
                 occluded: {
-                    label: 'Occluded',
+                    label: '被遮挡',
                     type: 'boolean',
                 },
                 ...(Object.keys(keypointAttributesSubfields).length ? {
                     attr: {
-                        label: 'Attributes',
+                        label: '属性',
                         type: '!struct',
                         subfields: keypointAttributesSubfields,
                         fieldSettings: {

@@ -137,5 +137,5 @@
     "lodash": "^4.18.1",
     "lru-cache": "^11.2.7"
   },
-  "packageManager": "yarn@4.18.0"
+  "packageManager": "yarn@4.18.1"
 }

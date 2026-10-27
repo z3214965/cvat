@@ -11,6 +11,8 @@ const DISCORD_URL = 'https://discord.gg/fNR3eXfk6C';
 const GITHUB_URL = 'https://github.com/cvat-ai/cvat';
 const GITHUB_IMAGE_URL = 'https://github.com/cvat-ai/cvat/raw/develop/site/content/en/images/cvat.jpg';
 const GUIDE_URL = 'https://docs.cvat.ai/docs';
+const QUALITY_TARGET_METRICS_GUIDE_URL =
+    `${GUIDE_URL}/qa-analytics/auto-qa/#quality-target-metrics`;
 const UPGRADE_GUIDE_URL = 'https://docs.cvat.ai/docs/administration/advanced/upgrade_guide';
 const SHARE_MOUNT_GUIDE_URL =
     'https://docs.cvat.ai/docs/administration/basics/installation/#share-path';
@@ -135,14 +137,14 @@ const PAID_PLACEHOLDER_CONFIG = {
 };
 
 // ====================== 中文配置开始 ======================
-const supportedLanguages: string[] = (
+const SUPPORT_LANGUAGES: string[] = (
     process.env.REACT_APP_SUPPORTED_LANGUAGES || 'en'
 ).split(',');
 
-const defaultLanguage: string =
+const DEFAULT_LANGUAGE: string =
   process.env.REACT_APP_DEFAULT_LANGUAGE || 'en';
 
-const languageResources = {
+const LANGUAGE_RESOURCES = {
     en: require('./locales/en.json'),
     'zh-CN': require('./locales/zh-CN.json'),
 };
@@ -157,6 +159,7 @@ export default {
     GITHUB_URL,
     GITHUB_IMAGE_URL,
     GUIDE_URL,
+    QUALITY_TARGET_METRICS_GUIDE_URL,
     UPGRADE_GUIDE_URL,
     SHARE_MOUNT_GUIDE_URL,
     CANVAS_BACKGROUND_COLORS,
@@ -191,7 +194,7 @@ export default {
     BLACKLISTED_GO_BACK_PATHS,
     PAID_PLACEHOLDER_CONFIG,
     MAXIMUM_NOTIFICATION_MESSAGE_LENGTH,
-    supportedLanguages,
-    defaultLanguage,
-    languageResources,
+    SUPPORT_LANGUAGES,
+    DEFAULT_LANGUAGE,
+    LANGUAGE_RESOURCES,
 };

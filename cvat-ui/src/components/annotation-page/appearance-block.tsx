@@ -15,7 +15,7 @@ import Button from 'antd/lib/button';
 
 import ColorPicker from 'components/annotation-page/standard-workspace/objects-side-bar/color-picker';
 import { ColorizeIcon } from 'icons';
-import { ColorBy, ColorByNames, CombinedState, Workspace } from 'reducers';
+import { ColorBy, ColorByCH, CombinedState, Workspace } from 'reducers';
 import { DimensionType, Job } from 'cvat-core-wrapper';
 import { OrientationVisibility } from 'cvat-canvas3d-wrapper';
 import { collapseAppearance as collapseAppearanceAction } from 'actions/annotation-actions';
@@ -41,8 +41,8 @@ const componentShortcuts = {
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
     TOGGLE_SHOW_BITMAP_APPEARANCE: {
-        name: 'Switch objects appearance setting "Show bitmap"',
-        description: 'Show or hide the bitmap layer on the canvas',
+        name: '切换对象外观设置"显示位图"',
+        description: '在画布上显示或隐藏位图图层',
         sequences: [],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
@@ -53,7 +53,7 @@ registerComponentShortcuts(componentShortcuts);
 interface StateToProps {
     appearanceCollapsed: boolean;
     colorBy: ColorBy;
-    colorByNames: ColorByNames;
+    colorByNames: typeof ColorByCH;
     opacity: number;
     selectedOpacity: number;
     outlined: boolean;
@@ -96,6 +96,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         appearanceCollapsed,
         colorBy,
+        colorByNames: ColorByCH,
         opacity,
         selectedOpacity,
         outlined,
@@ -205,11 +206,11 @@ function AppearanceBlock(props: Props): JSX.Element {
                             value={colorBy}
                             onChange={(event: RadioChangeEvent) => changeShapesColorBy(event.target.value)}
                         >
-                            {Object.keys(nextColorBy).map((val) => (
-                                <Radio.Button value={val} key={val}>{ColorByNames[val]}</Radio.Button>
+                            {(Object.keys(nextColorBy) as ColorBy[]).map((val) => (
+                                <Radio.Button value={val} key={val}>{ColorByCH[val]}</Radio.Button>
                             ))}
                         </Radio.Group>
-                        <Text type='secondary'>不透明度</Text>
+                        <Text type='secondary'>透明度</Text>
                         <Slider
                             className='cvat-appearance-opacity-slider'
                             onChange={changeShapesOpacity}

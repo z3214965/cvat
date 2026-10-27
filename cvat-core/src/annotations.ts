@@ -15,8 +15,8 @@ import { ArgumentError } from './exceptions';
 import { getFramesMeta, getJobFramesMetaSync } from './frames';
 import { JobType } from './enums';
 
-const jobCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver }>();
-const taskCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver }>();
+const jobCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver; }>();
+const taskCollectionCache = new WeakMap<Task | Job, { collection: AnnotationsCollection; saver: AnnotationsSaver; }>();
 
 // save history separately as not all history actions are related to annotations (e.g. delete, restore frame are not)
 const jobHistoryCache = new WeakMap<Task | Job, AnnotationsHistory>();
@@ -101,10 +101,9 @@ async function getAnnotationsFromServer(session: Job | Task): Promise<void> {
             dimension: session.dimension,
             replicasCount: session instanceof Job ? session.replicasCount : undefined,
             framesInfo: {
-                isFrameDeleted:
-                    session instanceof Job
-                        ? (frame: number) => !!getJobFramesMetaSync(session.id).deletedFrames[frame]
-                        : (frame: number) => !!frameMeta.deletedFrames[frame],
+                isFrameDeleted: session instanceof Job ?
+                    (frame: number) => !!getJobFramesMetaSync(session.id).deletedFrames[frame] :
+                    (frame: number) => !!frameMeta.deletedFrames[frame],
                 ...frameMeta.frames.reduce((acc, frameInfo, idx) => {
                     // keep only static information
                     acc[frameNumbers[idx]] = {
@@ -205,32 +204,14 @@ export async function exportDataset(
 
     let result = null;
     if (instance instanceof Task) {
-        result = await serverProxy.tasks.exportDataset(
-            instance.id,
-            format,
-            saveImages,
-            useDefaultSettings,
-            targetStorage,
-            name,
-        );
+        result = await serverProxy.tasks
+            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
     } else if (instance instanceof Job) {
-        result = await serverProxy.jobs.exportDataset(
-            instance.id,
-            format,
-            saveImages,
-            useDefaultSettings,
-            targetStorage,
-            name,
-        );
+        result = await serverProxy.jobs
+            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
     } else {
-        result = await serverProxy.projects.exportDataset(
-            instance.id,
-            format,
-            saveImages,
-            useDefaultSettings,
-            targetStorage,
-            name,
-        );
+        result = await serverProxy.projects
+            .exportDataset(instance.id, format, saveImages, useDefaultSettings, targetStorage, name);
     }
 
     return result;
@@ -243,9 +224,9 @@ export function importDataset(
     sourceStorage: Storage,
     file: File | string,
     options: {
-        convMaskToPoly?: boolean;
-        importMode?: 'replace' | 'append';
-        updateStatusCallback?: (message: string, progress: number) => void;
+        convMaskToPoly?: boolean,
+        importMode?: 'replace' | 'append',
+        updateStatusCallback?: (message: string, progress: number) => void,
     } = {},
 ): Promise<string> {
     const updateStatusCallback = options.updateStatusCallback || (() => {});
@@ -253,56 +234,66 @@ export function importDataset(
     const importMode = options.importMode ?? 'replace';
 
     if (!(instance instanceof Project || instance instanceof Task || instance instanceof Job)) {
-        throw new ArgumentError('实例必须是项目、任务或作业类型');
+        throw new ArgumentError('实例必须是项目、任务或作业的实例对象');
     }
     if (!(typeof updateStatusCallback === 'function')) {
-        throw new ArgumentError('回调函数必须是一个function类型');
+        throw new ArgumentError('回调函数必须为函数类型');
     }
     if (!(typeof convMaskToPoly === 'boolean')) {
-        throw new ArgumentError('选项"Mask转多边形"必须是布尔值');
+        throw new ArgumentError('选项 convMaskToPoly 必须为布尔值');
     }
     if (importMode !== 'replace' && importMode !== 'append') {
-        throw new ArgumentError('选项"导入模式"必须为"替换"或"追加"');
+        throw new ArgumentError('选项 importMode 只能是 replace（覆盖）或 append（追加）');
     }
-    const allowedFileExtensions = ['.zip', '.xml', '.json', '.tsv'];
+    const allowedFileExtensions = [
+        '.zip', '.xml', '.json', '.tsv',
+    ];
     const allowedFileExtensionsList = allowedFileExtensions.join(', ');
-    if (typeof file === 'string' && !allowedFileExtensions.some((ext) => file.toLowerCase().endsWith(ext))) {
+    if (typeof file === 'string' && !(allowedFileExtensions.some((ext) => file.toLowerCase().endsWith(ext)))) {
         throw new ArgumentError(
-            `文件必须为文件实例，仅支持以下扩展名：${allowedFileExtensionsList}。当前传入：${file}`,
+            `文件后缀必须为以下其中一种：${allowedFileExtensionsList}。` +
+            `检测到的MIME类型：${file.type}`
         );
     }
     const allowedMimeTypes = [
-        'application/zip',
-        'application/x-zip-compressed',
-        'application/xml',
-        'text/xml',
-        'application/json',
-        'text/tab-separated-values',
+        'application/zip', 'application/x-zip-compressed',
+        'application/xml', 'text/xml',
+        'application/json', 'text/tab-separated-values',
     ];
-    if (file instanceof File && !allowedMimeTypes.includes(file.type)) {
+    if (file instanceof File && !(allowedMimeTypes.includes(file.type))) {
         throw new ArgumentError(
-            `文件必须为文件实例，且扩展名属于以下列表：${allowedFileExtensionsList}。当前文件MIME类型：${file.type}`,
+            `文件必须为File对象，且后缀属于以下类型之一：${allowedFileExtensionsList}。` +
+            `当前MIME类型：${file.type}`,
         );
     }
 
     if (instance instanceof Project) {
-        return serverProxy.projects.importDataset(instance.id, format, useDefaultSettings, sourceStorage, file, {
-            updateStatusCallback,
-            convMaskToPoly,
-        });
+        return serverProxy.projects
+            .importDataset(
+                instance.id,
+                format,
+                useDefaultSettings,
+                sourceStorage,
+                file,
+                {
+                    updateStatusCallback,
+                    convMaskToPoly,
+                },
+            );
     }
 
     const instanceType = instance instanceof Task ? 'task' : 'job';
-    return serverProxy.annotations.uploadAnnotations(
-        instanceType,
-        instance.id,
-        format,
-        useDefaultSettings,
-        sourceStorage,
-        file,
-        {
-            convMaskToPoly,
-            importMode,
-        },
-    );
+    return serverProxy.annotations
+        .uploadAnnotations(
+            instanceType,
+            instance.id,
+            format,
+            useDefaultSettings,
+            sourceStorage,
+            file,
+            {
+                convMaskToPoly,
+                importMode,
+            },
+        );
 }

@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Iterable, Sequence
 import logging
+from collections.abc import Iterable, Sequence
 from typing import Any, TypeVar
 
 from django.conf import settings
 from django.db import DatabaseError, connection
 from django.db.models import Manager, Model, QuerySet
-from psycopg2 import Error as PsycopgError, sql
+from psycopg2 import Error as PsycopgError
+from psycopg2 import sql
 from psycopg2.errors import LockNotAvailable
-
 
 _ModelT = TypeVar("_ModelT", bound=Model)
 _QuerysetT = TypeVar("_QuerysetT", bound=QuerySet)
@@ -21,16 +21,16 @@ _logger = logging.getLogger(__name__)
 
 
 __all__ = (
-    "add_prefetch_fields",
+    "get_or_404",
+    "find_psycopg_cause",
+    "is_lock_timeout_error",
     "bulk_create",
     "clear_prefetched_relation_cache",
-    "find_psycopg_cause",
+    "is_prefetched",
+    "is_field_cached",
+    "add_prefetch_fields",
     "get_cached",
     "get_object_by_id_for_share",
-    "get_or_404",
-    "is_field_cached",
-    "is_lock_timeout_error",
-    "is_prefetched",
 )
 
 

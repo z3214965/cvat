@@ -3,13 +3,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
+import os.path as osp
+import zipfile
 from collections import OrderedDict
 from collections.abc import Callable
 from glob import glob
 from io import BufferedWriter
-import os
-import os.path as osp
-import zipfile
 
 from datumaro.components.annotation import (
     AnnotationType,
@@ -401,11 +401,43 @@ class CvatExtractor(DatasetBase):
 
         for ev, el in context:
             if ev == "start":
-                if accepted("annotations", "meta") or accepted("meta", "task") or accepted("meta", "project") or accepted("project", "tasks") or accepted("tasks", "task") or accepted("task", "id", next_state="task_id") or accepted("task", "segment") or accepted("task", "mode") or accepted("task", "original_size") or accepted("original_size", "height", next_state="frame_height") or accepted("original_size", "width", next_state="frame_width") or accepted("task", "labels") or accepted("project", "labels"):
+                if accepted("annotations", "meta"):
+                    pass
+                elif accepted("meta", "task"):
+                    pass
+                elif accepted("meta", "project"):
+                    pass
+                elif accepted("project", "tasks"):
+                    pass
+                elif accepted("tasks", "task"):
+                    pass
+                elif accepted("task", "id", next_state="task_id"):
+                    pass
+                elif accepted("task", "segment"):
+                    pass
+                elif accepted("task", "mode"):
+                    pass
+                elif accepted("task", "original_size"):
+                    pass
+                elif accepted("original_size", "height", next_state="frame_height"):
+                    pass
+                elif accepted("original_size", "width", next_state="frame_width"):
+                    pass
+                elif accepted("task", "labels"):
+                    pass
+                elif accepted("project", "labels"):
                     pass
                 elif accepted("labels", "label"):
                     label = {"name": None, "attributes": []}
-                elif accepted("label", "name", next_state="label_name") or accepted("label", "attributes") or accepted("attributes", "attribute") or accepted("attribute", "name", next_state="attr_name") or accepted("attribute", "input_type", next_state="attr_type"):
+                elif accepted("label", "name", next_state="label_name"):
+                    pass
+                elif accepted("label", "attributes"):
+                    pass
+                elif accepted("attributes", "attribute"):
+                    pass
+                elif accepted("attribute", "name", next_state="attr_name"):
+                    pass
+                elif accepted("attribute", "input_type", next_state="attr_type"):
                     pass
                 elif (
                     accepted("annotations", "image")
@@ -418,7 +450,9 @@ class CvatExtractor(DatasetBase):
             elif ev == "end":
                 if consumed("meta", "meta"):
                     break
-                elif consumed("project", "project") or consumed("tasks", "tasks"):
+                elif consumed("project", "project"):
+                    pass
+                elif consumed("tasks", "tasks"):
                     pass
                 elif consumed("task", "task"):
                     tasks_info[task_id] = {
@@ -445,7 +479,9 @@ class CvatExtractor(DatasetBase):
                     label["attributes"].append({"name": el.text})
                 elif consumed("attr_type", "input_type"):
                     label["attributes"][-1]["input_type"] = el.text
-                elif consumed("attribute", "attribute") or consumed("attributes", "attributes"):
+                elif consumed("attribute", "attribute"):
+                    pass
+                elif consumed("attributes", "attributes"):
                     pass
                 elif consumed("label", "label"):
                     labels[label["name"]] = label["attributes"]
@@ -831,54 +867,54 @@ def dump_as_cvat_annotation(dumper, annotations: JobData | TaskData | ProjectDat
                     dump_data.update(
                         OrderedDict(
                             [
-                                ("xtl", f"{shape.points[0]:.2f}"),
-                                ("ytl", f"{shape.points[1]:.2f}"),
-                                ("xbr", f"{shape.points[2]:.2f}"),
-                                ("ybr", f"{shape.points[3]:.2f}"),
+                                ("xtl", "{:.2f}".format(shape.points[0])),
+                                ("ytl", "{:.2f}".format(shape.points[1])),
+                                ("xbr", "{:.2f}".format(shape.points[2])),
+                                ("ybr", "{:.2f}".format(shape.points[3])),
                             ]
                         )
                     )
 
                     if shape.rotation:
                         dump_data.update(
-                            OrderedDict([("rotation", f"{shape.rotation:.2f}")])
+                            OrderedDict([("rotation", "{:.2f}".format(shape.rotation))])
                         )
                 elif shape.type == "ellipse":
                     dump_data.update(
                         OrderedDict(
                             [
-                                ("cx", f"{shape.points[0]:.2f}"),
-                                ("cy", f"{shape.points[1]:.2f}"),
-                                ("rx", f"{shape.points[2] - shape.points[0]:.2f}"),
-                                ("ry", f"{shape.points[1] - shape.points[3]:.2f}"),
+                                ("cx", "{:.2f}".format(shape.points[0])),
+                                ("cy", "{:.2f}".format(shape.points[1])),
+                                ("rx", "{:.2f}".format(shape.points[2] - shape.points[0])),
+                                ("ry", "{:.2f}".format(shape.points[1] - shape.points[3])),
                             ]
                         )
                     )
 
                     if shape.rotation:
                         dump_data.update(
-                            OrderedDict([("rotation", f"{shape.rotation:.2f}")])
+                            OrderedDict([("rotation", "{:.2f}".format(shape.rotation))])
                         )
                 elif shape.type == "cuboid":
                     dump_data.update(
                         OrderedDict(
                             [
-                                ("xtl1", f"{shape.points[0]:.2f}"),
-                                ("ytl1", f"{shape.points[1]:.2f}"),
-                                ("xbl1", f"{shape.points[2]:.2f}"),
-                                ("ybl1", f"{shape.points[3]:.2f}"),
-                                ("xtr1", f"{shape.points[4]:.2f}"),
-                                ("ytr1", f"{shape.points[5]:.2f}"),
-                                ("xbr1", f"{shape.points[6]:.2f}"),
-                                ("ybr1", f"{shape.points[7]:.2f}"),
-                                ("xtl2", f"{shape.points[8]:.2f}"),
-                                ("ytl2", f"{shape.points[9]:.2f}"),
-                                ("xbl2", f"{shape.points[10]:.2f}"),
-                                ("ybl2", f"{shape.points[11]:.2f}"),
-                                ("xtr2", f"{shape.points[12]:.2f}"),
-                                ("ytr2", f"{shape.points[13]:.2f}"),
-                                ("xbr2", f"{shape.points[14]:.2f}"),
-                                ("ybr2", f"{shape.points[15]:.2f}"),
+                                ("xtl1", "{:.2f}".format(shape.points[0])),
+                                ("ytl1", "{:.2f}".format(shape.points[1])),
+                                ("xbl1", "{:.2f}".format(shape.points[2])),
+                                ("ybl1", "{:.2f}".format(shape.points[3])),
+                                ("xtr1", "{:.2f}".format(shape.points[4])),
+                                ("ytr1", "{:.2f}".format(shape.points[5])),
+                                ("xbr1", "{:.2f}".format(shape.points[6])),
+                                ("ybr1", "{:.2f}".format(shape.points[7])),
+                                ("xtl2", "{:.2f}".format(shape.points[8])),
+                                ("ytl2", "{:.2f}".format(shape.points[9])),
+                                ("xbl2", "{:.2f}".format(shape.points[10])),
+                                ("ybl2", "{:.2f}".format(shape.points[11])),
+                                ("xtr2", "{:.2f}".format(shape.points[12])),
+                                ("ytr2", "{:.2f}".format(shape.points[13])),
+                                ("xbr2", "{:.2f}".format(shape.points[14])),
+                                ("ybr2", "{:.2f}".format(shape.points[15])),
                             ]
                         )
                     )
@@ -902,7 +938,7 @@ def dump_as_cvat_annotation(dumper, annotations: JobData | TaskData | ProjectDat
                                     "points",
                                     ";".join(
                                         (
-                                            ",".join((f"{x:.2f}", f"{y:.2f}"))
+                                            ",".join(("{:.2f}".format(x), "{:.2f}".format(y)))
                                             for x, y in pairwise(shape.points)
                                         )
                                     ),
@@ -998,30 +1034,30 @@ def dump_as_cvat_interpolation(dumper, annotations: CommonData | ProjectData):
             dump_data.update(
                 OrderedDict(
                     [
-                        ("xtl", f"{shape.points[0]:.2f}"),
-                        ("ytl", f"{shape.points[1]:.2f}"),
-                        ("xbr", f"{shape.points[2]:.2f}"),
-                        ("ybr", f"{shape.points[3]:.2f}"),
+                        ("xtl", "{:.2f}".format(shape.points[0])),
+                        ("ytl", "{:.2f}".format(shape.points[1])),
+                        ("xbr", "{:.2f}".format(shape.points[2])),
+                        ("ybr", "{:.2f}".format(shape.points[3])),
                     ]
                 )
             )
 
             if shape.rotation:
-                dump_data.update(OrderedDict([("rotation", f"{shape.rotation:.2f}")]))
+                dump_data.update(OrderedDict([("rotation", "{:.2f}".format(shape.rotation))]))
         elif shape.type == "ellipse":
             dump_data.update(
                 OrderedDict(
                     [
-                        ("cx", f"{shape.points[0]:.2f}"),
-                        ("cy", f"{shape.points[1]:.2f}"),
-                        ("rx", f"{shape.points[2] - shape.points[0]:.2f}"),
-                        ("ry", f"{shape.points[1] - shape.points[3]:.2f}"),
+                        ("cx", "{:.2f}".format(shape.points[0])),
+                        ("cy", "{:.2f}".format(shape.points[1])),
+                        ("rx", "{:.2f}".format(shape.points[2] - shape.points[0])),
+                        ("ry", "{:.2f}".format(shape.points[1] - shape.points[3])),
                     ]
                 )
             )
 
             if shape.rotation:
-                dump_data.update(OrderedDict([("rotation", f"{shape.rotation:.2f}")]))
+                dump_data.update(OrderedDict([("rotation", "{:.2f}".format(shape.rotation))]))
         elif shape.type == "mask":
             dump_data.update(
                 OrderedDict(
@@ -1038,22 +1074,22 @@ def dump_as_cvat_interpolation(dumper, annotations: CommonData | ProjectData):
             dump_data.update(
                 OrderedDict(
                     [
-                        ("xtl1", f"{shape.points[0]:.2f}"),
-                        ("ytl1", f"{shape.points[1]:.2f}"),
-                        ("xbl1", f"{shape.points[2]:.2f}"),
-                        ("ybl1", f"{shape.points[3]:.2f}"),
-                        ("xtr1", f"{shape.points[4]:.2f}"),
-                        ("ytr1", f"{shape.points[5]:.2f}"),
-                        ("xbr1", f"{shape.points[6]:.2f}"),
-                        ("ybr1", f"{shape.points[7]:.2f}"),
-                        ("xtl2", f"{shape.points[8]:.2f}"),
-                        ("ytl2", f"{shape.points[9]:.2f}"),
-                        ("xbl2", f"{shape.points[10]:.2f}"),
-                        ("ybl2", f"{shape.points[11]:.2f}"),
-                        ("xtr2", f"{shape.points[12]:.2f}"),
-                        ("ytr2", f"{shape.points[13]:.2f}"),
-                        ("xbr2", f"{shape.points[14]:.2f}"),
-                        ("ybr2", f"{shape.points[15]:.2f}"),
+                        ("xtl1", "{:.2f}".format(shape.points[0])),
+                        ("ytl1", "{:.2f}".format(shape.points[1])),
+                        ("xbl1", "{:.2f}".format(shape.points[2])),
+                        ("ybl1", "{:.2f}".format(shape.points[3])),
+                        ("xtr1", "{:.2f}".format(shape.points[4])),
+                        ("ytr1", "{:.2f}".format(shape.points[5])),
+                        ("xbr1", "{:.2f}".format(shape.points[6])),
+                        ("ybr1", "{:.2f}".format(shape.points[7])),
+                        ("xtl2", "{:.2f}".format(shape.points[8])),
+                        ("ytl2", "{:.2f}".format(shape.points[9])),
+                        ("xbl2", "{:.2f}".format(shape.points[10])),
+                        ("ybl2", "{:.2f}".format(shape.points[11])),
+                        ("xtr2", "{:.2f}".format(shape.points[12])),
+                        ("ytr2", "{:.2f}".format(shape.points[13])),
+                        ("xbr2", "{:.2f}".format(shape.points[14])),
+                        ("ybr2", "{:.2f}".format(shape.points[15])),
                     ]
                 )
             )
@@ -1064,7 +1100,7 @@ def dump_as_cvat_interpolation(dumper, annotations: CommonData | ProjectData):
                         (
                             "points",
                             ";".join(
-                                [f"{x:.2f},{y:.2f}" for x, y in pairwise(shape.points)]
+                                ["{:.2f},{:.2f}".format(x, y) for x, y in pairwise(shape.points)]
                             ),
                         )
                     ]
@@ -1097,9 +1133,9 @@ def dump_as_cvat_interpolation(dumper, annotations: CommonData | ProjectData):
             raise NotImplementedError("unknown shape type")
 
         if (
-            (shape.type == "skeleton"
+            shape.type == "skeleton"
             and element_shapes
-            and element_shapes.get(shape.frame))
+            and element_shapes.get(shape.frame)
             or shape.type != "skeleton"
         ):
             for attr in shape.attributes:

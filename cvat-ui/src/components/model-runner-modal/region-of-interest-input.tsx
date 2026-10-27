@@ -156,7 +156,7 @@ function RegionOfInterestInputComponent(props: Props): JSX.Element {
                 const drawnInput = getInputFromRegionOfInterest(clamped);
                 if (!isValidRegionOfInterestInput(drawnInput)) {
                     notification.error({
-                        message: 'Region of interest must have positive width and height',
+                        message: '感兴趣区域的宽高必须大于0',
                     });
                 } else {
                     updateInput(clamped);
@@ -204,8 +204,8 @@ function RegionOfInterestInputComponent(props: Props): JSX.Element {
     return (
         <div className='cvat-automatic-annotation-region-of-interest-container'>
             <div>
-                <Text>Region of interest</Text>
-                <CVATTooltip title='Defines area of the image where the model will be applied'>
+                <Text>感兴趣区域</Text>
+                <CVATTooltip title='设定模型作用于图像的区域'>
                     <QuestionCircleOutlined className='cvat-info-circle-icon' />
                 </CVATTooltip>
             </div>
@@ -260,13 +260,13 @@ function RegionOfInterestInputComponent(props: Props): JSX.Element {
                 </Col>
                 {canvasInstance && (
                     <Col>
-                        <CVATTooltip title='Draw a region of interest'>
+                        <CVATTooltip title='绘制感兴趣区域'>
                             <Button icon={<Icon component={RectangleIcon} />} onClick={startDrawing} />
                         </CVATTooltip>
                     </Col>
                 )}
                 <Col>
-                    <Button type='link' onClick={() => updateInput(null)}>Clear</Button>
+                    <Button type='link' onClick={() => updateInput(null)}>清除</Button>
                 </Col>
             </Row>
         </div>

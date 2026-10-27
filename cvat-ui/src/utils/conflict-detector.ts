@@ -180,8 +180,9 @@ export function conflictDetector(
         for (const sequence of sequences.filter((seq) => !currentSequences.includes(seq))) {
             for (const existingSequence of flatKeyMapUpdated.sequences) {
                 if (conflict(sequence, existingSequence)) {
-                    const conflictingActions = Object.keys(flatKeyMapUpdated.items).filter((a) => flatKeyMapUpdated.items[a].sequences.includes(existingSequence));
-                    console.warn(`快捷键：${label}的${sequence}与以下快捷键存在冲突：${conflictingActions.join(', ')}`);
+                    const conflictingActions = Object.keys(flatKeyMapUpdated.items)
+                        .filter((a) => flatKeyMapUpdated.items[a].sequences.includes(existingSequence));
+                    console.warn(`快捷键：${sequence}（${label}）与以下快捷键冲突：${conflictingActions.join(', ')}`);
                     conflictingActions.forEach((conflictingAction) => {
                         conflictingItems[conflictingAction] = flatKeyMapUpdated.items[conflictingAction];
                     });

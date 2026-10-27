@@ -142,15 +142,12 @@ class RequestsManager {
                         }
 
                         if (request) {
-                            onUpdate.forEach((update) =>
-                                update(
-                                    new Request({
-                                        ...request.toJSON(),
-                                        status: RQStatus.FAILED,
-                                        message: `无法获取请求 ${requestID} 的状态。${error.toString()}`,
-                                    }),
-                                ),
-                            );
+                            onUpdate
+                                .forEach((update) => update(new Request({
+                                    ...request.toJSON(),
+                                    status: RQStatus.FAILED,
+                                    message: `Could not get a status of the request ${requestID}. ${error.toString()}`,
+                                })));
                         }
 
                         delete this.listening[requestID];

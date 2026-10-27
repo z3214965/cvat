@@ -160,7 +160,9 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                 initialSelectedFormat = 'CVAT for images 1.1';
             }
         }
-        form.setFieldsValue({ selectedFormat: initialSelectedFormat });
+        if (instance) {
+            form.setFieldsValue({ selectedFormat: initialSelectedFormat });
+        }
         setSelectedFormat(initialSelectedFormat);
         setNameTemplate(`dataset_${newInstanceType}_{{id}}`);
         setInstanceType(newInstanceType);

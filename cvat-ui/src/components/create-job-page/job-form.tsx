@@ -141,15 +141,15 @@ function JobForm(props: Props): JSX.Element {
         <Col key={JobFormSection.JOB_TYPE}>
             <Form.Item
                 name='type'
-                label='Job type'
-                rules={[{ required: true, message: 'Please, specify Job type' }]}
+                label='任务类型'
+                rules={[{ required: true, message: '请指定任务类型' }]}
             >
                 <Select
                     virtual={false}
                     className='cvat-select-job-type'
                 >
                     <Select.Option value={JobType.GROUND_TRUTH}>
-                        Ground truth
+                        真值
                     </Select.Option>
                 </Select>
             </Form.Item>
@@ -160,8 +160,8 @@ function JobForm(props: Props): JSX.Element {
         <Col key={JobFormSection.FRAME_SELECTION}>
             <Form.Item
                 name='frameSelectionMethod'
-                label='Frame selection method'
-                rules={[{ required: true, message: 'Please, specify frame selection method' }]}
+                label='帧选取方式'
+                rules={[{ required: true, message: '请指定帧选取方式' }]}
             >
                 <Select
                     virtual={false}
@@ -169,10 +169,10 @@ function JobForm(props: Props): JSX.Element {
                     onChange={setFrameSelectionMethod}
                 >
                     <Select.Option value={FrameSelectionMethod.RANDOM}>
-                        Random
+                        随机
                     </Select.Option>
                     <Select.Option value={FrameSelectionMethod.RANDOM_PER_JOB}>
-                        Random per job
+                        每个任务随机
                     </Select.Option>
                 </Select>
             </Form.Item>
@@ -188,7 +188,7 @@ function JobForm(props: Props): JSX.Element {
                         label={(
                             <Space>
                                 {frameSelectionMethod === FrameSelectionMethod.RANDOM ?
-                                    'Quantity' : 'Quantity per job'}
+                                    '数量' : '单任务数量'}
                                 <CVATTooltip title={description}>
                                     <QuestionCircleOutlined
                                         style={{ opacity: 0.5 }}
@@ -196,7 +196,7 @@ function JobForm(props: Props): JSX.Element {
                                 </CVATTooltip>
                             </Space>
                         )}
-                        rules={[{ required: true, message: 'Please, specify quantity' }]}
+                        rules={[{ required: true, message: '请指定数量' }]}
                     >
                         <InputNumber
                             className='cvat-input-frame-quantity'
@@ -214,7 +214,7 @@ function JobForm(props: Props): JSX.Element {
                                 name='frameCount'
                                 label={(
                                     <Space>
-                                        Frame count
+                                        帧数量
                                         <CVATTooltip title={description}>
                                             <QuestionCircleOutlined
                                                 style={{ opacity: 0.5 }}
@@ -222,7 +222,7 @@ function JobForm(props: Props): JSX.Element {
                                         </CVATTooltip>
                                     </Space>
                                 )}
-                                rules={[{ required: true, message: 'Please, specify frame count' }]}
+                                rules={[{ required: true, message: '请指定帧数量' }]}
                             >
                                 <InputNumber
                                     className='cvat-input-frame-count'
@@ -238,7 +238,7 @@ function JobForm(props: Props): JSX.Element {
                 <Col>
                     <Form.Item
                         name='randomSeed'
-                        label='Seed'
+                        label='随机种子'
                     >
                         <InputNumber
                             className='cvat-input-seed'

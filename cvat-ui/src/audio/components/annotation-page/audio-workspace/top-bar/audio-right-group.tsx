@@ -13,7 +13,7 @@ import notification from 'antd/lib/notification';
 import { FilterIcon, FullscreenIcon, GuideIcon } from 'icons';
 import config from 'config';
 import { Job, JobStage, JobState } from 'cvat-core-wrapper';
-import { Workspace } from 'reducers';
+import { Workspace, WorkspaceCH } from 'reducers';
 
 import MDEditor from '@uiw/react-md-editor';
 import rehypeSanitize from 'rehype-sanitize';
@@ -155,7 +155,7 @@ function AudioRightGroup(props: Props): JSX.Element {
                     value={workspace}
                 >
                     <Select.Option key={Workspace.AUDIO} value={Workspace.AUDIO}>
-                        {Workspace.AUDIO}
+                        {WorkspaceCH[Workspace.AUDIO]}
                     </Select.Option>
                 </Select>
             </div>

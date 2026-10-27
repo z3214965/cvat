@@ -336,7 +336,7 @@ class QualitySettingPermission(OpenPolicyAgentPermission):
         permissions = []
         for scope in cls.get_scopes(request, view, obj):
             if scope in [Scopes.VIEW, Scopes.UPDATE]:
-                obj = cast("QualitySettings", obj)
+                obj = cast(QualitySettings, obj)
                 if scope == Scopes.VIEW:
                     permissions.append(cls.create_scope_view(request, obj, iam_context=iam_context))
                 else:
@@ -418,7 +418,7 @@ class QualityRequirementPermission(OpenPolicyAgentPermission):
             elif scope == cls.Scopes.LIST and isinstance(obj, Project):
                 permissions.append(ProjectPermission.create_scope_view(request, obj, iam_context))
             elif scope == cls.Scopes.VIEW:
-                requirement = cast("QualityRequirement", obj)
+                requirement = cast(QualityRequirement, obj)
                 permissions.append(
                     QualitySettingPermission.create_scope_view(
                         request,
@@ -434,7 +434,7 @@ class QualityRequirementPermission(OpenPolicyAgentPermission):
 
                     settings_obj = db_utils.get_or_404(QualitySettings, int(settings_id))
                 else:
-                    settings_obj = cast("QualityRequirement", obj).settings
+                    settings_obj = cast(QualityRequirement, obj).settings
 
                 permissions.append(
                     QualitySettingPermission.create_scope_update(

@@ -5,10 +5,10 @@
 
 from __future__ import annotations
 
+import operator
 from abc import ABCMeta, abstractmethod
 from collections.abc import Sequence
 from functools import cached_property, reduce
-import operator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TypeAlias
 
@@ -23,7 +23,6 @@ from cvat.apps.organizations.models import Membership, Organization
 from cvat.utils.http import make_requests_session
 
 from .utils import add_opa_rules_path
-
 
 if TYPE_CHECKING:
     from rest_framework.viewsets import ViewSet

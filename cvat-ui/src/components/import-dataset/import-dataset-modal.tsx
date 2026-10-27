@@ -26,7 +26,8 @@ import { importActions, importDatasetAsync } from 'actions/import-actions';
 import Space from 'antd/lib/space';
 import Switch from 'antd/lib/switch';
 import {
-    getCore, Job, Loader, Project, Storage, StorageData, StorageLocation, Task, DimensionType,
+    getCore, Job, Loader, Project, Storage, StorageData, StorageLocation,
+    Task, DimensionType,
 } from 'cvat-core-wrapper';
 import StorageField from 'components/storage/storage-field';
 import { createAction, ActionUnion } from 'utils/redux';

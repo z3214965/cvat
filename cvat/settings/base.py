@@ -16,12 +16,12 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import ast
-from datetime import timedelta
-from enum import Enum, IntEnum
 import os
-from pathlib import Path
 import tempfile
 import urllib
+from datetime import timedelta
+from enum import Enum, IntEnum
+from pathlib import Path
 
 from attr.converters import to_bool
 from corsheaders.defaults import default_headers
@@ -30,7 +30,6 @@ from logstash_async.constants import constants as logstash_async_constants
 
 from cvat import __version__
 from cvat.apps.iam.password_validation import DEFAULT_MIN_PASSWORD_LENGTH
-
 
 # Build paths inside the project like this: BASE_DIR / ...
 BASE_DIR = Path(os.environ.get("CVAT_BASE_DIR", Path(__file__).parents[2]))
@@ -56,7 +55,7 @@ def generate_secret_key():
 
     with tempfile.NamedTemporaryFile(mode="wt", dir=keys_dir, prefix=secret_key_fname + ".") as f:
         chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
-        f.write(f"SECRET_KEY = '{get_random_string(50, chars)}'\n")
+        f.write("SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
 
         # Make sure the file contents are written before we link to it
         # from the final location.
@@ -174,6 +173,8 @@ def parse_num_proxies(value: str | None) -> int | None:
     return num_proxies
 
 
+# NOTE @sosov: DRF does not have a max_page_size setting out of the box
+REST_FRAMEWORK_MAX_PAGE_SIZE = 500
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
@@ -453,6 +454,13 @@ PERIODIC_RQ_JOBS = [
     },
     {
         "queue": CVAT_QUEUES.CLEANING.value,
+        "id": "cron_instance_tmp_directories_cleanup",
+        "func": "cvat.apps.dataset_manager.cron.cleanup_instance_tmp_directories",
+        # Run once a day
+        "cron_string": "0 20 * * *",
+    },
+    {
+        "queue": CVAT_QUEUES.CLEANING.value,
         "id": "clear_unusable_access_tokens",
         "func": "cvat.apps.access_tokens.cron.clear_unusable_access_tokens",
         "cron_string": "0 0 * * 0",
@@ -661,6 +669,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 CORS_EXPOSE_HEADERS = [
     "Content-Range",
+    "X-Checksum",
+    "X-Chunk-Size",
+    "X-Updated-Date",
 ]
 
 TUS_MAX_FILE_SIZE = 26843545600  # 25gb
@@ -738,6 +749,7 @@ SPECTACULAR_SETTINGS = {
         "StorageType": "cvat.apps.engine.models.StorageChoice",
         "SortingMethod": "cvat.apps.engine.models.SortingMethod",
         "WebhookType": "cvat.apps.webhooks.models.WebhookTypeChoice",
+        "AllWebhookType": "cvat.apps.webhooks.serializers.AllWebhookTypeChoice",
         "WebhookContentType": "cvat.apps.webhooks.models.WebhookContentTypeChoice",
         "RequestStatus": "cvat.apps.redis_handler.serializers.RequestStatus",
         "ValidationMode": "cvat.apps.engine.models.ValidationMode",
@@ -746,7 +758,7 @@ SPECTACULAR_SETTINGS = {
         "AnnotationConflictSeverity": "cvat.apps.quality_control.models.AnnotationConflictSeverity",
         "AnnotationConflictAnnotationType": "cvat.apps.quality_control.models.AnnotationType",
         "MismatchingAnnotationKind": "cvat.apps.quality_control.models.MismatchingAnnotationKind",
-        "QualityTargetMetric": "cvat.apps.quality_control.models.QualityTargetMetricType",
+        "QualityTargetMetric": "cvat.apps.quality_control.models.QUALITY_TARGET_METRIC_CHOICES",
         "QualityPointSizeBase": "cvat.apps.quality_control.models.PointSizeBase",
         "QualityReportTarget": "cvat.apps.quality_control.models.QualityReportTarget",
     },
@@ -815,7 +827,6 @@ BUCKET_CONTENT_MAX_PAGE_SIZE = 500
 
 IMPORT_CACHE_FAILED_TTL = timedelta(days=30)
 IMPORT_CACHE_SUCCESS_TTL = timedelta(hours=1)
-IMPORT_CACHE_CLEAN_DELAY = timedelta(hours=12)
 
 ASSET_MAX_SIZE_MB = 10
 ASSET_SUPPORTED_TYPES = ("image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf")
@@ -831,11 +842,12 @@ EMAIL_BACKEND = None
 
 ONE_RUNNING_JOB_IN_QUEUE_PER_USER = to_bool(os.getenv("ONE_RUNNING_JOB_IN_QUEUE_PER_USER", False))
 
+EMAIL_VALIDATORS = []
+
 # How many chunks can be prepared simultaneously during task creation in case the cache is not used
 CVAT_CONCURRENT_CHUNK_PROCESSING = int(os.getenv("CVAT_CONCURRENT_CHUNK_PROCESSING", 1))
 
 from cvat.rq_patching import patch_rq
-
 
 patch_rq()
 

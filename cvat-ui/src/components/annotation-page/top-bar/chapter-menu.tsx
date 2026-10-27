@@ -72,14 +72,12 @@ function ChapterMenu(props: Readonly<Props>): JSX.Element {
             placement='bottom'
             className='cvat-player-chapter-menu'
         >
-
             <CvatTooltip title='选择章节'>
                 <Icon
                     className='cvat-player-chapters-menu-button'
                     component={ChapterMenuIcon}
                 />
             </CvatTooltip>
-
         </Popover>
     );
 }

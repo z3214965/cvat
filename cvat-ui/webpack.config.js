@@ -83,25 +83,23 @@ module.exports = (env, argv = {}) => {
                 'Cross-Origin-Embedder-Policy': 'credentialless',
                 'Service-Worker-Allowed': '/',
             },
-            proxy: [
-                {
-                    context: (param) =>
-                        param.match(
-                            /\/api\/.*|analytics\/.*|static\/.*|admin(?:\/(.*))?.*|profiler(?:\/(.*))?.*|documentation\/.*|django-rq(?:\/(.*))?/gm,
-                        ),
-                    target: env && env.API_URL,
-                    secure: false,
-                    changeOrigin: true,
-                    onProxyReq: (proxyReq) => {
-                        // proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
-                        // 👇 关键：把 Origin 伪装成远程服务器地址，解决跨域问题
-                        const targetUrl = new URL(env.API_URL);
-                        proxyReq.setHeader('Origin', targetUrl.origin);
-                        proxyReq.setHeader('Referer', targetUrl.origin);
-                        proxyReq.setHeader('X-FORWARDED-HOST', targetUrl.host);
-                    },
+            proxy: [{
+                context: (param) =>
+                    param.match(
+                        /\/api\/.*|analytics\/.*|static\/.*|admin(?:\/(.*))?.*|profiler(?:\/(.*))?.*|documentation\/.*|django-rq(?:\/(.*))?/gm,
+                    ),
+                target: env && env.API_URL,
+                secure: false,
+                changeOrigin: true,
+                onProxyReq: (proxyReq) => {
+                    proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
+                    // 👇 关键：把 Origin 伪装成远程服务器地址，解决跨域问题
+                    // const targetUrl = new URL(env.API_URL);
+                    // proxyReq.setHeader('Origin', targetUrl.origin);
+                    // proxyReq.setHeader('Referer', targetUrl.origin);
+                    // proxyReq.setHeader('X-FORWARDED-HOST', targetUrl.host);
                 },
-            ],
+            }],
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
@@ -118,7 +116,13 @@ module.exports = (env, argv = {}) => {
                 '@root': path.resolve(__dirname, 'src'),
                 '@modules': path.resolve(__dirname, '..', 'node_modules'),
             },
-            modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+            modules: [
+                path.resolve(__dirname, 'src'),
+                'node_modules',
+                // Fallback for plugins symlinked from outside the CVAT source tree. Keep this after
+                // 'node_modules' to preserve standard resolution of nested package dependencies.
+                path.resolve(__dirname, '..', 'node_modules'),
+            ],
         },
         module: {
             rules: [

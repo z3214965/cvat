@@ -4,9 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 
+import math
 from collections.abc import Sequence
 from functools import partial
-import math
 from typing import Any
 from unittest import mock
 

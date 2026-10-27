@@ -11,7 +11,9 @@ import Modal from 'antd/lib/modal';
 
 import { useTranslation } from 'react-i18next';
 
-import { Organization, Project, User } from 'cvat-core-wrapper';
+import {
+    DimensionType, Organization, Project, User,
+} from 'cvat-core-wrapper';
 import { useDropdownEditField, usePlugins } from 'utils/hooks';
 import { CombinedState } from 'reducers';
 import { deleteProjectAsync, getProjectsAsync, updateProjectAsync } from 'actions/projects-actions';

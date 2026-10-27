@@ -280,7 +280,7 @@ export function getUpdatedLabels(oldLabels: Label[], newLabels: Label[]): Label[
         oldLabels.some((label) => !(label instanceof Label)) ||
         newLabels.some((label) => !(label instanceof Label))
     ) {
-        throw new ArgumentError('Old and new labels must be arrays of Labels');
+        throw new ArgumentError('旧标签与新标签必须为标签对象数组');
     }
 
     const oldIDs = new Set(oldLabels.map((label) => label.id));

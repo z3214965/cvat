@@ -32,6 +32,7 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { fetchAnnotationsAsync } from 'actions/annotation-actions';
 import { clamp } from 'utils/math';
 import CVATTooltip from 'components/common/cvat-tooltip';
+import CVATMarkdown from 'components/common/cvat-markdown';
 
 const core = getCore();
 
@@ -46,7 +47,7 @@ interface State {
     frameTo: number;
     actionParameters: Record<string, Record<string, string>>;
     modalVisible: boolean;
-    targetObjectState?: ObjectState | null;
+    targetObjectStates?: ObjectState[] | null;
 }
 
 enum ReducerActionType {
@@ -58,7 +59,7 @@ enum ReducerActionType {
     CANCEL_ACTION = 'CANCEL_ACTION',
     UPDATE_FRAME_FROM = 'UPDATE_FRAME_FROM',
     UPDATE_FRAME_TO = 'UPDATE_FRAME_TO',
-    UPDATE_TARGET_OBJECT_STATE = 'UPDATE_TARGET_OBJECT_STATE',
+    UPDATE_TARGET_OBJECT_STATES = 'UPDATE_TARGET_OBJECT_STATES',
     UPDATE_ACTION_PARAMETER = 'UPDATE_ACTION_PARAMETER',
     SET_VISIBLE = 'SET_VISIBLE',
 }
@@ -88,8 +89,8 @@ export const reducerActions = {
     updateFrameTo: (frameTo: number) => (
         createAction(ReducerActionType.UPDATE_FRAME_TO, { frameTo })
     ),
-    updateTargetObjectState: (targetObjectState: ObjectState | null) => (
-        createAction(ReducerActionType.UPDATE_TARGET_OBJECT_STATE, { targetObjectState })
+    updateTargetObjectStates: (targetObjectStates: ObjectState[] | null) => (
+        createAction(ReducerActionType.UPDATE_TARGET_OBJECT_STATES, { targetObjectStates })
     ),
     updateActionParameter: (name: string, value: string) => (
         createAction(ReducerActionType.UPDATE_ACTION_PARAMETER, { name, value })
@@ -110,7 +111,7 @@ const defaultState = {
     frameTo: 0,
     actionParameters: {},
     modalVisible: true,
-    targetObjectState: null,
+    targetObjectStates: null,
 };
 
 const reducer = (state: State = { ...defaultState }, action: ActionUnion<typeof reducerActions>): State => {
@@ -126,9 +127,11 @@ const reducer = (state: State = { ...defaultState }, action: ActionUnion<typeof 
 
     if (action.type === ReducerActionType.SET_ACTIVE_ANNOTATIONS_ACTION) {
         const { activeAction } = action.payload;
-        const { targetObjectState } = state;
+        const { targetObjectStates } = state;
 
-        if (!targetObjectState || activeAction.isApplicableForObject(targetObjectState)) {
+        if (!targetObjectStates?.length || targetObjectStates.every(
+            (targetObjectState: ObjectState): boolean => activeAction.isApplicableForObject(targetObjectState),
+        )) {
             return {
                 ...state,
                 activeAction,
@@ -208,19 +211,23 @@ const reducer = (state: State = { ...defaultState }, action: ActionUnion<typeof 
         };
     }
 
-    if (action.type === ReducerActionType.UPDATE_TARGET_OBJECT_STATE) {
-        const { targetObjectState } = action.payload;
+    if (action.type === ReducerActionType.UPDATE_TARGET_OBJECT_STATES) {
+        const { targetObjectStates } = action.payload;
         let { activeAction } = state;
 
-        if (activeAction && targetObjectState && !activeAction.isApplicableForObject(targetObjectState)) {
-            const filtered = state.actions.filter((_action) => _action.isApplicableForObject(targetObjectState));
+        if (activeAction && targetObjectStates?.some(
+            (targetObjectState: ObjectState): boolean => !activeAction.isApplicableForObject(targetObjectState),
+        )) {
+            const filtered = state.actions.filter((_action) => targetObjectStates.every(
+                (targetObjectState: ObjectState): boolean => _action.isApplicableForObject(targetObjectState),
+            ));
             activeAction = filtered[0] ?? null;
         }
 
         return {
             ...state,
             activeAction,
-            targetObjectState: action.payload.targetObjectState,
+            targetObjectStates,
         };
     }
 
@@ -240,7 +247,7 @@ const componentStorage = createStore(reducer, {
     frameTo: 0,
     actionParameters: {},
     modalVisible: true,
-    targetObjectState: null,
+    targetObjectStates: null,
 });
 
 function ActionParameterComponent(props: ActionParameterProps & {
@@ -305,25 +312,27 @@ function ActionParameterComponent(props: ActionParameterProps & {
 
 interface Props {
     onClose: () => void;
-    targetObjectState?: ObjectState;
+    targetObjectStates?: ObjectState[];
     defaultAnnotationAction?: string;
 }
 
 function AnnotationsActionsModalContent(props: Props): JSX.Element {
-    const { onClose, targetObjectState: defaultTargetObjectState, defaultAnnotationAction } = props;
+    const { onClose, targetObjectStates: defaultTargetObjectStates, defaultAnnotationAction } = props;
     const dispatch = useDispatch();
     const storage = getCVATStore();
     const cancellationRef = useRef<boolean>(false);
     const {
-        actions, activeAction, fetching, targetObjectState, cancelled,
+        actions, activeAction, fetching, targetObjectStates, cancelled,
         progress, progressMessage, frameFrom, frameTo, actionParameters, modalVisible,
     } = useSelector((state: State) => ({ ...state }), shallowEqual);
 
-    const filteredActions = targetObjectState ? actions
-        .filter((_action) => _action.isApplicableForObject(targetObjectState)) : actions;
+    const filteredActions = targetObjectStates?.length ? actions.filter((_action) => targetObjectStates.every(
+        (targetObjectState: ObjectState): boolean => _action.isApplicableForObject(targetObjectState),
+    )) : actions;
     const jobInstance = storage.getState().annotation.job.instance as Job;
     const is1D = jobInstance.dimension === DimensionType.DIMENSION_1D;
-    const currentFrameAction = activeAction instanceof BaseCollectionAction || targetObjectState !== null;
+    const currentFrameAction = activeAction instanceof BaseCollectionAction || !!targetObjectStates?.length;
+    const actionDescriptions = activeAction?.descriptions ?? [];
 
     useEffect(() => {
         if (is1D) {
@@ -338,7 +347,11 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                 const defaultAction = list.find((action) => action.name === defaultAnnotationAction);
                 if (
                     defaultAction &&
-                    (!defaultTargetObjectState || defaultAction.isApplicableForObject(defaultTargetObjectState))
+                    (!defaultTargetObjectStates?.length || defaultTargetObjectStates.every(
+                        (targetObjectState: ObjectState): boolean => defaultAction.isApplicableForObject(
+                            targetObjectState,
+                        ),
+                    ))
                 ) {
                     dispatch(reducerActions.setActiveAnnotationsAction(defaultAction));
                 }
@@ -347,7 +360,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
             dispatch(reducerActions.setVisible(true));
             dispatch(reducerActions.updateFrameFrom(jobInstance.startFrame));
             dispatch(reducerActions.updateFrameTo(jobInstance.stopFrame));
-            dispatch(reducerActions.updateTargetObjectState(defaultTargetObjectState ?? null));
+            dispatch(reducerActions.updateTargetObjectStates(defaultTargetObjectStates ?? null));
         });
     }, [jobInstance]);
 
@@ -365,7 +378,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                 onOk={() => dispatch(reducerActions.setVisible(false))}
             >
                 <Alert
-                    message='Annotation actions are not available for audio jobs'
+                    message='音频任务暂不支持标注操作'
                     type='info'
                     showIcon
                 />
@@ -387,11 +400,15 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                 <Col span={24} className='cvat-action-runner-info'>
                     <Alert
                         message={(
-                            targetObjectState ? (
-                                <Text> 所选操作将应用于当前对象 </Text>
+                            targetObjectStates?.length ? (
+                                <Text>
+                                    {targetObjectStates.length === 1 ?
+                                        '选中操作将应用到当前对象' :
+                                        `选中操作将应用到 ${targetObjectStates.length} 个已选对象`}
+                                </Text>
                             ) : (
                                 <div>
-                                    <Text>各项操作可用于运行对应的算法 </Text>
+                                    <Text>操作可用于在……上运行指定算法</Text>
                                     <Text strong>
                                         <a
                                             target='_blank'
@@ -401,7 +418,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                             过滤
                                         </a>
                                     </Text>
-                                    <Text> 标注。 </Text>
+                                    <Text>标注。</Text>
                                 </div>
                             )
                         )}
@@ -443,12 +460,26 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                     </Row>
                 </Col>
 
+                {actionDescriptions.map(({ message, type }, index) => (
+                    <Col
+                        key={`${type}-${index}`}
+                        span={24}
+                        className='cvat-action-runner-description'
+                    >
+                        <Alert
+                            message={message}
+                            type={type}
+                            showIcon
+                        />
+                    </Col>
+                ))}
+
                 {activeAction && !currentFrameAction ? (
                     <>
                         <Col span={24} className='cvat-action-runner-frames'>
                             <Row>
                                 <Col span={24}>
-                                    <Text strong>指定要应用该操作的帧 </Text>
+                                    <Text strong>指定要应用该操作的帧</Text>
                                     <hr />
                                 </Col>
                                 <Col span={24}>
@@ -658,12 +689,12 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                 };
 
                                 const currentFrame = storage.getState().annotation.player.frame.number;
-                                const actionPromise = targetObjectState ? core.actions.call(
+                                const actionPromise = targetObjectStates?.length ? core.actions.call(
                                     jobInstance,
                                     activeAction,
                                     actionParameters[activeAction.name],
                                     currentFrame,
-                                    [targetObjectState],
+                                    targetObjectStates,
                                     updateProgressWrapper,
                                     () => cancellationRef.current,
                                 ) : core.actions.run(
@@ -681,7 +712,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                     if (!cancellationRef.current) {
                                         canvasInstance.setup(frameData, []);
                                         storage.dispatch(fetchAnnotationsAsync());
-                                        if (targetObjectState !== null) {
+                                        if (targetObjectStates?.length) {
                                             onClose();
                                         }
                                     }
@@ -690,7 +721,7 @@ function AnnotationsActionsModalContent(props: Props): JSX.Element {
                                 }).catch((error: unknown) => {
                                     if (error instanceof Error) {
                                         notification.error({
-                                            message: error.message,
+                                            message: <CVATMarkdown>{error.message}</CVATMarkdown>,
                                         });
                                     }
                                 });
@@ -709,9 +740,11 @@ const MemoizedAnnotationsActionsModalContent = React.memo(AnnotationsActionsModa
 
 export function openAnnotationsActionModal({
     defaultObjectState,
+    defaultObjectStates,
     defaultAnnotationAction,
 }: {
     defaultObjectState?: ObjectState,
+    defaultObjectStates?: ObjectState[],
     defaultAnnotationAction?: string,
 } = {}): void {
     window.document.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -719,10 +752,11 @@ export function openAnnotationsActionModal({
     const div = window.document.createElement('div');
     window.document.body.append(div);
     const root = createRoot(div);
+    const targetObjectStates = defaultObjectStates ?? (defaultObjectState ? [defaultObjectState] : undefined);
     root.render(
         <Provider store={componentStorage}>
             <MemoizedAnnotationsActionsModalContent
-                targetObjectState={defaultObjectState}
+                targetObjectStates={targetObjectStates}
                 defaultAnnotationAction={defaultAnnotationAction}
                 onClose={() => {
                     root.unmount();

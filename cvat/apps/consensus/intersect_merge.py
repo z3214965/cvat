@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
+import itertools
 from abc import ABCMeta, abstractmethod
 from collections.abc import Collection, Iterable, Sequence
-import itertools
 from typing import ClassVar, TypeAlias
 
 import attrs
@@ -16,7 +16,7 @@ from datumaro.util.annotation_util import mean_bbox
 from datumaro.util.attrs_util import ensure_cls
 
 from cvat.apps.dataset_manager.bindings import CVAT_INTERNAL_ATTRIBUTES
-from cvat.apps.quality_control.annotation_matching import DistanceComparator, segment_iou
+from cvat.apps.quality_control.backends.datumaro.matching import DistanceComparator, segment_iou
 from cvat.apps.quality_control.comparison_report import ComparisonParameters
 
 
@@ -345,7 +345,7 @@ class ShapeMatcher(AnnotationMatcher, metaclass=ABCMeta):
                     if _has_same_source(cluster, i):
                         continue
 
-                    if cluster_dist > 0 and not _is_close_enough(cluster, i):
+                    if 0 < cluster_dist and not _is_close_enough(cluster, i):
                         # if positive, cluster_dist and this annotation isn't close enough
                         # with other annotations in the cluster
                         continue

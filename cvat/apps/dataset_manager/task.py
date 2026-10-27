@@ -3,13 +3,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+import io
+import itertools
 from collections import OrderedDict, defaultdict
 from collections.abc import Callable, Generator, Sequence
 from contextlib import nullcontext
 from copy import deepcopy
 from enum import Enum
-import io
-import itertools
 
 from datumaro.components.errors import DatasetError, DatasetImportError, DatasetNotFoundError
 from django.conf import settings
@@ -36,7 +36,6 @@ from cvat.apps.engine.utils import av_scan_paths, take_by
 from cvat.apps.events.handlers import handle_annotations_change
 from cvat.apps.profiler import silk_profile
 from cvat.utils import django_database as db_utils
-
 
 dlogger = DatasetLogManager()
 
@@ -106,7 +105,7 @@ def merge_table_rows(rows, keys_for_merge, field_id):
     # accordance with keys_for_merge structure.
     for row in rows:
         row_id = row[field_id]
-        if row_id not in merged_rows:
+        if not row_id in merged_rows:
             merged_rows[row_id] = dotdict(row)
             for key in keys_for_merge:
                 merged_rows[row_id][key] = []
@@ -134,7 +133,9 @@ def _validate_input_annotations(
     if annotations.tracks and db_data.validation_mode == models.ValidationMode.GT_POOL:
         # Only tags and shapes can be used in tasks with GT pool
         raise ValidationError(
-            f"Tracks are not supported when task validation mode is {models.ValidationMode.GT_POOL}"
+            "Tracks are not supported when task validation mode is {}".format(
+                models.ValidationMode.GT_POOL
+            )
         )
 
     if annotations.intervals:
@@ -263,11 +264,11 @@ class JobAnnotation:
 
     def _validate_attribute_for_existence(self, db_attr_val, label_id, attr_type):
         if db_attr_val.spec_id not in self.db_attributes[label_id][attr_type]:
-            raise ValidationError(f"spec_id `{db_attr_val.spec_id}` is invalid")
+            raise ValidationError("spec_id `{}` is invalid".format(db_attr_val.spec_id))
 
     def _validate_label_for_existence(self, label_id):
         if label_id not in self.db_labels:
-            raise ValidationError(f"label_id `{label_id}` is invalid")
+            raise ValidationError("label_id `{}` is invalid".format(label_id))
 
     def _add_missing_shape(self, track, first_shape):
         if first_shape["type"] == "skeleton":
@@ -921,7 +922,7 @@ class JobAnnotation:
             "interval_id",
         )
 
-        def serialize(annotations: dict) -> Generator[dict]:
+        def serialize(annotations: dict) -> Generator[dict, None, None]:
             serializer = serializers.LabeledIntervalSerializerFromDB(
                 list(annotations.values()), many=True
             )
@@ -1092,7 +1093,9 @@ class TaskAnnotation:
         if data.tracks:
             # Only tags and shapes are supported in tasks with GT pool
             raise ValidationError(
-                f"Tracks are not supported when task validation mode is {models.ValidationMode.GT_POOL}"
+                "Tracks are not supported when task validation mode is {}".format(
+                    models.ValidationMode.GT_POOL
+                )
             )
 
         gt_job = self.db_task.gt_job

@@ -13,7 +13,6 @@ from cvat.apps.iam.models import User
 from cvat.apps.organizations.models import Organization
 from cvat.utils.django_database.utils import _ModelT
 
-
 _USER_DELETION_VALIDATORS = []
 
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Icon from '@ant-design/icons';
 import Popover from 'antd/lib/popover';
 import Button from 'antd/lib/button';
@@ -27,34 +27,32 @@ export interface Props {
     extendRegionShortkey: string;
     labels: Label[];
     activeLabelId: number | null;
-    updateActiveControl(activeControl: ActiveControl): void;
+    onUpdateActiveControl(activeControl: ActiveControl): void;
     onSetActiveLabel(labelId: number | null): void;
     onExtendRegion(labelId: number): void;
 }
 
 const componentShortcuts = {
     CREATE_AUDIO_REGION: {
-        name: 'Create audio interval',
-        description: 'Enable audio interval creation mode — drag on waveform to create an interval',
+        name: '创建音频区间',
+        description: '开启音频区间创建模式 — 在波形图上拖动以创建区间',
         sequences: ['n'],
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
     },
     RECORD_AUDIO_REGION: {
-        name: 'Record audio interval',
+        name: '录制音频区间',
         description: (
-            'Toggle live audio interval recording. ' +
-            'First press marks the interval start at the current playback position; ' +
-            'pressing again or pausing finalizes the end.'
+            '切换实时音频区间录制功能。' +
+            '首次按下，在当前播放位置标记区间起点；' +
+            '再次按下或暂停音频，即可确定区间终点。'
         ),
         sequences: ['shift+n'],
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
     },
     EXTEND_AUDIO_REGION_FROM_LAST: {
-        name: 'Extend interval from last region',
+        name: '从上个区间延伸创建区间',
         description: (
-            'Create a new audio interval that starts at the end of the most recently ' +
-            'added region (or at the audio start if none exists) and ends at the ' +
-            'current playback position.'
+            '新建音频区间：起始点为最近创建区间的末尾；如果尚无区间，则从音频开头开始，结束点为当前播放位置。'
         ),
         sequences: ['shift+e'],
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
@@ -71,70 +69,38 @@ function IntervalRegionControl(props: Props): JSX.Element {
         extendRegionShortkey,
         labels,
         activeLabelId,
-        updateActiveControl,
+        onUpdateActiveControl,
         onSetActiveLabel,
         onExtendRegion,
     } = props;
 
     const { keyMap } = useSelector((state: CombinedState) => state.shortcuts);
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const [selectedLabelId, setSelectedLabelId] = useState<number | null>(
-        activeLabelId ?? (labels.length ? labels[0].id ?? null : null),
-    );
 
     const noLabels = labels.length === 0;
     const drawing = activeControl === ActiveControl.AUDIO_REGION_CREATE;
     const recording = activeControl === ActiveControl.AUDIO_REGION_RECORD;
     const isActive = drawing || recording;
 
-    useEffect(() => {
-        if (selectedLabelId === null && labels.length) {
-            setSelectedLabelId(activeLabelId ?? labels[0].id ?? null);
-        }
-    }, [activeLabelId, labels, selectedLabelId]);
+    const createUpdateActiveControlHandler = (nextControl: ActiveControl): (() => void) => (): void => {
+        if (noLabels || activeLabelId === null) return;
 
-    const getLabelId = (): number | null => selectedLabelId ?? activeLabelId ?? labels[0]?.id ?? null;
-    const activateLabel = (labelId: number): void => {
-        onSetActiveLabel(labelId);
-        setSelectedLabelId(labelId);
-    };
-
-    const drawInterval = (): void => {
-        if (noLabels) return;
-
-        const labelId = getLabelId();
-        if (labelId === null) return;
-
-        activateLabel(labelId);
-        updateActiveControl(ActiveControl.AUDIO_REGION_CREATE);
+        onUpdateActiveControl(nextControl);
         setPopoverOpen(false);
     };
 
-    const recordInterval = (): void => {
-        if (noLabels) return;
-
-        const labelId = getLabelId();
-        if (labelId === null) return;
-
-        activateLabel(labelId);
-        updateActiveControl(ActiveControl.AUDIO_REGION_RECORD);
-        setPopoverOpen(false);
-    };
-
+    const drawInterval = createUpdateActiveControlHandler(ActiveControl.AUDIO_REGION_CREATE);
+    const recordInterval = createUpdateActiveControlHandler(ActiveControl.AUDIO_REGION_RECORD);
     const extendInterval = (): void => {
-        if (noLabels || recording) return;
+        if (noLabels || recording || activeLabelId === null) return;
 
-        const labelId = getLabelId();
-        if (labelId === null) return;
-
-        activateLabel(labelId);
-        onExtendRegion(labelId);
+        onExtendRegion(activeLabelId);
         setPopoverOpen(false);
     };
 
     const stopActiveIntervalControl = (): void => {
         if (isActive) {
-            updateActiveControl(ActiveControl.CURSOR);
+            onUpdateActiveControl(ActiveControl.CURSOR);
             setPopoverOpen(false);
         }
     };
@@ -185,12 +151,12 @@ function IntervalRegionControl(props: Props): JSX.Element {
         <div className='cvat-audio-interval-region-popover-content'>
             <Row justify='start'>
                 <Col>
-                    <Text className='cvat-text-color' strong>Audio interval</Text>
+                    <Text className='cvat-text-color' strong>音频区间</Text>
                 </Col>
             </Row>
             <Row justify='start' className='cvat-audio-interval-popover-label-row'>
                 <Col>
-                    <Text className='cvat-text-color'>Label</Text>
+                    <Text className='cvat-text-color'>标签</Text>
                 </Col>
             </Row>
             <Row justify='center'>
@@ -198,8 +164,12 @@ function IntervalRegionControl(props: Props): JSX.Element {
                     <LabelSelector
                         style={{ width: '100%' }}
                         labels={labels}
-                        value={selectedLabelId}
-                        onChange={(label: Label) => setSelectedLabelId(label.id ?? null)}
+                        value={activeLabelId}
+                        onChange={(label: Label) => {
+                            if (label.id !== undefined) {
+                                onSetActiveLabel(label.id);
+                            }
+                        }}
                     />
                 </Col>
             </Row>
@@ -207,28 +177,28 @@ function IntervalRegionControl(props: Props): JSX.Element {
                 <Col span={8}>
                     {renderAction(
                         'Draw',
-                        'Draw an interval on the waveform',
+                        '在波形图上绘制区间',
                         createRegionShortkey,
                         drawInterval,
-                        selectedLabelId === null,
+                        activeLabelId === null,
                     )}
                 </Col>
                 <Col span={8}>
                     {renderAction(
                         'Record',
-                        'Record an interval from playback position',
+                        '从当前播放位置录制区间',
                         recordRegionShortkey,
                         recordInterval,
-                        selectedLabelId === null,
+                        activeLabelId === null,
                     )}
                 </Col>
                 <Col span={8}>
                     {renderAction(
                         'Extend',
-                        'Create an interval from the previous interval end to current time',
+                        '从上一区间末尾到当前时间创建区间',
                         extendRegionShortkey,
                         extendInterval,
-                        selectedLabelId === null || recording,
+                        activeLabelId === null || recording,
                     )}
                 </Col>
             </Row>
@@ -252,8 +222,8 @@ function IntervalRegionControl(props: Props): JSX.Element {
                 <CVATTooltip
                     title={
                         noLabels ?
-                            'Add a label to the task to create intervals' :
-                            'Audio interval tools'
+                            '请为任务添加标签后才可创建区间' :
+                            '音频区间工具'
                     }
                     placement='right'
                 >

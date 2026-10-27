@@ -16,8 +16,9 @@ import {
     showStatistics as showStatisticsAction,
 } from 'actions/annotation-actions';
 import {
-    AudioSeekIntent, audioRedoAsync, audioUndoAsync, requestAudioSeekByIntent, toggleAudioPlayback,
+    audioActions, audioRedoAsync, audioUndoAsync, toggleAudioPlayback,
 } from 'actions/audio-actions';
+import type { AudioSeekRequest } from 'actions/audio-actions';
 import AudioTopBarComponent from 'audio/components/annotation-page/audio-workspace/top-bar/audio-top-bar';
 import { Job } from 'cvat-core-wrapper';
 import { CombinedState, Workspace } from 'reducers';
@@ -51,7 +52,7 @@ interface DispatchToProps {
     setForceExitAnnotationFlag(forceExit: boolean): void;
     changeWorkspace(workspace: Workspace): void;
     onAudioPlayPause(): void;
-    onAudioSeek(intent: AudioSeekIntent): void;
+    onAudioSeek(request: AudioSeekRequest): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -128,8 +129,8 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onAudioPlayPause(): void {
             dispatch(toggleAudioPlayback());
         },
-        onAudioSeek(intent: AudioSeekIntent): void {
-            dispatch(requestAudioSeekByIntent(intent));
+        onAudioSeek(request: AudioSeekRequest): void {
+            dispatch(audioActions.seekAudio(request));
         },
     };
 }
@@ -158,7 +159,7 @@ class AudioTopBarContainer extends React.PureComponent<Props> {
                 location.pathname !== `/tasks/${taskID}/jobs/${jobID}` &&
                 !forceExit
             ) {
-                return 'You have unsaved changes, please confirm leaving this page.';
+                return '您有尚未保存的修改，确认要离开此页面吗？';
             }
 
             if (forceExit) {
@@ -211,7 +212,7 @@ class AudioTopBarContainer extends React.PureComponent<Props> {
 
         writeLatestFrame(jobInstance.id, frameNumber);
         if (jobInstance.annotations.hasUnsavedChanges() && !forceExit) {
-            const confirmationMessage = 'You have unsaved changes, please confirm leaving this page.';
+            const confirmationMessage = '您存在未保存的更改，请确认是否离开当前页面。';
             // eslint-disable-next-line no-param-reassign
             event.returnValue = confirmationMessage;
             return confirmationMessage;

@@ -185,8 +185,8 @@ function DetectorRunner(props: Props): JSX.Element {
             {isDetector && (
                 <div className='cvat-detector-runner-threshold-wrapper'>
                     <div>
-                        <Text>Threshold</Text>
-                        <CVATTooltip title='Minimum confidence threshold for detections. Leave empty to use the default value specified in the model settings'>
+                        <Text>置信度阈值</Text>
+                        <CVATTooltip title='检测结果的最低置信度阈值。留空则使用模型设置中指定的默认值'>
                             <QuestionCircleOutlined className='cvat-info-circle-icon' />
                         </CVATTooltip>
                     </div>

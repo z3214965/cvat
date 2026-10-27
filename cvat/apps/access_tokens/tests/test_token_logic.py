@@ -57,7 +57,7 @@ class AccessTokenAutomationTest(ApiTestBase):
             token_id = response.json()["id"]
 
         response = self._post_request(
-            "/api/auth/access_tokens", user=self.admin, data={"name": "test extra token"}
+            "/api/auth/access_tokens", user=self.admin, data={"name": f"test extra token"}
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(b"You have reached the maximum allowed number" in response.content)
@@ -67,7 +67,7 @@ class AccessTokenAutomationTest(ApiTestBase):
 
         # Revoked tokens should not be counted
         response = self._post_request(
-            "/api/auth/access_tokens", user=self.admin, data={"name": "test extra token"}
+            "/api/auth/access_tokens", user=self.admin, data={"name": f"test extra token"}
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(AccessToken.objects.filter(owner=self.admin).count(), 3)

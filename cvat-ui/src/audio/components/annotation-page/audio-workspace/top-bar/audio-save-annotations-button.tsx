@@ -19,9 +19,9 @@ import { SaveIcon } from 'icons';
 
 const componentShortcuts = {
     SAVE_JOB: {
-        name: 'Save the job',
-        description: 'Submit unsaved changes of annotations to the server',
-        sequences: ['ctrl+s'],
+        name: '保存任务',
+        description: '将未保存的标注修改提交至服务器',
+        sequences: ['ctrl+s', 'command+s'],
         scope: ShortcutScope.ANNOTATION_PAGE,
     },
 };
@@ -61,7 +61,7 @@ function AudioSaveAnnotationsButton(): JSX.Element {
                         'cvat-annotation-header-save-button cvat-annotation-header-button'}
                 >
                     <Icon component={SaveIcon} />
-                    {isSaving ? 'Saving...' : 'Save'}
+                    {isSaving ? '保存中...' : '已保存'}
                 </Button>
             </CVATTooltip>
         </>

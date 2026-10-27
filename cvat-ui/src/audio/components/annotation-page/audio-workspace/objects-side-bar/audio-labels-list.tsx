@@ -23,6 +23,8 @@ import { registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { subKeyMap } from 'utils/component-subkeymap';
 import { useResetShortcutsOnUnmount } from 'utils/hooks';
 import { getCVATStore } from 'cvat-store';
+import { LabelType } from 'cvat-core-wrapper';
+import { filterApplicableForType } from 'utils/filter-applicable-labels';
 
 const componentShortcuts: Record<string, KeyMapItem> = {};
 
@@ -30,8 +32,8 @@ const makeKey = (index: number): string => `SWITCH_LABEL_AUDIO_${index}`;
 
 for (const index of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
     componentShortcuts[makeKey(index)] = {
-        name: 'Switch label (audio)',
-        description: 'Change label of selected audio region, or default label for next created region',
+        name: '切换标签（音频）',
+        description: '修改选中音频区间的标签；或设置后续新建区间的默认标签',
         sequences: [`ctrl+${index}`],
         nonActive: true,
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
@@ -126,12 +128,16 @@ function AudioLabelsList(): JSX.Element {
     }), shallowEqual);
 
     const labelIDs = useMemo(() => labels.map((label: any): number => label.id), [labels]);
+    const applicableLabelIDs = useMemo(
+        () => filterApplicableForType(LabelType.INTERVAL, labels).map((label) => label.id!),
+        [labels],
+    );
 
     useResetShortcutsOnUnmount(componentShortcuts);
 
     const keyToLabelMapping = useMemo(() => Object.fromEntries(
-        labelIDs.slice(0, 10).map((labelID: number, idx: number) => [(idx + 1) % 10, labelID]),
-    ), [labelIDs]);
+        applicableLabelIDs.slice(0, 10).map((labelID: number, idx: number) => [(idx + 1) % 10, labelID]),
+    ), [applicableLabelIDs]);
 
     useEffect(() => {
         const updated = JSON.parse(JSON.stringify(componentShortcuts));
@@ -142,9 +148,8 @@ function AudioLabelsList(): JSX.Element {
                 updated[key] = {
                     ...updated[key],
                     nonActive: false,
-                    name: `Switch audio label to ${labelName}`,
-                    description: `Change the label to ${labelName} for the active audio region,
-                        or set it as default for the next created region`,
+                    name: `切换音频标签为 ${labelName}`,
+                    description: `将当前选中音频区间的标签修改为 ${labelName}，或将其设为后续新建区间的默认标签`,
                 };
             }
         }
@@ -165,7 +170,7 @@ function AudioLabelsList(): JSX.Element {
         } else {
             dispatch(audioActions.setAudioActiveLabel(labelID));
             message.destroy();
-            message.success(`Default label has been changed to "${label.name}"`);
+            message.success(`默认标签已修改为 "${label.name}"`);
         }
     }, [dispatch, keyToLabelMapping, labels]);
 

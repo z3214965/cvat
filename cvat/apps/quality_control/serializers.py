@@ -2,17 +2,19 @@
 #
 # SPDX-License-Identifier: MIT
 
+import textwrap
 from collections.abc import Iterator, Mapping
 from enum import Enum
-import textwrap
 from typing import Any
 
 from django.conf import settings as django_settings
-from django.db import models as django_models, transaction
+from django.db import models as django_models
+from django.db import transaction
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
-from cvat.apps.engine import field_validation, serializers as engine_serializers
+from cvat.apps.engine import field_validation
+from cvat.apps.engine import serializers as engine_serializers
 from cvat.apps.engine.filters import JsonLogicFilter
 from cvat.apps.engine.models import AttributeSpec
 from cvat.apps.engine.serializers import WriteOnceMixin
@@ -118,7 +120,7 @@ class QualityReportRequirementCalculationSerializer(serializers.Serializer):
 class QualityReportRequirementSummaryItemSerializer(serializers.Serializer):
     requirement_id = serializers.IntegerField(allow_null=True)
     name = serializers.CharField()
-    metric = serializers.CharField()
+    metric = serializers.ChoiceField(choices=models.QUALITY_TARGET_METRIC_CHOICES)
     score = serializers.FloatField(allow_null=True)
     score_components = QualityReportScoreComponentsSerializer()
     calculation = QualityReportRequirementCalculationSerializer()
@@ -138,6 +140,21 @@ class QualityReportConfusionMatrixAxesSerializer(serializers.Serializer):
     rows = serializers.CharField()
 
 
+class QualityReportTargetMetricValuesSerializer(serializers.Serializer):
+    micro = serializers.FloatField(allow_null=True)
+    mean = serializers.FloatField(allow_null=True)
+    label = serializers.FloatField(allow_null=True)
+
+
+class QualityReportTargetMetricSummarySerializer(serializers.Serializer):
+    metric = serializers.ChoiceField(choices=[metric.value for metric in models.QualityMetric])
+    aggregation = serializers.ChoiceField(
+        choices=[aggregation.value for aggregation in models.QualityMetricAggregation]
+    )
+    values = QualityReportTargetMetricValuesSerializer()
+    worst_labels = serializers.ListField(child=serializers.CharField())
+
+
 class QualityReportConfusionMatrixSerializer(serializers.Serializer):
     labels = serializers.ListField(child=serializers.CharField())
     rows = serializers.ListField(child=serializers.ListField(child=serializers.IntegerField()))
@@ -146,6 +163,8 @@ class QualityReportConfusionMatrixSerializer(serializers.Serializer):
     recall = serializers.ListField(child=serializers.FloatField(), allow_null=True)
     accuracy = serializers.ListField(child=serializers.FloatField(), allow_null=True)
     jaccard_index = serializers.ListField(child=serializers.FloatField(), allow_null=True)
+    dice = serializers.ListField(child=serializers.FloatField(), allow_null=True)
+    target_metric_summary = QualityReportTargetMetricSummarySerializer()
 
 
 class QualityReportTargetSerializer(serializers.ChoiceField):
@@ -390,7 +409,7 @@ class QualityRequirementSerializer(serializers.ModelSerializer):
     )
     metric = serializers.ChoiceField(
         source="target_metric",
-        choices=models.QualityTargetMetricType.choices(),
+        choices=models.QUALITY_TARGET_METRIC_CHOICES,
         required=False,
         allow_null=True,
         help_text="The primary metric used for quality estimation",
@@ -421,11 +440,11 @@ class QualityRequirementSerializer(serializers.ModelSerializer):
         min_value=0,
         max_value=1,
         help_text=textwrap.dedent("""
-            Like IoU threshold, but for points.
-            The percent of the bbox side, used as the radius of the circle around the GT point,
-            where the checked point is expected to be. For boxes with different width and
-            height, the "side" is computed as a geometric mean of the width and height.
-            Read more: https://cocodataset.org/#keypoints-eval
+            The point "size" (the OKS sigma), as a fraction of the object size, defined by
+            the point size base. Corresponds to the standard deviation of the keypoint position.
+            Larger values give larger areas around the GT points, where the checked points
+            are accepted.
+            Read more about the point matching in the documentation.
             """).strip(),
     )
     match_orientation = serializers.BooleanField(
@@ -654,19 +673,27 @@ class QualityRequirementSerializer(serializers.ModelSerializer):
         extra_kwargs = {k: {"required": False} for k in fields}
 
         for field_name, help_text in {
-            "iou_threshold": "Used for distinction between matched / unmatched shapes",
-            "point_size_base": f"""
+            "iou_threshold": """
+                The overlap threshold used for distinction between matched / unmatched objects.
+                The specific meaning can vary depending on the shape type:
+                for rectangles, polygons, ellipses, lines and masks it's the IoU threshold;
+                for points and skeletons, it's the OKS threshold.
+            """,
+            "point_size_base": """
                 When comparing point annotations (including both separate points and point groups),
                 the point size parameter defines matching area for each GT point based to the
                 object size. The point size base parameter allows to configure how to determine
                 the object size.
-                If {models.PointSizeBase.IMAGE_SIZE}, the image size is used. Useful if each point
+                If {image_size}, the image size is used. Useful if each point
                 annotation represents a separate object or boxes grouped with points do not
                 represent object boundaries.
-                If {models.PointSizeBase.GROUP_BBOX_SIZE}, the object size is based on
+                If {group_bbox_size}, the object size is based on
                 the point group bbox size. Useful if each point group represents an object
                 or there is a bbox grouped with points, representing the object size.
-            """,
+            """.format(
+                image_size=models.PointSizeBase.IMAGE_SIZE,
+                group_bbox_size=models.PointSizeBase.GROUP_BBOX_SIZE,
+            ),
             "line_thickness": """
                 Thickness of polylines, relatively to the (image area) ^ 0.5.
                 The distance to the boundary around the GT line,
@@ -1170,10 +1197,10 @@ class QualitySettingsSerializer(WriteOnceMixin, serializers.ModelSerializer):
         allow_blank=True,
         max_length=1024,
         required=False,
-        help_text=textwrap.dedent(f"""\
+        help_text=textwrap.dedent("""\
             A JSON-based logic expression used to filter jobs for quality validation.
-            The filter supports various terms to specify conditions on job: {Meta.model.get_job_filter_terms()}
-        """),
+            The filter supports various terms to specify conditions on job: {}
+        """.format(Meta.model.get_job_filter_terms())),
     )
 
     def validate_job_filter(self, value):

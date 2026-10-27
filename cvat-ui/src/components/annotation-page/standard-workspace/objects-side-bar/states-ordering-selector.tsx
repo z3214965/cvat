@@ -8,7 +8,7 @@ import { Col } from 'antd/lib/grid';
 import Select from 'antd/lib/select';
 import Text from 'antd/lib/typography/Text';
 
-import { StatesOrdering } from 'reducers';
+import { StatesOrdering, StatesOrderingCH } from 'reducers';
 
 interface StatesOrderingSelectorComponentProps {
     statesOrdering: StatesOrdering;
@@ -29,19 +29,19 @@ function StatesOrderingSelectorComponent(props: StatesOrderingSelectorComponentP
                 onChange={changeStatesOrdering}
             >
                 <Select.Option key={StatesOrdering.ID_DESCENT} value={StatesOrdering.ID_DESCENT}>
-                    {StatesOrdering.ID_DESCENT}
+                    {StatesOrderingCH[StatesOrdering.ID_DESCENT]}
                 </Select.Option>
                 <Select.Option key={StatesOrdering.ID_ASCENT} value={StatesOrdering.ID_ASCENT}>
-                    {StatesOrdering.ID_ASCENT}
+                    {StatesOrderingCH[StatesOrdering.ID_ASCENT]}
                 </Select.Option>
                 <Select.Option key={StatesOrdering.UPDATED} value={StatesOrdering.UPDATED}>
-                    {StatesOrdering.UPDATED}
+                    {StatesOrderingCH[StatesOrdering.UPDATED]}
                 </Select.Option>
                 <Select.Option key={StatesOrdering.LAYER} value={StatesOrdering.LAYER}>
-                    {StatesOrdering.LAYER}
+                    {StatesOrderingCH[StatesOrdering.LAYER]}
                 </Select.Option>
                 <Select.Option key={StatesOrdering.LABEL_NAME} value={StatesOrdering.LABEL_NAME}>
-                    {StatesOrdering.LABEL_NAME}
+                    {StatesOrderingCH[StatesOrdering.LABEL_NAME]}
                 </Select.Option>
             </Select>
         </Col>

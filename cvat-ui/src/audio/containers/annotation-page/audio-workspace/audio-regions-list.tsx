@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { connect } from 'react-redux';
 
 import AudioRegionsList from 'audio/components/annotation-page/audio-workspace/audio-regions-list';
-import { intervalID } from 'audio/components/annotation-page/audio-workspace/utils/audio-interval';
+import {
+    AudioRegionsOrdering, intervalID,
+} from 'audio/components/annotation-page/audio-workspace/utils/audio-interval';
 import { ActiveControl, ColorBy, CombinedState } from 'reducers';
 import {
     audioActions,
@@ -25,67 +27,67 @@ import { AudioIntervalState, Label } from 'cvat-core-wrapper';
 
 const componentShortcuts = {
     AUDIO_SWITCH_ALL_LOCK: {
-        name: 'Lock/unlock all intervals',
+        name: '锁定/解锁全部区间',
         description: '修改侧边栏内所有音频区间的锁定状态',
         sequences: ['t l'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SWITCH_LOCK: {
-        name: 'Lock/unlock an interval',
+        name: '锁定/解锁区间',
         description: '修改当前选中音频区间的锁定状态',
         sequences: ['l'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SWITCH_ALL_PINNED: {
-        name: 'Pin/unpin all intervals',
+        name: '固定/取消固定全部区间',
         description: '修改侧边栏内所有未锁定音频区间的固定状态',
         sequences: ['t p'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SWITCH_PINNED: {
-        name: 'Pin/unpin an interval',
+        name: '固定/取消固定区间',
         description: '修改当前选中音频区间的固定状态',
         sequences: ['p'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SWITCH_ALL_HIDDEN: {
-        name: 'Hide/show all intervals',
+        name: '显示/隐藏全部区间',
         description: '修改侧边栏内所有音频区间的显示/隐藏状态',
         sequences: ['t h'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SWITCH_HIDDEN: {
-        name: 'Hide/show an interval',
+        name: '显示/隐藏区间',
         description: '修改当前选中音频区间的显示/隐藏状态',
         sequences: ['h'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_DELETE_REGION: {
-        name: 'Delete interval',
+        name: '删除区间',
         description: '删除当前选中音频区间。按住 Shift 可强制删除已锁定区间',
         sequences: ['del', 'shift+del'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SET_PLAYBACK_TO_INTERVAL_START: {
-        name: 'Set playback to interval start',
+        name: '定位播放头到区间起点',
         description: '将播放定位到选中区间起点，不启动或暂停播放',
         sequences: ['shift+d'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_SET_PLAYBACK_TO_INTERVAL_END: {
-        name: 'Set playback to interval end',
+        name: '定位播放头到区间终点',
         description: '将播放定位到选中区间终点，不启动或暂停播放',
         sequences: ['shift+f'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_PLAY_INTERVAL_ONCE: {
-        name: 'Play interval as range',
+        name: '播放区间一次',
         description: '播放一次当前选中音频区间',
         sequences: ['shift+space'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     AUDIO_FIT_INTERVAL: {
-        name: 'Fit interval',
+        name: '适配区间视图',
         description: '缩放波形视图，完整显示当前选中音频区间',
         sequences: ['i'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
@@ -97,6 +99,7 @@ registerComponentShortcuts(componentShortcuts);
 interface StateToProps {
     intervals: AudioIntervalState[];
     filtersActive: boolean;
+    ordering: AudioRegionsOrdering;
     activeIntervalID: number | null;
     hoveredIntervalID: number | null;
     labels: Label[];
@@ -109,6 +112,7 @@ interface StateToProps {
 interface DispatchToProps {
     onSetActiveInterval(clientID: number | null): void;
     onSetHoveredInterval(clientID: number | null): void;
+    onChangeOrdering(ordering: AudioRegionsOrdering): void;
     onPlayIntervalOnce(clientID: number): void;
     onToggleIntervalLock(clientID: number): void;
     onToggleIntervalPinned(clientID: number): void;
@@ -129,6 +133,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         intervals: player.intervals,
         filtersActive: filters.length > 0,
+        ordering: player.intervalsOrdering,
         activeIntervalID: player.activeIntervalID,
         hoveredIntervalID: player.hoveredIntervalID,
         labels,
@@ -146,6 +151,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         },
         onSetHoveredInterval(clientID: number | null): void {
             dispatch(audioActions.setAudioHoveredInterval(clientID));
+        },
+        onChangeOrdering(ordering: AudioRegionsOrdering): void {
+            dispatch(audioActions.setAudioIntervalsOrdering(ordering));
         },
         onPlayIntervalOnce(clientID: number): void {
             dispatch(requestPlayAudioIntervalOnce(clientID));
@@ -187,10 +195,10 @@ type Props = StateToProps & DispatchToProps;
 
 function AudioRegionsListContainer(props: Props): JSX.Element {
     const {
-        intervals, filtersActive, activeIntervalID, hoveredIntervalID, labels, colorBy,
+        intervals, filtersActive, ordering, activeIntervalID, hoveredIntervalID, labels, colorBy,
         activeControl,
         keyMap, normalizedKeyMap,
-        onSetActiveInterval, onSetHoveredInterval, onPlayIntervalOnce,
+        onSetActiveInterval, onSetHoveredInterval, onChangeOrdering, onPlayIntervalOnce,
         onToggleIntervalLock, onToggleIntervalPinned, onToggleIntervalHidden,
         onToggleIntervalsLock, onToggleIntervalsPinned, onToggleIntervalsHidden,
         onDeleteInterval, onSetPlayback, onChangeLabel,
@@ -264,30 +272,41 @@ function AudioRegionsListContainer(props: Props): JSX.Element {
         },
     };
 
+    const intervalActionShortcuts = useMemo(() => ({
+        setPlaybackToStart: normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_START,
+        playInterval: normalizedKeyMap.AUDIO_PLAY_INTERVAL_ONCE,
+        setPlaybackToEnd: normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_END,
+        switchLock: normalizedKeyMap.AUDIO_SWITCH_LOCK,
+        switchPinned: normalizedKeyMap.AUDIO_SWITCH_PINNED,
+        switchHidden: normalizedKeyMap.AUDIO_SWITCH_HIDDEN,
+    }), [
+        normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_START,
+        normalizedKeyMap.AUDIO_PLAY_INTERVAL_ONCE,
+        normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_END,
+        normalizedKeyMap.AUDIO_SWITCH_LOCK,
+        normalizedKeyMap.AUDIO_SWITCH_PINNED,
+        normalizedKeyMap.AUDIO_SWITCH_HIDDEN,
+    ]);
+
     return (
         <>
             <GlobalHotKeys keyMap={subKeyMap(componentShortcuts, keyMap)} handlers={handlers} />
             <AudioRegionsList
                 intervals={intervals}
                 filtersActive={filtersActive}
+                ordering={ordering}
                 activeIntervalID={activeIntervalID}
                 hoveredIntervalID={hoveredIntervalID}
                 labels={labels}
                 colorBy={colorBy}
                 activeControl={activeControl}
-                intervalActionShortcuts={{
-                    setPlaybackToStart: normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_START,
-                    playInterval: normalizedKeyMap.AUDIO_PLAY_INTERVAL_ONCE,
-                    setPlaybackToEnd: normalizedKeyMap.AUDIO_SET_PLAYBACK_TO_INTERVAL_END,
-                    switchLock: normalizedKeyMap.AUDIO_SWITCH_LOCK,
-                    switchPinned: normalizedKeyMap.AUDIO_SWITCH_PINNED,
-                    switchHidden: normalizedKeyMap.AUDIO_SWITCH_HIDDEN,
-                }}
+                intervalActionShortcuts={intervalActionShortcuts}
                 switchLockAllShortcut={normalizedKeyMap.AUDIO_SWITCH_ALL_LOCK}
                 switchPinAllShortcut={normalizedKeyMap.AUDIO_SWITCH_ALL_PINNED}
                 switchHiddenAllShortcut={normalizedKeyMap.AUDIO_SWITCH_ALL_HIDDEN}
                 onSetActiveInterval={onSetActiveInterval}
                 onSetHoveredInterval={onSetHoveredInterval}
+                onChangeOrdering={onChangeOrdering}
                 onPlayIntervalOnce={onPlayIntervalOnce}
                 onToggleIntervalsLock={onToggleIntervalsLock}
                 onToggleIntervalsPinned={onToggleIntervalsPinned}

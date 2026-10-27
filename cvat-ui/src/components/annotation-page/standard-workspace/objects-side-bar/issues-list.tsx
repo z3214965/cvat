@@ -56,7 +56,7 @@ export default function IssuesListComponent(): JSX.Element {
     }), shallowEqual);
 
     if (workspace === Workspace.AUDIO) {
-        throw new Error('Not supported in audio workspace');
+        throw new Error('该功能在音频工作区中暂不支持');
     }
 
     let frames = issues
@@ -106,12 +106,12 @@ export default function IssuesListComponent(): JSX.Element {
                     <Col span={24}>
                         <Row className='cvat-objects-sidebar-issues-toolbar' justify='space-around' align='middle'>
                             <Col>
-                                <CVATTooltip title='Find the previous frame with issues'>
+                                <CVATTooltip title='查找上一个存在问题的帧'>
                                     <LeftOutlined className='cvat-issues-sidebar-previous-frame' {...dynamicLeftProps} />
                                 </CVATTooltip>
                             </Col>
                             <Col>
-                                <CVATTooltip title='Find the next frame with issues'>
+                                <CVATTooltip title='查找下一个存在问题的帧'>
                                     <RightOutlined className='cvat-issues-sidebar-next-frame' {...dynamicRightProps} />
                                 </CVATTooltip>
                             </Col>

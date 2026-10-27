@@ -4,18 +4,13 @@
 
 import * as SVG from 'svg.js';
 import {
-    stringifyPoints,
-    translateToCanvas,
-    translateFromCanvas,
-    translateToSVG,
-    findIntersection,
-    imageDataToRLE,
-    Segment,
-    findClosestPointOnSegment,
-    segmentsFromPoints,
+    stringifyPoints, translateToCanvas, translateFromCanvas, translateToSVG,
+    findIntersection, imageDataToRLE, Segment, findClosestPointOnSegment, segmentsFromPoints,
     toReversed,
 } from './shared';
-import { Geometry, SliceData, Configuration, CanvasHint } from './canvasModel';
+import {
+    Geometry, SliceData, Configuration, CanvasHint,
+} from './canvasModel';
 import consts from './consts';
 import { ObjectSelector } from './objectSelector';
 
@@ -142,29 +137,25 @@ export class SliceHandlerImpl implements SliceHandler {
     }
 
     private showInitialMessage(): void {
-        this.onMessage(
-            [
-                {
-                    type: 'text',
-                    icon: 'info',
-                    content: '在图形轮廓上设置起始点',
-                },
-                {
-                    type: 'list',
-                    content: ['切割线不能自相交', '切割线与轮廓的交点不能超过两个'],
-                    className: 'cvat-canvas-notification-list-warning',
-                },
+        this.onMessage([{
+            type: 'text',
+            icon: 'info',
+            content: '在图形轮廓上设置起始点',
+        }, {
+            type: 'list',
+            content: [
+                '切割线不能自相交',
+                '切割线与轮廓的交点不能超过两处',
             ],
-            'slice',
-        );
+            className: 'cvat-canvas-notification-list-warning',
+        }], 'slice');
     }
 
     private initialize(sliceData: EnhancedSliceData): void {
         this.showInitialMessage();
         const { clientID } = sliceData.state;
         this.hiddenClientIDs = (this.canvas.select('.cvat_canvas_shape') as any).members
-            .map((shape) => +shape.attr('clientID'))
-            .filter((_clientID: number) => _clientID !== clientID);
+            .map((shape) => +shape.attr('clientID')).filter((_clientID: number) => _clientID !== clientID);
         this.hiddenClientIDs.forEach((clientIDs) => {
             this.hideObject(clientIDs);
         });
@@ -228,21 +219,18 @@ export class SliceHandlerImpl implements SliceHandler {
                 circle.attr('stroke-width', consts.BASE_STROKE_WIDTH / this.geometry.scale);
                 this.slicingPoints.push(circle);
 
-                this.onMessage(
-                    [
-                        {
-                            type: 'text',
-                            icon: 'info',
-                            content: '如有需要，在图形轮廓内设置更多点。在另一点与轮廓相交以执行切割',
-                        },
-                        {
-                            type: 'list',
-                            content: ['按住 <Shift> 启用滑动模式', '点击 <右键> 取消上一个点'],
-                            className: 'cvat-canvas-notification-list-shortcuts',
-                        },
+                this.onMessage([{
+                    type: 'text',
+                    icon: 'info',
+                    content: '必要时在图形轮廓内部添加更多点。在轮廓另一处相交以完成切割',
+                }, {
+                    type: 'list',
+                    content: [
+                        '按住 <Shift> 启用滑动模式',
+                        '右键单击撤销上一个点',
                     ],
-                    'slice',
-                );
+                    className: 'cvat-canvas-notification-list-shortcuts',
+                }], 'slice');
             }
         };
 
@@ -252,12 +240,12 @@ export class SliceHandlerImpl implements SliceHandler {
             points[points.length - 1] = [x, y];
 
             // check slicing line does not intersect itself
-            const segment = [
-                [prevX, prevY],
-                [x, y],
-            ] as Segment;
+            const segment = [[prevX, prevY], [x, y]] as Segment;
             const slicingLineSegments = segmentsFromPoints(points.slice(0, -1).flat());
-            const selfIntersections = filterIntersections(segment, getAllIntersections(segment, slicingLineSegments));
+            const selfIntersections = filterIntersections(
+                segment,
+                getAllIntersections(segment, slicingLineSegments),
+            );
 
             if (Object.keys(selfIntersections).length) {
                 // not allowed
@@ -266,17 +254,8 @@ export class SliceHandlerImpl implements SliceHandler {
 
             // find all intersections with contour
             const intersections = filterIntersections(
-                [
-                    [prevX, prevY],
-                    [x, y],
-                ],
-                getAllIntersections(
-                    [
-                        [prevX, prevY],
-                        [x, y],
-                    ],
-                    contourSegments,
-                ),
+                [[prevX, prevY], [x, y]],
+                getAllIntersections([[prevX, prevY], [x, y]], contourSegments),
             );
 
             const numberOfIntersections = Object.keys(intersections).length;
@@ -302,16 +281,13 @@ export class SliceHandlerImpl implements SliceHandler {
                 ];
 
                 contour2 = [...contour1];
-                const otherPoints = Array(contourSegments.length)
-                    .fill(0)
-                    .map((_, idx) => {
-                        if (firstIntersectedSegmentIdx + idx < contourSegments.length) {
-                            return firstIntersectedSegmentIdx + idx;
-                        }
+                const otherPoints = Array(contourSegments.length).fill(0).map((_, idx) => {
+                    if (firstIntersectedSegmentIdx + idx < contourSegments.length) {
+                        return firstIntersectedSegmentIdx + idx;
+                    }
 
-                        return firstIntersectedSegmentIdx + idx - contourSegments.length;
-                    })
-                    .map((idx) => contourSegments[idx][1]);
+                    return firstIntersectedSegmentIdx + idx - contourSegments.length;
+                }).map((idx) => contourSegments[idx][1]);
 
                 const p1 = firstIntersectionPoint;
                 const p2 = secondIntersectionPoint;
@@ -327,50 +303,41 @@ export class SliceHandlerImpl implements SliceHandler {
             } else {
                 const firstSegmentIdx = Math.min(firstIntersectedSegmentIdx, secondIntersectedSegmentIdx);
                 const secondSegmentIdx = Math.max(firstIntersectedSegmentIdx, secondIntersectedSegmentIdx);
-                const firstSegmentPoint =
-                    firstIntersectedSegmentIdx < secondIntersectedSegmentIdx
-                        ? firstIntersectionPoint
-                        : secondIntersectionPoint;
-                const secondSegmentPoint =
-                    firstIntersectedSegmentIdx < secondIntersectedSegmentIdx
-                        ? secondIntersectionPoint
-                        : firstIntersectionPoint;
+                const firstSegmentPoint = firstIntersectedSegmentIdx < secondIntersectedSegmentIdx ?
+                    firstIntersectionPoint : secondIntersectionPoint;
+                const secondSegmentPoint = firstIntersectedSegmentIdx < secondIntersectedSegmentIdx ?
+                    secondIntersectionPoint : firstIntersectionPoint;
 
                 // intersected different segments. Results in this case are:
                 contour1 = [
                     ...firstSegmentPoint, // first intersection
                     // intermediate points (reversed if intersections order was swopped)
-                    ...(firstSegmentIdx === firstIntersectedSegmentIdx
-                        ? intermediatePoints
-                        : toReversed<[number, number]>(intermediatePoints)
+                    ...(firstSegmentIdx === firstIntersectedSegmentIdx ?
+                        intermediatePoints : toReversed<[number, number]>(intermediatePoints)
                     ).flat(),
                     // second intersection
                     ...secondSegmentPoint,
                     // all the following contours points N, N+1, .. until (including) the first intersected segment
                     ...indexGenerator(contourSegments.length, secondSegmentIdx, firstSegmentIdx, 'forward')
-                        .map((idx) => contourSegments[idx][1])
-                        .slice(0, -1)
-                        .flat(),
+                        .map((idx) => contourSegments[idx][1]).slice(0, -1).flat(),
                 ];
 
                 contour2 = [
                     ...firstSegmentPoint, // first intersection
                     // intermediate points (reversed if intersections order was swopped)
-                    ...(firstSegmentIdx === firstIntersectedSegmentIdx
-                        ? intermediatePoints
-                        : toReversed<[number, number]>(intermediatePoints)
+                    ...(firstSegmentIdx === firstIntersectedSegmentIdx ?
+                        intermediatePoints : toReversed<[number, number]>(intermediatePoints)
                     ).flat(),
                     ...secondSegmentPoint,
                     // all the previous contours points N, N-1, .. until (including) the first intersected segment
                     ...indexGenerator(contourSegments.length, secondSegmentIdx, firstSegmentIdx, 'backward')
-                        .map((idx) => contourSegments[idx][0])
-                        .slice(0, -1)
-                        .flat(),
+                        .map((idx) => contourSegments[idx][0]).slice(0, -1).flat(),
                 ];
             }
 
             if (sliceData.shapeType === 'mask') {
-                const shape = this.canvas.select(`#cvat_canvas_shape_${clientID}`).get(0).node;
+                const shape = this.canvas
+                    .select(`#cvat_canvas_shape_${clientID}`).get(0).node;
                 const width = +shape.getAttribute('width');
                 const height = +shape.getAttribute('height');
                 const left = +shape.getAttribute('x');
@@ -396,6 +363,12 @@ export class SliceHandlerImpl implements SliceHandler {
                 drawOverOffscreenCanvas(context, shape as any as SVGImageElement);
                 applyOffscreenCanvasMask(context, polygon2);
                 const secondShape = imageDataToRLE(context.getImageData(0, 0, width, height).data);
+
+                if (firstShape.length < 2 || secondShape.length < 2) {
+                    this.slice({ enabled: false });
+                    return;
+                }
+
                 this.onSliceDone(sliceData.state, [firstShape, secondShape], Date.now() - this.startTimestamp);
             } else if (sliceData.shapeType === 'polygon') {
                 this.onSliceDone(
@@ -403,8 +376,7 @@ export class SliceHandlerImpl implements SliceHandler {
                     [
                         translateFromCanvas(this.geometry.offset, contour1),
                         translateFromCanvas(this.geometry.offset, contour2),
-                    ],
-                    Date.now() - this.startTimestamp,
+                    ], Date.now() - this.startTimestamp,
                 );
             } else {
                 this.slice({ enabled: false });
@@ -445,10 +417,7 @@ export class SliceHandlerImpl implements SliceHandler {
                 this.slicingLine.plot(stringifyPoints(points.flat()));
 
                 const [prevX, prevY] = points[points.length - 2];
-                const segment = [
-                    [prevX, prevY],
-                    [x, y],
-                ] as Segment;
+                const segment = [[prevX, prevY], [x, y]] as Segment;
 
                 const slicingLineSegments = segmentsFromPoints(points.slice(0, -1).flat());
                 const selfIntersections = filterIntersections(
@@ -462,17 +431,8 @@ export class SliceHandlerImpl implements SliceHandler {
 
                 // find all intersections with contour
                 const contourIntersection = filterIntersections(
-                    [
-                        [prevX, prevY],
-                        [x, y],
-                    ],
-                    getAllIntersections(
-                        [
-                            [prevX, prevY],
-                            [x, y],
-                        ],
-                        contourSegments,
-                    ),
+                    [[prevX, prevY], [x, y]],
+                    getAllIntersections([[prevX, prevY], [x, y]], contourSegments),
                 );
 
                 const numberOfIntersections = Object.keys(contourIntersection).length;
@@ -570,34 +530,26 @@ export class SliceHandlerImpl implements SliceHandler {
                 this.startTimestamp = Date.now();
                 const { startTimestamp } = this;
 
-                this.onMessage(
-                    [
-                        {
-                            type: 'text',
-                            content: '正在获取图形轮廓',
-                            icon: 'loading',
-                        },
-                    ],
-                    'force',
-                );
+                this.onMessage([{
+                    type: 'text',
+                    content: '正在获取图形轮廓',
+                    icon: 'loading',
+                }], 'force');
 
-                sliceData
-                    .getContour(state)
-                    .then((contour) => {
-                        if (this.startTimestamp === startTimestamp && this.enabled) {
-                            // checking if a user does not left mode / reinit it
-                            this.initialize({
-                                enabled: true,
-                                contour: contour.flat(),
-                                state,
-                                shapeType: state.shapeType,
-                            });
-                        }
-                    })
-                    .catch((error: unknown) => {
-                        this.release();
-                        this.onError(error);
-                    });
+                sliceData.getContour(state).then((contour) => {
+                    if (this.startTimestamp === startTimestamp && this.enabled) {
+                        // checking if a user does not left mode / reinit it
+                        this.initialize({
+                            enabled: true,
+                            contour: contour.flat(),
+                            state,
+                            shapeType: state.shapeType,
+                        });
+                    }
+                }).catch((error: unknown) => {
+                    this.release();
+                    this.onError(error);
+                });
             }
         };
 
@@ -605,32 +557,25 @@ export class SliceHandlerImpl implements SliceHandler {
             this.enabled = true;
             if (sliceData.clientID) {
                 const state = this.getObjects().find((_state) => _state.clientID === sliceData.clientID);
-                if (state && state.objectType === 'shape' && ['polygon', 'mask'].includes(state.shapeType)) {
+                if (state && state.objectType === 'shape' &&
+                    ['polygon', 'mask'].includes(state.shapeType)) {
                     initializeWithContour(state);
                     return;
                 }
             }
 
-            this.onMessage(
-                [
-                    {
-                        type: 'text',
-                        content: '点击需要切割的mask或多边形图形',
-                        icon: 'info',
-                    },
-                ],
-                'slice',
-            );
+            this.onMessage([{
+                type: 'text',
+                content: '点击需要切割的mask或多边形图形',
+                icon: 'info',
+            }], 'slice');
 
-            this.objectSelector.enable(
-                ([state]) => {
-                    if (state) {
-                        this.objectSelector.disable();
-                        initializeWithContour(state);
-                    }
-                },
-                { maxCount: 1, shapeType: ['polygon', 'mask'], objectType: ['shape'] },
-            );
+            this.objectSelector.enable(([state]) => {
+                if (state) {
+                    this.objectSelector.disable();
+                    initializeWithContour(state);
+                }
+            }, { maxCount: 1, shapeType: ['polygon', 'mask'], objectType: ['shape'] });
         } else if (this.enabled && !sliceData.enabled) {
             this.release();
         }

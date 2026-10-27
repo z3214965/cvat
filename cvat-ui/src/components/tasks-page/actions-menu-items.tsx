@@ -27,6 +27,7 @@ interface MenuItemsData {
     startEditField: (key: string) => void;
     selectedIds: number[];
     isExportDatasetDisabled: boolean;
+    isQualityControlDisabled: boolean;
     t: (key: string) => string;
 }
 
@@ -51,6 +52,7 @@ export default function TaskActionsItems(menuItemsData: MenuItemsData, taskMenuP
         onMoveTaskToProject,
         onDeleteTask,
         isExportDatasetDisabled,
+        isQualityControlDisabled,
         t,
     } = menuItemsData;
 

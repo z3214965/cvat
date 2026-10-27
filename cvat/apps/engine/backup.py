@@ -3,6 +3,13 @@
 #
 # SPDX-License-Identifier: MIT
 
+import io
+import itertools
+import mimetypes
+import os
+import re
+import shutil
+import stat
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict, deque
 from collections.abc import Collection, Iterable
@@ -10,24 +17,18 @@ from contextlib import closing
 from copy import deepcopy
 from datetime import timedelta
 from enum import Enum
-import io
-import itertools
 from logging import Logger
-import mimetypes
-import os
 from pathlib import Path, PurePath
-import re
-import shutil
 from typing import Any, ClassVar
 from zipfile import ZipFile, ZipInfo
 
+import rapidjson
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
 from django.db.models import Min, Prefetch
 from django.utils import timezone
-import rapidjson
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
@@ -42,9 +43,6 @@ from cvat.apps.dataset_manager.util import (
 from cvat.apps.dataset_manager.views import (
     EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT,
     EXPORT_CACHE_LOCK_TTL,
-    EXPORT_LOCKED_RETRY_INTERVAL,
-    LockNotAvailableError,
-    retry_current_rq_job,
 )
 from cvat.apps.engine import models
 from cvat.apps.engine.cache import MediaCache
@@ -70,7 +68,6 @@ from cvat.apps.engine.utils import av_scan_paths
 from cvat.utils import django_database as db_utils
 from cvat.utils.paths import join_untrusted_path, problem_with_untrusted_path
 from utils.dataset_manifest import ImageManifestManager
-
 
 slogger = ServerLogManager(__name__)
 
@@ -107,7 +104,7 @@ def _write_annotation_guide(
 
         for db_asset in assets:
             md = md.replace(
-                f"/api/assets/{db_asset.pk!s}", os.path.join(assets_dirname, db_asset.filename)
+                f"/api/assets/{str(db_asset.pk)}", os.path.join(assets_dirname, db_asset.filename)
             )
             file = os.path.join(settings.ASSETS_ROOT, str(db_asset.pk), db_asset.filename)
             with open(file, "rb") as asset_file:
@@ -176,7 +173,7 @@ class _BackupBase:
         keys_to_drop = set(meta.keys()) - allowed_keys
         if keys_to_drop:
             if self._logger:
-                self._logger.warning(f"the following keys are dropped {keys_to_drop}")
+                self._logger.warning("the following keys are dropped {}".format(keys_to_drop))
             for key in keys_to_drop:
                 del meta[key]
 
@@ -390,13 +387,25 @@ class _ExporterBase(metaclass=ABCMeta):
     @staticmethod
     def _write_files(source_dir, zip_object, files, target_dir):
         for filename in files:
-            arcname = os.path.normpath(
-                os.path.join(
-                    target_dir,
-                    os.path.relpath(filename, source_dir),
+            # Normally, there should not be any any irregular files in CVAT's data directory,
+            # but it's possible that some were uploaded to the instance before we started filtering
+            # them out in ArchiveReader. Attempting to write such files to the backup can cause
+            # adverse effects, for example:
+            #
+            # * If the file is a symlink, ZipFile.write will dereference it, which can lead to files
+            #   outside of the task to be included in the backup.
+            # * If it's a named pipe, ZipFile.write will block indefinitely.
+            #
+            # To avoid such problems, skip over irregular files.
+
+            if stat.S_ISREG(os.lstat(filename).st_mode):
+                arcname = os.path.normpath(
+                    os.path.join(
+                        target_dir,
+                        os.path.relpath(filename, source_dir),
+                    )
                 )
-            )
-            zip_object.write(filename=filename, arcname=arcname)
+                zip_object.write(filename=filename, arcname=arcname)
 
     def _write_directory(
         self, source_dir, zip_object, target_dir, recursive=True, exclude_files=None
@@ -694,8 +703,8 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
 
             segment_type = serialized_segment.pop("type")
             if (
-                (self._db_task.segment_size == 0
-                and segment_type == models.SegmentType.RANGE)
+                self._db_task.segment_size == 0
+                and segment_type == models.SegmentType.RANGE
                 or self._db_data.validation_mode == models.ValidationMode.GT_POOL
             ):
                 assert self._db_task.media_type != models.MediaType.AUDIO
@@ -772,8 +781,8 @@ class TaskExporter(_ExporterBase, _TaskBackupBase):
 
             if (
                 self._db_data.storage == StorageChoice.SHARE
-                or (self._db_data.storage == StorageChoice.CLOUD_STORAGE
-                and not self._lightweight)
+                or self._db_data.storage == StorageChoice.CLOUD_STORAGE
+                and not self._lightweight
             ):
                 data["storage"] = StorageChoice.LOCAL
             else:
@@ -852,7 +861,7 @@ class _ImporterBase:
         try:
             return Version(version)
         except ValueError:
-            raise ValueError(f"{version} version is not supported")
+            raise ValueError("{} version is not supported".format(version))
 
     @staticmethod
     def _prepare_dirs(filepath):
@@ -1027,7 +1036,7 @@ class TaskImporter(_ImporterBase, _TaskBackupBase):
         output_data_path = self._db_task.data.get_upload_dirname()
         uploaded_files = []
         for file_path in input_archive.namelist():
-            if file_path.endswith("/") or (self._subdir and not file_path.startswith(self._subdir)):
+            if file_path.endswith("/") or self._subdir and not file_path.startswith(self._subdir):
                 continue
 
             file_name = os.path.relpath(file_path, self._subdir)
@@ -1470,16 +1479,31 @@ def create_backup(
 ):
     db_instance = Exporter.get_object(instance_id)
 
-    try:
-        instance_type = db_instance.__class__.__name__
-        instance_timestamp = timezone.localtime(db_instance.updated_date).timestamp()
+    instance_type = db_instance.__class__.__name__
+    instance_timestamp = timezone.localtime(db_instance.updated_date).timestamp()
 
-        output_path = ExportCacheManager.make_backup_file_path(
-            instance_id=db_instance.id,
-            instance_type=instance_type,
-            instance_timestamp=instance_timestamp,
-            lightweight=lightweight,
-        )
+    output_path = ExportCacheManager.make_backup_file_path(
+        instance_id=db_instance.id,
+        instance_type=instance_type,
+        instance_timestamp=instance_timestamp,
+        lightweight=lightweight,
+    )
+
+    with get_export_cache_lock(
+        output_path,
+        block=True,
+        acquire_timeout=EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT,
+        ttl=EXPORT_CACHE_LOCK_TTL,
+    ):
+        # output_path includes timestamp of the last update
+        if os.path.exists(output_path):
+            extend_export_file_lifetime(output_path)
+            return output_path
+
+    with TmpDirManager.get_tmp_directory_for_export(instance_type=instance_type) as tmp_dir:
+        temp_file = os.path.join(tmp_dir, "dump")
+        exporter = Exporter(db_instance.id, lightweight=lightweight)
+        exporter.export_to(temp_file)
 
         with get_export_cache_lock(
             output_path,
@@ -1487,35 +1511,12 @@ def create_backup(
             acquire_timeout=EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT,
             ttl=EXPORT_CACHE_LOCK_TTL,
         ):
-            # output_path includes timestamp of the last update
-            if os.path.exists(output_path):
-                extend_export_file_lifetime(output_path)
-                return output_path
+            shutil.move(temp_file, output_path)
 
-        with TmpDirManager.get_tmp_directory_for_export(instance_type=instance_type) as tmp_dir:
-            temp_file = os.path.join(tmp_dir, "dump")
-            exporter = Exporter(db_instance.id, lightweight=lightweight)
-            exporter.export_to(temp_file)
-
-            with get_export_cache_lock(
-                output_path,
-                block=True,
-                acquire_timeout=EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT,
-                ttl=EXPORT_CACHE_LOCK_TTL,
-            ):
-                shutil.move(temp_file, output_path)
-
-            logger.info(
-                f"The {db_instance.__class__.__name__.lower()} '{db_instance.id}' is backed up at {output_path!r} "
-                f"and available for downloading for the next {cache_ttl}."
-            )
-    except LockNotAvailableError:
-        # Need to retry later if the lock was not available
-        retry_current_rq_job(EXPORT_LOCKED_RETRY_INTERVAL)
         logger.info(
-            f"Failed to acquire export cache lock. Retrying in {EXPORT_LOCKED_RETRY_INTERVAL}"
+            f"The {db_instance.__class__.__name__.lower()} '{db_instance.id}' is backed up at {output_path!r} "
+            f"and available for downloading for the next {cache_ttl}."
         )
-        raise
 
     return output_path
 

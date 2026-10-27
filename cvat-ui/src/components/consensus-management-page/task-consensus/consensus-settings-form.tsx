@@ -61,7 +61,7 @@ export default function ConsensusSettingsForm(props: Readonly<Props>): JSX.Eleme
                 </Col>
             </Row>
             <Row className='cvat-consensus-settings-title'>
-                <Text strong>Shape comparison</Text>
+                <Text strong>形状对比</Text>
                 <CVATTooltip
                     title={shapeComparisonTooltip}
                     className='cvat-settings-tooltip'

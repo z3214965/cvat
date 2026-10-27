@@ -268,7 +268,7 @@ function JobItem(props: Readonly<Props>): JSX.Element {
                                 <Row>
                                     <Col>
                                         <Icon component={FramesIcon} />
-                                        <Text>{isAudioTask ? 'Time range: ' : 'Frame range: '}</Text>
+                                        <Text>{isAudioTask ? '时间范围：' : '帧范围：'}</Text>
                                         <Text type='secondary' className='cvat-job-item-frame-range'>
                                             {isAudioTask ?
                                                 audioJobRange :

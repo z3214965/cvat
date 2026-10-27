@@ -32,15 +32,15 @@ interface Props {
 
 const componentShortcuts = {
     AUDIO_UNDO: {
-        name: 'Undo audio action',
-        description: 'Cancel the latest action related to audio regions',
-        sequences: ['ctrl+z'],
+        name: '撤销音频操作',
+        description: '撤销最近一次音频区间相关操作',
+        sequences: ['ctrl+z', 'command+z'],
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
     },
     AUDIO_REDO: {
-        name: 'Redo audio action',
-        description: 'Cancel undo of audio action',
-        sequences: ['ctrl+shift+z', 'ctrl+y'],
+        name: '重做音频操作',
+        description: '取消音频操作的撤销（恢复操作）',
+        sequences: ['ctrl+shift+z', 'command+shift+z', 'ctrl+y'],
         scope: ShortcutScope.AUDIO_WORKSPACE_CONTROLS,
     },
 };
@@ -85,7 +85,7 @@ function AudioLeftGroup(props: Props): JSX.Element {
                     closable={false}
                     footer={[]}
                 >
-                    <Text>CVAT is saving your annotations, please wait </Text>
+                    <Text>正在保存标注，请稍候...</Text>
                     <LoadingOutlined />
                 </Modal>
             )}
@@ -100,7 +100,7 @@ function AudioLeftGroup(props: Props): JSX.Element {
                         onClick={onUndoClick}
                     >
                         <Icon component={UndoIcon} />
-                        <span>Undo</span>
+                        <span>撤销</span>
                     </Button>
                 </CVATTooltip>
                 <CVATTooltip overlay={`Redo: ${redoAction} ${redoShortcut}`}>
@@ -111,7 +111,7 @@ function AudioLeftGroup(props: Props): JSX.Element {
                         onClick={onRedoClick}
                     >
                         <Icon component={RedoIcon} />
-                        Redo
+                        重做
                     </Button>
                 </CVATTooltip>
             </Col>

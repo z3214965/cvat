@@ -86,26 +86,40 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
                     />
                 </Col>
             </Row>
-            {is2D && shapeType === ShapeType.RECTANGLE && (
+            {is2D && [ShapeType.RECTANGLE, ShapeType.ELLIPSE].includes(shapeType) && (
                 <>
                     <Row>
                         <Col>
-                            <Text className='cvat-text-color'> 绘制方式 </Text>
+                            <Text className='cvat-text-color'> Drawing method </Text>
                         </Col>
                     </Row>
-                    <Row justify='space-around'>
-                        <Col>
+                    <Row className='cvat-draw-shape-popover-drawing-method'>
+                        <Col span={24}>
                             <Radio.Group
-                                style={{ display: 'flex' }}
+                                className='cvat-draw-shape-popover-drawing-method-selector'
                                 value={rectDrawingMethod}
                                 onChange={onChangeRectDrawingMethod}
                             >
-                                <Radio value={RectDrawingMethod.CLASSIC} style={{ width: 'auto' }}>
-                                    两点绘制
-                                </Radio>
-                                <Radio value={RectDrawingMethod.EXTREME_POINTS} style={{ width: 'auto' }}>
-                                    四点绘制
-                                </Radio>
+                                <Radio.Button value={RectDrawingMethod.CLASSIC}>
+                                    2点
+                                </Radio.Button>
+                                {shapeType === ShapeType.RECTANGLE && (
+                                    <Radio.Button value={RectDrawingMethod.EXTREME_POINTS}>
+                                        4点
+                                    </Radio.Button>
+                                )}
+                                <CVATTooltip
+                                    title={
+                                        `至少点击 ${shapeType === ShapeType.ELLIPSE ? '5' : '3'} 个轮廓点。` +
+                                        '增减点时，虚线适配图形会预览效果；' +
+                                        `按 ${repeatShapeShortcut} 或选择完成以结束绘制，` +
+                                        '右键点击撤销上一个点。'
+                                    }
+                                >
+                                    <Radio.Button value={RectDrawingMethod.ROTATED_POINTS}>
+                                        旋转框
+                                    </Radio.Button>
+                                </CVATTooltip>
                             </Radio.Group>
                         </Col>
                     </Row>
@@ -115,7 +129,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
                 <>
                     <Row>
                         <Col>
-                            <Text className='cvat-text-color'> 绘制方式 </Text>
+                            <Text className='cvat-text-color'>绘制方式</Text>
                         </Col>
                     </Row>
                     <Row justify='space-around'>
@@ -140,7 +154,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
                 <>
                     <Row justify='space-around' align='middle'>
                         <Col span={14}>
-                            <Text className='cvat-text-color'> 顶点数量: </Text>
+                            <Text className='cvat-text-color'>顶点数量：</Text>
                         </Col>
                         <Col span={10}>
                             <InputNumber

@@ -2,29 +2,29 @@
 #
 # SPDX-License-Identifier: MIT
 
+import itertools
+import logging
+import os
+import shutil
+import unittest
+import unittest.mock
 from collections.abc import Callable, Collection, Generator, Iterator, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
 from io import BytesIO
-import itertools
-import logging
-import os
 from pathlib import Path
 from pprint import pformat
-import shutil
-from typing import Any, Protocol, TypeVar
-import unittest
+from typing import Any, NoReturn, Protocol, TypeVar
 from unittest import TestCase
-import unittest.mock
 
 import av
+import django.test
+import django_rq
+import numpy as np
 from django.conf import settings
 from django.core.cache import caches
 from django.http.response import HttpResponse
-import django.test
 from django.utils.module_loading import import_string
-import django_rq
-import numpy as np
 from PIL import Image
 from rest_framework import status
 from rest_framework.response import Response
@@ -32,7 +32,6 @@ from rest_framework.test import APITestCase
 from scipy.optimize import linear_sum_assignment
 
 from cvat.apps.iam.models import User
-
 
 T = TypeVar("T")
 
@@ -107,6 +106,11 @@ def clear_rq_jobs():
                 scheduler.cancel(job)
         finally:
             scheduler.remove_lock()
+
+
+def set_rq_async_mode(is_async: bool) -> None:
+    for config in settings.RQ_QUEUES.values():
+        config["ASYNC"] = is_async
 
 
 class ApiTestBase(APITestCase):
@@ -609,7 +613,7 @@ def _match_lists(
     b_objs: list[Any],
     *,
     distance: Callable[[Any, Any], bool],
-) -> tuple[list[tuple[Any, Any]], list[Any], list[Any]]:
+) -> tuple[list[tuple[Any, Any]], list[Any], list[Any]] | NoReturn:
     """
     Matches two lists of objects using a distance function.
     The distance function should return True if the objects are equal, and False otherwise.
@@ -687,7 +691,7 @@ def compare_objects(
     fp_tolerance: float = 0.001,
     current_key: ObjectKey | str | None = None,
     check_order: bool | OrderStrategy = True,
-) -> None:
+) -> None | NoReturn:
     if isinstance(current_key, str):
         current_key = [current_key]
     elif not current_key:
@@ -781,7 +785,7 @@ def check_annotation_response(
     *,
     expected_values: dict | None = None,
     ignore_keys: Sequence[str] = frozenset(("id", "version")),
-) -> None:
+) -> None | NoReturn:
     optional_fields = dict(
         source="manual",
         occluded=False,
@@ -885,7 +889,7 @@ def check_annotation_response(
 @contextmanager
 def mock_method(
     obj: str | Any, attr: str, *, new: Callable | Any = unittest.mock.DEFAULT
-) -> Generator[unittest.mock.Mock]:
+) -> Generator[unittest.mock.Mock, None, None]:
     """
     Allows to mock a class instance method, while still be able to call the original implementation.
 

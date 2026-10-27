@@ -26,7 +26,12 @@ import BasicConfigurationForm, { BaseConfiguration } from './basic-configuration
 import ProjectSearchField from './project-search-field';
 import ProjectSubsetField from './project-subset-field';
 import MultiTasksProgress from './multi-task-progress';
-import AdvancedConfigurationForm, { AdvancedConfiguration, SortingMethod } from './advanced-configuration-form';
+import AdvancedConfigurationForm, {
+    AdvancedConfiguration,
+    CV_ADVANCED_CONFIGURATION_SECTIONS,
+    getAdvancedConfigurationInitialValues,
+    SortingMethod,
+} from './advanced-configuration-form';
 import QualityConfigurationForm, { QualityConfiguration, ValidationMode } from './quality-configuration-form';
 
 type TabName = 'local' | 'share' | 'remote' | 'cloudStorage';
@@ -71,22 +76,7 @@ const defaultState: State = {
         name: '',
     },
     subset: '',
-    advanced: {
-        useZipChunks: true,
-        useCache: true,
-        sortingMethod: SortingMethod.LEXICOGRAPHICAL,
-        sourceStorage: {
-            location: StorageLocation.LOCAL,
-            cloudStorageId: undefined,
-        },
-        targetStorage: {
-            location: StorageLocation.LOCAL,
-            cloudStorageId: undefined,
-        },
-        useProjectSourceStorage: true,
-        useProjectTargetStorage: true,
-        consensusReplicas: 0,
-    },
+    advanced: getAdvancedConfigurationInitialValues(CV_ADVANCED_CONFIGURATION_SECTIONS),
     quality: {
         validationMode: ValidationMode.NONE,
         validationFramesPercent: 5,
@@ -114,8 +104,8 @@ const UploadFileErrorMessages = {
 };
 
 const UploadFileHints = {
-    one: 'You can upload an archive with images, a video, or multiple images',
-    multi: 'You can upload one or more videos',
+    one: '可上传图片压缩包、单个视频或多张图片',
+    multi: '可上传一个或多个视频',
 };
 
 function receiveExtensions(files: RemoteFile[]): string[] {
@@ -202,6 +192,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
     private resetState = (): void => {
         this.basicConfigurationComponent.current?.resetFields();
         this.advancedConfigurationComponent.current?.resetFields();
+        this.qualityConfigurationComponent.current?.resetFields();
 
         this.fileManagerComponent.reset();
 
@@ -305,7 +296,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
     };
 
     private handleValidationModeChange = (value: ValidationMode): void => {
-        this.qualityConfigurationComponent.current?.resetFields();
+        this.qualityConfigurationComponent.current?.resetParameters();
         this.setState(() => ({
             quality: {
                 ...defaultState.quality,
@@ -900,14 +891,11 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
             advanced: {
                 useProjectSourceStorage,
                 useProjectTargetStorage,
-                sourceStorage: {
-                    location: sourceStorageLocation,
-                },
-                targetStorage: {
-                    location: targetStorageLocation,
-                },
+                sourceStorage: { location: sourceStorageLocation },
+                targetStorage: { location: targetStorageLocation },
             },
         } = this.state;
+
         return (
             <Col span={24}>
                 <Collapse

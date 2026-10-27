@@ -79,10 +79,10 @@ function renderEllipsisText(text: string, type?: BaseType): JSX.Element {
 }
 
 function constructTimestamps(request: Request): JSX.Element {
-    const started = dayjs(request.startedDate).format('MMM Do YY, H:mm');
-    const finished = dayjs(request.finishedDate).format('MMM Do YY, H:mm');
-    const created = dayjs(request.createdDate).format('MMM Do YY, H:mm');
-    const expired = dayjs(request.expiryDate).format('MMM Do YY, H:mm');
+    const started = dayjs(request.startedDate).format('YYYY-MM-DD, HH:mm');
+    const finished = dayjs(request.finishedDate).format('YYYY-MM-DD, HH:mm');
+    const created = dayjs(request.createdDate).format('YYYY-MM-DD, HH:mm');
+    const expired = dayjs(request.expiryDate).format('YYYY-MM-DD, HH:mm');
     const { operation: { type }, url } = request;
 
     switch (request.status) {

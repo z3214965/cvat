@@ -332,7 +332,7 @@ function RemoteBrowser(props: Props): JSX.Element {
                 <Paragraph className='cvat-remote-browser-empty'>
                     请确保你已
                     <Text strong>
-                        <a href={SHARE_MOUNT_GUIDE_URL}> 挂载 </a>
+                        <a target='_blank' rel='noopener noreferrer' href={SHARE_MOUNT_GUIDE_URL}> 挂载 </a>
                     </Text>
                     在构建之前进行共享，且共享存储中包含文件
                 </Paragraph>

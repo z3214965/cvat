@@ -6,6 +6,7 @@ import React from 'react';
 import Select from 'antd/lib/select';
 import { JobStage, JobState } from 'cvat-core-wrapper';
 import { handleDropdownKeyDown } from 'utils/dropdown-utils';
+import { JobStageLabel, JobStateLabel } from './job-status-visuals';
 
 interface JobStateSelectorProps {
     value: JobState | null;
@@ -22,10 +23,18 @@ export function JobStateSelector({ value, onSelect }: Readonly<JobStateSelectorP
             onKeyDown={handleDropdownKeyDown}
             placeholder='选择一个状态'
         >
-            <Select.Option value={JobState.NEW}>待处理</Select.Option>
-            <Select.Option value={JobState.IN_PROGRESS}>进行中</Select.Option>
-            <Select.Option value={JobState.REJECTED}>已驳回</Select.Option>
-            <Select.Option value={JobState.COMPLETED}>已完成</Select.Option>
+            <Select.Option value={JobState.NEW} title={JobState.NEW}>
+                <JobStateLabel state={JobState.NEW} />
+            </Select.Option>
+            <Select.Option value={JobState.IN_PROGRESS} title={JobState.IN_PROGRESS}>
+                <JobStateLabel state={JobState.IN_PROGRESS} />
+            </Select.Option>
+            <Select.Option value={JobState.REJECTED} title={JobState.REJECTED}>
+                <JobStateLabel state={JobState.REJECTED} />
+            </Select.Option>
+            <Select.Option value={JobState.COMPLETED} title={JobState.COMPLETED}>
+                <JobStateLabel state={JobState.COMPLETED} />
+            </Select.Option>
         </Select>
     );
 }
@@ -45,14 +54,14 @@ export function JobStageSelector({ value, onSelect }: Readonly<JobStageSelectorP
             onKeyDown={handleDropdownKeyDown}
             placeholder='选择一个阶段'
         >
-            <Select.Option value={JobStage.ANNOTATION}>
-                标注
+            <Select.Option value={JobStage.ANNOTATION} title={JobStage.ANNOTATION}>
+                <JobStageLabel stage={JobStage.ANNOTATION} />
             </Select.Option>
-            <Select.Option value={JobStage.VALIDATION}>
-                验证
+            <Select.Option value={JobStage.VALIDATION} title={JobStage.VALIDATION}>
+                <JobStageLabel stage={JobStage.VALIDATION} />
             </Select.Option>
-            <Select.Option value={JobStage.ACCEPTANCE}>
-                验收
+            <Select.Option value={JobStage.ACCEPTANCE} title={JobStage.ACCEPTANCE}>
+                <JobStageLabel stage={JobStage.ACCEPTANCE} />
             </Select.Option>
         </Select>
     );

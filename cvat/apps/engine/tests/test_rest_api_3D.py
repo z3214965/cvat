@@ -4,15 +4,15 @@
 # SPDX-License-Identifier: MIT
 
 
-from collections import defaultdict
 import copy
-from glob import glob
 import itertools
 import os.path as osp
-from shutil import copyfile
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
+from collections import defaultdict
+from glob import glob
+from shutil import copyfile
 
 from django.contrib.auth.models import Group
 from rest_framework import status
@@ -30,7 +30,6 @@ from cvat.apps.engine.tests.utils import (
 from cvat.apps.iam.models import User
 
 from .utils import check_annotation_response
-
 
 CREATE_ACTION = "create"
 UPDATE_ACTION = "update"

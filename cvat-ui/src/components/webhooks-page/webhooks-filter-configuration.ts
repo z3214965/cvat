@@ -41,8 +41,8 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
             fieldSettings: {
                 listValues: [
-                    { value: 'organization', title: 'Organization' },
-                    { value: 'project', title: 'Project' },
+                    { value: 'organization', title: '组织' },
+                    { value: 'project', title: '项目' },
                 ],
             },
         },

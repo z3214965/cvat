@@ -20,8 +20,9 @@ from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from cvat.apps.iam.email_validation import run_email_validators
 from cvat.apps.iam.forms import ResetPasswordFormEx
-from cvat.apps.iam.models import User
+from cvat.apps.iam.models import User, UserCreationMethod
 from cvat.apps.iam.password_validation import (
     DEFAULT_MAX_PASSWORD_LENGTH,
     DEFAULT_MIN_PASSWORD_LENGTH,
@@ -102,8 +103,12 @@ class RegisterSerializerEx(RegisterSerializer):
                 _("A user is already registered with this e-mail address.")
             )
 
+        if not dummy_user:
+            run_email_validators(self.cleaned_data["email"])
+
         # Allow to overwrite data for dummy users
         user = dummy_user or adapter.new_user(request)
+        user.created_via = UserCreationMethod.REGISTRATION
 
         user = adapter.save_user(request, user, self, commit=False)
         if "password1" in self.cleaned_data:
@@ -128,7 +133,7 @@ class PasswordResetSerializerEx(PasswordResetSerializer):
         if hasattr(settings, "UI_HOST") and settings.UI_HOST:
             domain = settings.UI_HOST
             if hasattr(settings, "UI_PORT") and settings.UI_PORT:
-                domain += f":{settings.UI_PORT}"
+                domain += ":{}".format(settings.UI_PORT)
         return {"domain_override": domain}
 
 
@@ -180,10 +185,10 @@ class LoginSerializerEx(LoginSerializer):
     def get_auth_user_using_allauth(self, username, email, password):
 
         def is_email_authentication():
-            return {allauth_settings.LoginMethod.EMAIL} == allauth_settings.LOGIN_METHODS
+            return allauth_settings.LOGIN_METHODS == {allauth_settings.LoginMethod.EMAIL}
 
         def is_username_authentication():
-            return {allauth_settings.LoginMethod.USERNAME} == allauth_settings.LOGIN_METHODS
+            return allauth_settings.LOGIN_METHODS == {allauth_settings.LoginMethod.USERNAME}
 
         # check that the server settings match the request
         if is_username_authentication() and not username and email:

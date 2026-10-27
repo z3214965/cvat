@@ -3,39 +3,45 @@
 #
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Callable
-from contextlib import ExitStack, contextmanager
 import copy
-from datetime import timedelta
-from functools import partial
-from io import BytesIO
 import itertools
 import json
 import multiprocessing
 import os
 import os.path as osp
-from pathlib import Path
 import random
+import xml.etree.ElementTree as ET
+import zipfile
+from collections.abc import Callable
+from contextlib import ExitStack, contextmanager
+from datetime import timedelta
+from functools import partial
+from io import BytesIO
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import sleep
 from typing import Any, ClassVar, overload
-from unittest.mock import DEFAULT as MOCK_DEFAULT, MagicMock, patch
-import xml.etree.ElementTree as ET
-import zipfile
+from unittest.mock import DEFAULT as MOCK_DEFAULT
+from unittest.mock import patch
 
-from attr import define, field
 import av
 import datumaro
+import django_rq
+import numpy as np
+import rq.worker
+from attr import define, field
 from datumaro.components.comparator import EqualityComparator
 from datumaro.components.dataset import Dataset
+from django.conf import settings
 from django.contrib.auth.models import Group
-import numpy as np
+from django.test import override_settings
 from PIL import Image
 from rest_framework import status
+from rq.job import JobStatus as RQJobStatus
 
 import cvat.apps.dataset_manager as dm
 from cvat.apps.dataset_manager.bindings import CvatDataExtractor, TaskData
-from cvat.apps.dataset_manager.cron import clear_export_cache
+from cvat.apps.dataset_manager.cron import ExportCacheDirectoryCleaner
 from cvat.apps.dataset_manager.task import TaskAnnotation
 from cvat.apps.dataset_manager.tests.utils import (
     TestDir,
@@ -49,10 +55,11 @@ from cvat.apps.engine.tests.utils import (
     ExportApiTestBase,
     ForceLogin,
     ImportApiTestBase,
+    clear_rq_jobs,
     get_paginated_collection,
+    set_rq_async_mode,
 )
 from cvat.apps.iam.models import User
-
 
 projects_path = osp.join(osp.dirname(__file__), "assets", "projects.json")
 with open(projects_path) as file:
@@ -653,20 +660,21 @@ class TaskDumpUploadTest(_DbTestBase):
                 )
 
             for user, edata in list(expected.items()):
-                with self.subTest(format=f"{edata['name']}"), TestDir() as test_dir:
-                    self._clear_temp_data()  # clean up from previous tests and iterations
+                with self.subTest(format=f"{edata['name']}"):
+                    with TestDir() as test_dir:
+                        self._clear_temp_data()  # clean up from previous tests and iterations
 
-                    user_name = edata["name"]
-                    file_zip_name = osp.join(test_dir, f"{user_name}.zip")
-                    expected_4xx_status_code = None if user else status.HTTP_401_UNAUTHORIZED
-                    response = self._export_task_annotations(
-                        user,
-                        task_id,
-                        query_params=export_params,
-                        expected_4xx_status_code=expected_4xx_status_code,
-                    )
-                    self._save_file_from_response(response, file_zip_name)
-                    self.assertEqual(osp.exists(file_zip_name), edata["file_exists"])
+                        user_name = edata["name"]
+                        file_zip_name = osp.join(test_dir, f"{user_name}.zip")
+                        expected_4xx_status_code = None if user else status.HTTP_401_UNAUTHORIZED
+                        response = self._export_task_annotations(
+                            user,
+                            task_id,
+                            query_params=export_params,
+                            expected_4xx_status_code=expected_4xx_status_code,
+                        )
+                        self._save_file_from_response(response, file_zip_name)
+                        self.assertEqual(osp.exists(file_zip_name), edata["file_exists"])
 
     def test_api_v2_dump_and_upload_annotations_with_objects_are_different_images(self):
         test_name = self._testMethodName
@@ -681,48 +689,49 @@ class TaskDumpUploadTest(_DbTestBase):
         }
 
         for upload_type in upload_types:
-            with self.subTest(format=type), TestDir() as test_dir:
-                if upload_type == "task":
-                    self._create_annotations(
-                        task, "CVAT for images 1.1 different types", "random"
-                    )
-                else:
-                    jobs = self._get_jobs(task_id)
-                    job_id = jobs[0]["id"]
-                    self._create_annotations_in_job(
-                        task, job_id, "CVAT for images 1.1 different types", "random"
-                    )
-
-                file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
-                self._export_task_annotations(
-                    self.admin, task_id, query_params=export_params, file_path=file_zip_name
-                )
-                self.assertEqual(osp.exists(file_zip_name), True)
-
-                url = self._generate_url_remove_tasks_annotations(task_id)
-                self._remove_annotations(url, self.admin)
-
-                if upload_type == "task":
-                    with open(file_zip_name, "rb") as binary_file:
-                        self._import_task_annotations(
-                            self.admin,
-                            task_id,
-                            binary_file,
-                            query_params={"format": "CVAT 1.1"},
+            with self.subTest(format=type):
+                with TestDir() as test_dir:
+                    if upload_type == "task":
+                        self._create_annotations(
+                            task, "CVAT for images 1.1 different types", "random"
                         )
-                else:
-                    jobs = self._get_jobs(task_id)
-                    with open(file_zip_name, "rb") as binary_file:
-                        self._import_job_annotations(
-                            self.admin,
-                            jobs[0]["id"],
-                            binary_file,
-                            query_params={"format": "CVAT 1.1"},
+                    else:
+                        jobs = self._get_jobs(task_id)
+                        job_id = jobs[0]["id"]
+                        self._create_annotations_in_job(
+                            task, job_id, "CVAT for images 1.1 different types", "random"
                         )
 
-                response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
-                self.assertEqual(len(response.data["shapes"]), 2)
-                self.assertEqual(len(response.data["tracks"]), 0)
+                    file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
+                    self._export_task_annotations(
+                        self.admin, task_id, query_params=export_params, file_path=file_zip_name
+                    )
+                    self.assertEqual(osp.exists(file_zip_name), True)
+
+                    url = self._generate_url_remove_tasks_annotations(task_id)
+                    self._remove_annotations(url, self.admin)
+
+                    if upload_type == "task":
+                        with open(file_zip_name, "rb") as binary_file:
+                            self._import_task_annotations(
+                                self.admin,
+                                task_id,
+                                binary_file,
+                                query_params={"format": "CVAT 1.1"},
+                            )
+                    else:
+                        jobs = self._get_jobs(task_id)
+                        with open(file_zip_name, "rb") as binary_file:
+                            self._import_job_annotations(
+                                self.admin,
+                                jobs[0]["id"],
+                                binary_file,
+                                query_params={"format": "CVAT 1.1"},
+                            )
+
+                    response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
+                    self.assertEqual(len(response.data["shapes"]), 2)
+                    self.assertEqual(len(response.data["tracks"]), 0)
 
     def test_api_v2_dump_and_upload_annotations_with_objects_are_different_video(self):
         test_name = self._testMethodName
@@ -738,47 +747,48 @@ class TaskDumpUploadTest(_DbTestBase):
         }
 
         for upload_type in upload_types:
-            with self.subTest(format=type), TestDir() as test_dir:
-                if upload_type == "task":
-                    self._create_annotations(
-                        task, "CVAT for images 1.1 different types", "random"
-                    )
-                else:
-                    jobs = self._get_jobs(task_id)
-                    job_id = jobs[0]["id"]
-                    self._create_annotations_in_job(
-                        task, job_id, "CVAT for images 1.1 different types", "random"
-                    )
-
-                file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
-                self._export_task_annotations(
-                    self.admin, task_id, query_params=export_params, file_path=file_zip_name
-                )
-                self.assertEqual(osp.exists(file_zip_name), True)
-                url = self._generate_url_remove_tasks_annotations(task_id)
-                self._remove_annotations(url, self.admin)
-                if upload_type == "task":
-                    with open(file_zip_name, "rb") as binary_file:
-                        self._import_task_annotations(
-                            self.admin,
-                            task_id,
-                            binary_file,
-                            query_params={"format": "CVAT 1.1"},
+            with self.subTest(format=type):
+                with TestDir() as test_dir:
+                    if upload_type == "task":
+                        self._create_annotations(
+                            task, "CVAT for images 1.1 different types", "random"
                         )
-                else:
-                    jobs = self._get_jobs(task_id)
-                    with open(file_zip_name, "rb") as binary_file:
-                        self._import_job_annotations(
-                            self.admin,
-                            jobs[0]["id"],
-                            binary_file,
-                            query_params={"format": "CVAT 1.1"},
+                    else:
+                        jobs = self._get_jobs(task_id)
+                        job_id = jobs[0]["id"]
+                        self._create_annotations_in_job(
+                            task, job_id, "CVAT for images 1.1 different types", "random"
                         )
 
-                self.assertEqual(osp.exists(file_zip_name), True)
-                response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
-                self.assertEqual(len(response.data["shapes"]), 0)
-                self.assertEqual(len(response.data["tracks"]), 2)
+                    file_zip_name = osp.join(test_dir, f"{test_name}_{upload_type}.zip")
+                    self._export_task_annotations(
+                        self.admin, task_id, query_params=export_params, file_path=file_zip_name
+                    )
+                    self.assertEqual(osp.exists(file_zip_name), True)
+                    url = self._generate_url_remove_tasks_annotations(task_id)
+                    self._remove_annotations(url, self.admin)
+                    if upload_type == "task":
+                        with open(file_zip_name, "rb") as binary_file:
+                            self._import_task_annotations(
+                                self.admin,
+                                task_id,
+                                binary_file,
+                                query_params={"format": "CVAT 1.1"},
+                            )
+                    else:
+                        jobs = self._get_jobs(task_id)
+                        with open(file_zip_name, "rb") as binary_file:
+                            self._import_job_annotations(
+                                self.admin,
+                                jobs[0]["id"],
+                                binary_file,
+                                query_params={"format": "CVAT 1.1"},
+                            )
+
+                    self.assertEqual(osp.exists(file_zip_name), True)
+                    response = self._get_request(f"/api/tasks/{task_id}/annotations", self.admin)
+                    self.assertEqual(len(response.data["shapes"]), 0)
+                    self.assertEqual(len(response.data["tracks"]), 2)
 
     def test_api_v2_dump_and_upload_with_objects_type_is_track_and_outside_property(self):
         test_name = self._testMethodName
@@ -1487,6 +1497,7 @@ class ExportBehaviorTest(_DbTestBase):
         pass
 
     def setUp(self):
+        super().setUp()
         self.export_cache_lock = multiprocessing.Lock()
 
     @contextmanager
@@ -1621,9 +1632,9 @@ class ExportBehaviorTest(_DbTestBase):
         EXPORT_CACHE_LOCK_ACQUISITION_TIMEOUT = EXPORT_CACHE_LOCK_TTL * 2
 
         def _export(*_, task_id: int):
+            import sys
             from os import replace as original_replace
             from os.path import exists as original_exists
-            import sys
 
             from cvat.apps.dataset_manager.task import export_task as original_export_task
             from cvat.apps.dataset_manager.views import log_exception as original_log_exception
@@ -1701,7 +1712,7 @@ class ExportBehaviorTest(_DbTestBase):
                     side_effect(set_condition, clear_removed_the_file),
                 )
 
-                clear_export_cache(file_path=Path(file_path))
+                ExportCacheDirectoryCleaner().cron_cleanup()
                 set_condition(clear_has_been_finished)
 
                 mock_os_remove.assert_not_called()
@@ -1853,9 +1864,16 @@ class ExportBehaviorTest(_DbTestBase):
                 mock_osp_exists.assert_called()
 
         def _clear(*_, file_path: str):
+            import sys
             from os import remove as original_remove
 
             from cvat.apps.dataset_manager.util import LockNotAvailableError
+
+            swallowed_exceptions = []
+
+            def patched_log_exception(logger=None, exc_info=True):
+                cur_exc_info = sys.exc_info() if exc_info is True else exc_info
+                swallowed_exceptions.append(cur_exc_info[1] if cur_exc_info else None)
 
             with (
                 patch(
@@ -1869,20 +1887,20 @@ class ExportBehaviorTest(_DbTestBase):
                 patch(
                     "cvat.apps.dataset_manager.views.TTL_CONSTS", new={"task": timedelta(seconds=0)}
                 ),
+                patch("cvat.apps.dataset_manager.cron.log_exception", new=patched_log_exception),
             ):
                 mock_os_remove.side_effect = chain_side_effects(
                     original_remove,
                     side_effect(set_condition, clear_removed_the_file),
                 )
 
-                exited_by_timeout = False
-                try:
-                    clear_export_cache(file_path=Path(file_path))
-                except LockNotAvailableError:
-                    # should come from waiting for get_export_cache_lock
-                    exited_by_timeout = True
+                ExportCacheDirectoryCleaner().cron_cleanup()
 
-                assert exited_by_timeout, "LockNotAvailableError should have been raised"
+                # should come from waiting for get_export_cache_lock
+                assert any(
+                    isinstance(e, LockNotAvailableError) for e in swallowed_exceptions
+                ), "LockNotAvailableError should have been raised"
+                mock_os_remove.assert_not_called()
 
         # The problem checked is TOCTOU / race condition for file existence check and
         # further file reading / removal. There are several possible variants of the problem.
@@ -1994,29 +2012,101 @@ class ExportBehaviorTest(_DbTestBase):
             with get_export_cache_lock("test_export_path", ttl=lock_time, acquire_timeout=5):
                 sleep(lock_time + 1)
 
+    def _run_export_job_via_worker(self, rq_id: str):
+        queue = django_rq.get_queue(settings.CVAT_QUEUES.EXPORT_DATA.value)
+
+        with patch.object(queue.connection, "client_list", return_value=[]):
+            worker = rq.worker.SimpleWorker([queue], connection=queue.connection)
+
+        worked = worker.work(burst=True)
+        self.assertTrue(worked, "The worker did not process any job")
+        return queue.fetch_job(rq_id)
+
     def test_export_can_request_retry_on_locking_failure(self):
+        from cvat.apps.dataset_manager.util import LockNotAvailableError
+
         format_name = "CVAT for images 1.1"
         task = self._setup_task_with_annotations(format_name=format_name)
         task_id = task["id"]
 
+        set_rq_async_mode(is_async=True)
+        self.addCleanup(set_rq_async_mode, is_async=False)
+        self.addCleanup(clear_rq_jobs)
+
+        real_get_export_cache_lock = get_export_cache_lock
+        lock_calls = []
+
+        def flaky_get_export_cache_lock(*args, **kwargs):
+            lock_calls.append((args, kwargs))
+            if len(lock_calls) == 1:
+                raise LockNotAvailableError
+            return real_get_export_cache_lock(*args, **kwargs)
+
+        with (
+            patch(
+                "cvat.apps.dataset_manager.views.get_export_cache_lock",
+                side_effect=flaky_get_export_cache_lock,
+            ),
+            override_settings(EXPORT_JOB_RETRY_INTERVALS=[0]),
+        ):
+            response = self._post_request(
+                f"/api/tasks/{task_id}/dataset/export",
+                self.admin,
+                query_params={"format": format_name, "save_images": True},
+            )
+            self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+            rq_id = response.json()["rq_id"]
+
+            job = self._run_export_job_via_worker(rq_id=rq_id)
+
+        self.assertGreaterEqual(len(lock_calls), 2, "The lock error should have caused a retry")
+        self.assertEqual(job.get_status(refresh=True), RQJobStatus.FINISHED)
+        self.assertEqual(job.retries_left, 0)
+
+        response = self._check_request_status(self.admin, rq_id)
+        self.assertIsNotNone(response.json()["result_url"])
+
+    def test_export_is_scheduled_for_retry_on_locking_failure(self):
         from cvat.apps.dataset_manager.util import LockNotAvailableError
+
+        format_name = "CVAT for images 1.1"
+        task = self._setup_task_with_annotations(format_name=format_name)
+        task_id = task["id"]
+
+        set_rq_async_mode(is_async=True)
+        self.addCleanup(set_rq_async_mode, is_async=False)
+        self.addCleanup(clear_rq_jobs)
 
         with (
             patch(
                 "cvat.apps.dataset_manager.views.get_export_cache_lock",
                 side_effect=LockNotAvailableError,
             ) as mock_get_export_cache_lock,
-            patch("cvat.apps.dataset_manager.views.rq.get_current_job") as mock_rq_get_current_job,
-            patch("cvat.apps.dataset_manager.views.django_rq.get_scheduler"),
-            self.assertRaises(LockNotAvailableError),
+            override_settings(EXPORT_JOB_RETRY_INTERVALS=[60]),
         ):
-            mock_rq_job = MagicMock(timeout=5)
-            mock_rq_get_current_job.return_value = mock_rq_job
+            response = self._post_request(
+                f"/api/tasks/{task_id}/dataset/export",
+                self.admin,
+                query_params={"format": format_name, "save_images": True},
+            )
+            self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+            rq_id = response.json()["rq_id"]
 
-            export(dst_format=format_name, task_id=task_id)
+            job = self._run_export_job_via_worker(rq_id=rq_id)
 
         mock_get_export_cache_lock.assert_called()
-        self.assertEqual(mock_rq_job.retries_left, 1)
+        self.assertEqual(job.get_status(refresh=True), RQJobStatus.SCHEDULED)
+        self.assertEqual(job.retries_left, 0)
+        self.assertIn(
+            job.id,
+            django_rq.get_queue(
+                settings.CVAT_QUEUES.EXPORT_DATA.value
+            ).scheduled_job_registry.get_job_ids(),
+        )
+
+        response = self._get_request(f"/api/requests/{rq_id}", self.admin)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["status"], "queued")
 
     def test_export_can_reuse_older_file_if_still_relevant(self):
         format_name = "CVAT for images 1.1"
@@ -2080,7 +2170,6 @@ class ExportBehaviorTest(_DbTestBase):
                 ),
                 patch("cvat.apps.dataset_manager.views.shutil.move") as mock_os_replace,
                 patch("cvat.apps.dataset_manager.views.task.export_task") as mock_export_fn,
-                patch("cvat.apps.dataset_manager.views.django_rq.get_scheduler"),
             ):
                 mock_export_fn.side_effect = chain_side_effects(
                     side_effect(set_condition, export_1_checked_file),
@@ -2120,7 +2209,6 @@ class ExportBehaviorTest(_DbTestBase):
                 ),
                 patch("cvat.apps.dataset_manager.views.shutil.move") as mock_os_replace,
                 patch("cvat.apps.dataset_manager.views.task.export_task") as mock_export_fn,
-                patch("cvat.apps.dataset_manager.views.django_rq.get_scheduler"),
             ):
                 mock_export_fn.side_effect = chain_side_effects(
                     side_effect(set_condition, export_2_checked_file),
@@ -2207,15 +2295,20 @@ class ExportBehaviorTest(_DbTestBase):
             patch("cvat.apps.dataset_manager.views.TTL_CONSTS", new={"task": timedelta(seconds=0)}),
         ):
             export_path = export(dst_format=format_name, task_id=task_id)
-            clear_export_cache(file_path=Path(export_path))
+            self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 1)
 
         self.assertFalse(osp.isfile(export_path))
 
-    def test_cleanup_can_fail_if_no_file(self):
-        from cvat.apps.dataset_manager.util import CacheFileOrDirPathParseError
+    def test_cleanup_can_skip_unparsable_files(self):
+        from cvat.apps.dataset_manager.util import ExportCacheManager
 
-        with self.assertRaises(CacheFileOrDirPathParseError):
-            clear_export_cache(file_path=Path("non existent file path"))
+        unparsable_file = Path(ExportCacheManager.ROOT) / "unparsable_file_name"
+        unparsable_file.touch()
+        try:
+            self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 0)
+            self.assertTrue(unparsable_file.is_file())
+        finally:
+            unparsable_file.unlink(missing_ok=True)
 
     def test_cleanup_can_defer_removal_if_file_is_used_recently(self):
         from os import remove as original_remove
@@ -2233,14 +2326,12 @@ class ExportBehaviorTest(_DbTestBase):
             ) as mock_os_remove,
         ):
             export_path = export(dst_format=format_name, task_id=task_id)
-            clear_export_cache(file_path=Path(export_path))
+            self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 0)
             mock_os_remove.assert_not_called()
 
         self.assertTrue(osp.isfile(export_path))
 
     def test_cleanup_cron_job_can_delete_cached_files(self):
-        from cvat.apps.dataset_manager.cron import cleanup_export_cache_directory
-
         def _get_project_task_job_ids():
             project = self._create_project(projects["main"])
             project_id = project["id"]
@@ -2273,13 +2364,8 @@ class ExportBehaviorTest(_DbTestBase):
                         "cvat.apps.dataset_manager.views.TTL_CONSTS",
                         new={resource: timedelta(seconds=0)},
                     ),
-                    patch(
-                        "cvat.apps.dataset_manager.cron.clear_export_cache",
-                        side_effect=clear_export_cache,
-                    ) as mock_clear_export_cache,
                 ):
-                    cleanup_export_cache_directory()
-                    mock_clear_export_cache.assert_called_once()
+                    self.assertEqual(ExportCacheDirectoryCleaner().cron_cleanup(), 1)
 
                 self.assertFalse(osp.exists(export_path))
 
@@ -2409,7 +2495,7 @@ class ProjectDumpUpload(_DbTestBase):
                 query_params={"format": dump_format_name},
                 file_path=file_zip_name,
             )
-            folder_name = osp.join(test_dir, "folder")
+            folder_name = osp.join(test_dir, f"folder")
             with zipfile.ZipFile(file_zip_name, "r") as zip_ref:
                 zip_ref.extractall(folder_name)
             dataset = Dataset.import_from(folder_name, "datumaro")

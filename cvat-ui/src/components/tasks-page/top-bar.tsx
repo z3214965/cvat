@@ -133,7 +133,7 @@ export default function TopBarComponent(props: Readonly<VisibleTopBarProps>): JS
                                     onClick={(): void => history.push('/tasks/create?type=audio')}
                                     icon={<SoundOutlined />}
                                 >
-                                    Create a new audio task
+                                    新建音频任务
                                 </Button>
                                 <Button
                                     className='cvat-create-multi-tasks-button'

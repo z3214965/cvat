@@ -401,7 +401,7 @@ function factory() {
                   var exports = Module["instantiateWasm"](info, receiveInstance);
                   return exports
               } catch (e) {
-                  err("Module.instantiateWasm回调函数执行失败：" + e);
+                  err("Module.instantiateWasm 回调函数执行失败：" + e);
                   return false
               }
           }

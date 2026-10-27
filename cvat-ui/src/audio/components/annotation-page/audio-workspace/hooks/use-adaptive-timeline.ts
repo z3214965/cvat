@@ -8,6 +8,7 @@ import TimelinePlugin, { type TimelinePluginOptions } from 'wavesurfer.js/dist/p
 import { formatSecondsWithPrecision } from 'audio/utils/format-audio-time';
 import { MINIMAP_TIMELINE_HEIGHT } from 'audio/utils/waveform-geometry';
 
+import OptimizedTimelinePlugin from '../plugins/optimized-timeline-plugin';
 import type { WaveSurferRuntime } from './use-audio-waveform';
 
 interface TimelineDensityBand {
@@ -132,7 +133,7 @@ let prevMPPS = Number.MAX_SAFE_INTEGER;
 for (const band of DENSITY_BANDS) {
     const currMpps = band.minPixelsPerSecond;
     if (currMpps > prevMPPS) {
-        throw new Error(`DENSITY_BANDS must be sorted by MPPS descending. Conflicting band: ${JSON.stringify(band)}`);
+        throw new Error(`DENSITY_BANDS 必须按 MPPS 降序排列。冲突波段：${JSON.stringify (band)}`);
     }
     prevMPPS = currMpps;
 }
@@ -166,7 +167,7 @@ export function useAdaptiveTimeline(
         if (previousBandRef.current === band) return;
 
         timeline.destroy();
-        const nextTimeline = TimelinePlugin.create(band.options);
+        const nextTimeline = OptimizedTimelinePlugin.create(band.options);
         timelineRef.current = nextTimeline;
         previousBandRef.current = band;
         instance.registerPlugin(nextTimeline);

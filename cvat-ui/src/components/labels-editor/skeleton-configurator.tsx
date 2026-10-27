@@ -746,7 +746,10 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                             showUploadList={false}
                             beforeUpload={(file: RcFile) => {
                                 if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                                    notification.error({message: `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`});
+                                    notification.error({
+                                        message:
+                                            `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`,
+                                    });
                                 }
                                 this.setState({ image: file }, () => {
                                     this.setCanvasBackground();
@@ -879,7 +882,9 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                                         this.labels = {};
                                         this.setupSkeleton(svg, labels as Record<string, LabelOptColor>);
                                     } catch (_: unknown) {
-                                        notification.error({ message: '错误的骨架结构' });
+                                        notification.error({
+                                            message: '错误的骨架结构',
+                                        });
                                     }
                                 });
 

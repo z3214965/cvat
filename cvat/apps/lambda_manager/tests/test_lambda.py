@@ -4,17 +4,17 @@
 # SPDX-License-Identifier: MIT
 
 import base64
-from collections import Counter
 import io
-from itertools import groupby
 import json
 import os
+from collections import Counter
+from itertools import groupby
 from unittest import mock, skip
 
+import requests
 from django.core.signing import TimestampSigner
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from PIL import Image
-import requests
 from rest_framework import status
 
 from cvat.apps.engine.tests.utils import (
@@ -26,7 +26,6 @@ from cvat.apps.engine.tests.utils import (
     get_paginated_collection,
 )
 from cvat.apps.iam.models import User
-
 
 LAMBDA_ROOT_PATH = "/api/lambda"
 LAMBDA_FUNCTIONS_PATH = f"{LAMBDA_ROOT_PATH}/functions"
@@ -262,20 +261,20 @@ class LambdaTestCases(_LambdaTestCaseBase):
         super().setUp()
 
         images_main_task = self._generate_task_images(3)
-        images_assigneed_to_user_task = self._generate_task_images(3)
+        images_assigned_to_user_task = self._generate_task_images(3)
         self.main_task = self._create_task(tasks["main"], images_main_task, owner=self.owner)
-        self.assigneed_to_user_task = self._create_task(
-            tasks["assigneed_to_user"], images_assigneed_to_user_task, owner=self.owner
+        self.assigned_to_user_task = self._create_task(
+            tasks["assigned_to_user"], images_assigned_to_user_task, owner=self.owner
         )
         self._patch_request(
-            f"/api/tasks/{self.assigneed_to_user_task['id']}",
+            f"/api/tasks/{self.assigned_to_user_task['id']}",
             self.admin,
             data={"assignee_id": self.user.id},
         )
 
         response = self._get_request(
-            "/api/jobs",
-            query_params={"task_id": self.assigneed_to_user_task["id"]},
+            f"/api/jobs",
+            query_params={"task_id": self.assigned_to_user_task["id"]},
             user=self.admin,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -381,7 +380,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         request_ids = {}
         for name, task in (
             ("main", self.main_task),
-            ("assigned", self.assigneed_to_user_task),
+            ("assigned", self.assigned_to_user_task),
         ):
             response = self._post_request(
                 LAMBDA_REQUESTS_PATH,
@@ -440,7 +439,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         response = self._post_request(
             LAMBDA_REQUESTS_PATH,
             self.admin,
-            data={**data_main_task, "task": self.assigneed_to_user_task["id"]},
+            data={**data_main_task, "task": self.assigned_to_user_task["id"]},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         id_request = response.data["id"]
@@ -460,7 +459,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
             self.admin,
             data={
                 **data_main_task,
-                "task": self.assigneed_to_user_task["id"],
+                "task": self.assigned_to_user_task["id"],
                 "job": self.assigned_to_user_job_id,
             },
         )
@@ -492,7 +491,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
     def test_api_v2_lambda_requests_delete_finished_request(self):
         data = {
             "function": id_function_detector,
-            "task": self.assigneed_to_user_task["id"],
+            "task": self.assigned_to_user_task["id"],
             "cleanup": True,
             "mapping": {
                 "car": {"name": "car"},
@@ -554,9 +553,9 @@ class LambdaTestCases(_LambdaTestCaseBase):
                     "car": {"name": "car"},
                 },
             }
-            data_assigneed_to_user_task = {
+            data_assigned_to_user_task = {
                 "function": id_func,
-                "task": self.assigneed_to_user_task["id"],
+                "task": self.assigned_to_user_task["id"],
                 "cleanup": False,
                 "max_distance": 70,
                 "mapping": {
@@ -572,7 +571,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
             self._delete_lambda_request(response.data["id"])
 
             response = self._post_request(
-                LAMBDA_REQUESTS_PATH, self.user, data=data_assigneed_to_user_task
+                LAMBDA_REQUESTS_PATH, self.user, data=data_assigned_to_user_task
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             for key in expected_keys_in_response_requests:
@@ -755,8 +754,8 @@ class LambdaTestCases(_LambdaTestCaseBase):
                 "car": {"name": "car"},
             },
         }
-        data_assigneed_to_user_task = {
-            "task": self.assigneed_to_user_task["id"],
+        data_assigned_to_user_task = {
+            "task": self.assigned_to_user_task["id"],
             "frame": 0,
             "cleanup": True,
             "mapping": {
@@ -772,7 +771,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         response = self._post_request(
             f"{LAMBDA_FUNCTIONS_PATH}/{id_function_detector}",
             self.user,
-            data=data_assigneed_to_user_task,
+            data=data_assigned_to_user_task,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -941,8 +940,8 @@ class LambdaTestCases(_LambdaTestCaseBase):
                 [45.01, 45.99],
             ],
         }
-        data_assigneed_to_user_task = {
-            "task": self.assigneed_to_user_task["id"],
+        data_assigned_to_user_task = {
+            "task": self.assigned_to_user_task["id"],
             "frame": 0,
             "threshold": 0.1,
             "pos_points": [
@@ -967,7 +966,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         response = self._post_request(
             f"{LAMBDA_FUNCTIONS_PATH}/{id_function_interactor}",
             self.user,
-            data=data_assigneed_to_user_task,
+            data=data_assigned_to_user_task,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1024,8 +1023,8 @@ class LambdaTestCases(_LambdaTestCaseBase):
                 "frame": 0,
                 "shapes": [{"type": "rectangle", "points": [12.12, 34.45, 54.0, 76.12]}],
             }
-            data_assigneed_to_user_task = {
-                "task": self.assigneed_to_user_task["id"],
+            data_assigned_to_user_task = {
+                "task": self.assigned_to_user_task["id"],
                 "frame": 0,
                 "shapes": [{"type": "rectangle", "points": [12.12, 34.45, 54.0, 76.12]}],
             }
@@ -1038,7 +1037,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
             response = self._post_request(
                 f"{LAMBDA_FUNCTIONS_PATH}/{id_func}",
                 self.user,
-                data=data_assigneed_to_user_task,
+                data=data_assigned_to_user_task,
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1141,8 +1140,8 @@ class LambdaTestCases(_LambdaTestCaseBase):
             "threshold": 0.5,
             "max_distance": 55,
         }
-        data_assigneed_to_user_task = {
-            "task": self.assigneed_to_user_task["id"],
+        data_assigned_to_user_task = {
+            "task": self.assigned_to_user_task["id"],
             "frame0": 0,
             "frame1": 1,
             "boxes0": [
@@ -1221,7 +1220,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         response = self._post_request(
             f"{LAMBDA_FUNCTIONS_PATH}/{id_function_reid_with_response_data}",
             self.user,
-            data=data_assigneed_to_user_task,
+            data=data_assigned_to_user_task,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1242,7 +1241,7 @@ class LambdaTestCases(_LambdaTestCaseBase):
         response = self._post_request(
             f"{LAMBDA_FUNCTIONS_PATH}/{id_function_reid_with_no_response_data}",
             self.user,
-            data=data_assigneed_to_user_task,
+            data=data_assigned_to_user_task,
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -1591,7 +1590,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = self.task_rel_frame_range
         self.assertEqual(
-            dict.fromkeys(requested_frame_range, 1),
+            {frame: 1 for frame in requested_frame_range},
             {
                 frame: len(list(group))
                 for frame, group in groupby(annotations["shapes"], key=lambda a: a["frame"])
@@ -1671,7 +1670,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = range(job["start_frame"], job["stop_frame"] + 1)
         self.assertEqual(
-            dict.fromkeys(requested_frame_range, 1),
+            {frame: 1 for frame in requested_frame_range},
             {
                 frame: len(list(group))
                 for frame, group in groupby(annotations["shapes"], key=lambda a: a["frame"])
@@ -1764,7 +1763,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
         self.assertEqual(len(annotations["tracks"]), 0)
 
         self.assertEqual(
-            dict.fromkeys(requested_frame_range, 1),
+            {frame: 1 for frame in requested_frame_range},
             Counter(a["frame"] for a in annotations["shapes"]),
         )
 
@@ -1872,7 +1871,7 @@ class TestComplexFrameSetupCases(_LambdaTestCaseBase):
 
         requested_frame_range = self.task_rel_frame_range
         self.assertEqual(
-            dict.fromkeys(requested_frame_range, 1),
+            {frame: 1 for frame in requested_frame_range},
             Counter(a["frame"] for a in annotations["shapes"]),
         )
 

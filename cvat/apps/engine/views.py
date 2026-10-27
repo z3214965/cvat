@@ -3,28 +3,27 @@
 #
 # SPDX-License-Identifier: MIT
 
-from abc import ABCMeta, abstractmethod
-from contextlib import suppress
-from copy import copy
-from datetime import UTC, datetime
 import itertools
 import os
 import os.path as osp
 import re
 import shutil
 import textwrap
-import traceback
+import zlib
+from abc import ABCMeta, abstractmethod
+from contextlib import suppress
+from copy import copy
+from datetime import datetime, timezone
 from types import SimpleNamespace
 from typing import Any, cast
-import zlib
 
+import django_rq
 from attr.converters import to_bool
 from django.conf import settings
 from django.core.files.storage import storages
 from django.db import IntegrityError, transaction
 from django.db.models.query import Prefetch, prefetch_related_objects
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
-import django_rq
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -42,6 +41,7 @@ from rest_framework.permissions import SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rq.job import Job as RQJob
+from rq.job import JobStatus as RQJobStatus
 
 import cvat.apps.dataset_manager as dm
 from cvat.apps.dataset_manager.serializers import DatasetFormatsSerializer
@@ -103,7 +103,12 @@ from cvat.apps.engine.permissions import (
     UserPermission,
     get_iam_context,
 )
-from cvat.apps.engine.rq import ImportRequestId, ImportRQMeta, RQMetaWithFailureInfo
+from cvat.apps.engine.rq import (
+    ImportRequestId,
+    ImportRQMeta,
+    RQMetaWithFailureInfo,
+    save_job_failure_metadata,
+)
 from cvat.apps.engine.serializers import (
     AboutSerializer,
     AnnotationFileSerializer,
@@ -162,12 +167,12 @@ from utils.dataset_manifest import ImageManifestManager
 from . import models
 from .log import ServerLogManager
 
-
 slogger = ServerLogManager(__name__)
 
 _UPLOAD_PARSER_CLASSES = api_settings.DEFAULT_PARSER_CLASSES + [MultiPartParser]
 
 _DATA_CHECKSUM_HEADER_NAME = "X-Checksum"
+_DATA_CHUNK_SIZE_HEADER_NAME = "X-Chunk-Size"
 _DATA_UPDATED_DATE_HEADER_NAME = "X-Updated-Date"
 _RETRY_AFTER_TIMEOUT = 10
 
@@ -296,7 +301,7 @@ class ServerViewSet(viewsets.ViewSet):
                 return Response(serializer.data)
         else:
             return Response(
-                f"{directory_param} is an invalid directory",
+                "{} is an invalid directory".format(directory_param),
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -839,7 +844,7 @@ class _DataGetter(metaclass=ABCMeta):
             return HttpResponse(data.data, content_type=data.mime)
         else:
             return Response(
-                data=f"unknown data type {self.type}.", status=status.HTTP_400_BAD_REQUEST
+                data="unknown data type {}.".format(self.type), status=status.HTTP_400_BAD_REQUEST
             )
 
     def __call__(self):
@@ -881,11 +886,12 @@ class _DataGetter(metaclass=ABCMeta):
 
     def _make_chunk_response_headers(
         self,
-        checksum: str,
+        chunk_data: DataWithMeta,
         updated_date: datetime,
     ) -> dict[str, str]:
         return {
-            _DATA_CHECKSUM_HEADER_NAME: str(checksum or ""),
+            _DATA_CHECKSUM_HEADER_NAME: self._get_chunk_checksum(chunk_data),
+            _DATA_CHUNK_SIZE_HEADER_NAME: str(len(chunk_data.data.getbuffer())),
             _DATA_UPDATED_DATE_HEADER_NAME: serializers.DateTimeField().to_representation(
                 updated_date
             ),
@@ -925,7 +931,7 @@ class _TaskDataGetter(_DataGetter):
 
     def _get_chunk_response_headers(self, chunk_data: DataWithMeta) -> dict[str, str]:
         return self._make_chunk_response_headers(
-            self._get_chunk_checksum(chunk_data),
+            chunk_data,
             self._db_task.get_chunks_updated_date(),
         )
 
@@ -1000,7 +1006,7 @@ class _JobDataGetter(_DataGetter):
 
     def _get_chunk_response_headers(self, chunk_data: DataWithMeta) -> dict[str, str]:
         return self._make_chunk_response_headers(
-            self._get_chunk_checksum(chunk_data), self._db_job.segment.chunks_updated_date
+            chunk_data, self._db_job.segment.chunks_updated_date
         )
 
 
@@ -1155,7 +1161,7 @@ class TaskViewSet(
         "dimension",
         "validation_mode",
     )
-    filter_fields = (*simple_filters, "id", "updated_date")
+    filter_fields = (*simple_filters, "id", "updated_date", "created_date")
     filter_description = textwrap.dedent("""
 
         There are few examples for complex filtering tasks:\n
@@ -1313,14 +1319,14 @@ class TaskViewSet(
         return osp.join(upload_dir, filename)
 
     def _maybe_append_upload_info_entry(self, filename: str):
-        task_data = cast("Data", self._object.data)
+        task_data = cast(Data, self._object.data)
 
         filename = self._prepare_upload_info_entry(filename)
         task_data.client_files.get_or_create(file=filename)
 
     def _append_upload_info_entries(self, client_files: list[dict[str, Any]]):
         # batch version of _maybe_append_upload_info_entry() without optional insertion
-        task_data = cast("Data", self._object.data)
+        task_data = cast(Data, self._object.data)
         db_utils.bulk_create(
             ClientFile,
             [
@@ -1353,7 +1359,7 @@ class TaskViewSet(
                 "Mismatching files: {}{}".format(
                     self._UPLOAD_FILE_ORDER_FIELD,
                     ", ".join(mismatching_display),
-                    f" (and {remaining_count} more). " if remaining_count > 0 else "",
+                    f" (and {remaining_count} more). " if 0 < remaining_count else "",
                 )
             )
 
@@ -1476,7 +1482,7 @@ class TaskViewSet(
     @extend_schema(
         methods=["POST"],
         summary="Attach data to a task",
-        description=textwrap.dedent(f"""\
+        description=textwrap.dedent("""\
             Allows to upload data (images, video, etc.) to a task.
             Supports the TUS open file uploading protocol (https://tus.io/).
 
@@ -1502,9 +1508,9 @@ class TaskViewSet(
 
             The 'Upload-Finish' request allows to specify the uploaded files should be ordered.
             This may be needed if the files can be sent unordered. To state that the input files
-            are sent ordered, pass an empty list of files in the '{_UPLOAD_FILE_ORDER_FIELD}' field.
+            are sent ordered, pass an empty list of files in the '{upload_file_order_field}' field.
             If the files are sent unordered, the ordered file list is expected
-            in the '{_UPLOAD_FILE_ORDER_FIELD}' field. It must be a list of string file paths,
+            in the '{upload_file_order_field}' field. It must be a list of string file paths,
             relative to the dataset root.
 
             Example:
@@ -1528,7 +1534,7 @@ class TaskViewSet(
             the `GET /api/requests/<rq_id>`, where **rq_id** is request ID returned for this request.
 
             Once data is attached to a task, it cannot be detached or replaced.
-        """),
+        """.format(upload_file_order_field=_UPLOAD_FILE_ORDER_FIELD)),
         # TODO: add a tutorial on this endpoint in the REST API docs
         request=DataSerializer(required=False),
         parameters=[
@@ -1599,6 +1605,14 @@ class TaskViewSet(
                 required=False,
                 response=[200, 206],
                 description="Data checksum, applicable for chunks only",
+            ),
+            OpenApiParameter(
+                _DATA_CHUNK_SIZE_HEADER_NAME,
+                location=OpenApiParameter.HEADER,
+                type=OpenApiTypes.INT,
+                required=False,
+                response=[200, 206, 416],
+                description="Decoded chunk size in bytes, applicable for chunks only",
             ),
             OpenApiParameter(
                 _DATA_UPDATED_DATE_HEADER_NAME,
@@ -2097,7 +2111,7 @@ class TaskViewSet(
     @action(detail=True, methods=["GET", "PATCH"], url_path="validation_layout")
     @transaction.atomic
     def validation_layout(self, request: ExtendedRequest, pk: int):
-        db_task = cast("models.Task", self.get_object())  # call check_object_permissions as well
+        db_task = cast(models.Task, self.get_object())  # call check_object_permissions as well
 
         validation_layout = getattr(db_task.data, "validation_layout", None)
 
@@ -2303,7 +2317,9 @@ class JobViewSet(
         )
         if validation_layout and validation_layout.mode == models.ValidationMode.GT_POOL:
             raise ValidationError(
-                f'GT jobs cannot be removed when task validation mode is "{models.ValidationMode.GT_POOL}"'
+                'GT jobs cannot be removed when task validation mode is "{}"'.format(
+                    models.ValidationMode.GT_POOL
+                )
             )
 
         super().perform_destroy(instance)
@@ -2588,6 +2604,30 @@ class JobViewSet(
                 required=False,
                 type=OpenApiTypes.INT,
                 description="A unique number value identifying chunk, starts from 0 for each job",
+            ),
+            OpenApiParameter(
+                _DATA_CHECKSUM_HEADER_NAME,
+                location=OpenApiParameter.HEADER,
+                type=OpenApiTypes.STR,
+                required=False,
+                response=[200, 206],
+                description="Data checksum, applicable for chunks only",
+            ),
+            OpenApiParameter(
+                _DATA_CHUNK_SIZE_HEADER_NAME,
+                location=OpenApiParameter.HEADER,
+                type=OpenApiTypes.INT,
+                required=False,
+                response=[200, 206, 416],
+                description="Decoded chunk size in bytes, applicable for chunks only",
+            ),
+            OpenApiParameter(
+                _DATA_UPDATED_DATE_HEADER_NAME,
+                location=OpenApiParameter.HEADER,
+                type=OpenApiTypes.DATETIME,
+                required=False,
+                response=[200, 206],
+                description="Data update date, applicable for chunks only",
             ),
         ],
         responses={
@@ -3270,7 +3310,9 @@ class UserViewSet(
     PartialUpdateModelMixin,
     mixins.DestroyModelMixin,
 ):
-    queryset = User.objects.prefetch_related("groups").all()
+    queryset = (
+        User.objects.select_related("profile").prefetch_related("groups", "emailaddress_set").all()
+    )
     iam_supports_organization_params = True
     iam_permission_class = UserPermission
 
@@ -3487,7 +3529,7 @@ class CloudStorageViewSet(
                 )
 
                 if not full_manifest_path.exists() or datetime.fromtimestamp(
-                    full_manifest_path.stat().st_mtime, tz=UTC
+                    full_manifest_path.stat().st_mtime, tz=timezone.utc
                 ) < storage_client.get_file_last_modified(manifest_path):
                     storage_client.download_file(manifest_path, full_manifest_path)
                 manifest = ImageManifestManager(
@@ -3867,11 +3909,16 @@ class AnnotationGuidesViewSet(
 
 
 def rq_exception_handler(rq_job: RQJob, exc_type: type[Exception], exc_value: Exception, tb):
-    rq_job_meta = RQMetaWithFailureInfo.for_job(rq_job)
-    rq_job_meta.formatted_exception = "".join(traceback.format_exception_only(exc_type, exc_value))
-    if rq_job.origin == settings.CVAT_QUEUES.CHUNKS.value:
-        rq_job_meta.exc_type = exc_type
-        rq_job_meta.exc_args = exc_value.args
-    rq_job_meta.save()
+    # NOTE @sosov: The worker has already re-queued/re-scheduled the job for another attempt
+    # that is why we can`t use redis_handler.utils.rq_job_will_be_retried there
+    if rq_job.get_status(refresh=False) in (RQJobStatus.QUEUED, RQJobStatus.SCHEDULED):
+        return True
+
+    # The global exception handlers, like this function, are called by RQ AFTER the job status is
+    # set to FAILED. In some queues (e.g. chunk and request), jobs already save failure metadata in
+    # on_failure(), which is called before RQ publishes status, so API readers can reconstruct the
+    # exception. Avoid writing it again here, only do this for jobs that have no such callback.
+    if RQMetaWithFailureInfo.for_job(rq_job).formatted_exception is None:
+        save_job_failure_metadata(rq_job, exc_type, exc_value)
 
     return True
