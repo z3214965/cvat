@@ -55,8 +55,8 @@ class RequestsManager {
     async listen(
         requestID: string,
         options: {
-            callback: (request: Request) => void;
-            initialRequest?: Request;
+            callback: (request: Request) => void,
+            initialRequest?: Request,
         },
     ): Promise<Request> {
         if (!requestID) {

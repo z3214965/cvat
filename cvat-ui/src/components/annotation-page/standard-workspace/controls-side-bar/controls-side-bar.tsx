@@ -86,7 +86,7 @@ const componentShortcuts = {
     },
     PASTE_SHAPE: {
         name: '粘贴图形',
-        description: '从 CVAT 内部剪贴板粘贴图形',
+        description: '从内部剪贴板粘贴图形',
         sequences: ['ctrl+v', 'command+v'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },

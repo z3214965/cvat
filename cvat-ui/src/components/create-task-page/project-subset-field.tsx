@@ -22,6 +22,12 @@ interface ProjectPartialWithSubsets {
     subsets: string[];
 }
 
+const subsetLabels: Record<string, string> = {
+    Train: '训练集',
+    Test: '测试集',
+    Validation: '验证集',
+};
+
 export default function ProjectSubsetField(props: Props): JSX.Element {
     const {
         projectId, projectSubsets, value, onChange,
@@ -62,7 +68,7 @@ export default function ProjectSubsetField(props: Props): JSX.Element {
     return (
         <Autocomplete
             value={internalValue}
-            placeholder='Input subset'
+            placeholder='输入子集名称'
             className='cvat-project-search-field cvat-project-subset-field'
             onSearch={setInternalValue}
             onSelect={(_value) => {
@@ -75,7 +81,7 @@ export default function ProjectSubsetField(props: Props): JSX.Element {
             options={Array.from(new Set([...(internalValue ? [internalValue] : []), ...internalSubsets])).map(
                 (subset) => ({
                     value: subset,
-                    label: subset,
+                    label: subsetLabels[subset] || subset,
                 }),
             )}
         />

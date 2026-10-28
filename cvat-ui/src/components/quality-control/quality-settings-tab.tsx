@@ -158,7 +158,7 @@ function QualitySettingsTab(props: Readonly<Props>): JSX.Element | null {
                 {!requirementFormVisible && (
                     <Row justify='end' className='cvat-quality-settings-save-btn'>
                         <Col>
-                            <Button onClick={onSave} type='primary'>
+                            <Button onClick={onSave} type='primary' disabled={inherited}>
                                 保存
                             </Button>
                         </Col>

@@ -13,10 +13,9 @@ interface MenuItemsData {
     taskId: number;
     projectId: number | null;
     isAutomaticAnnotationEnabled: boolean;
-    isConsensusEnabled: boolean;
     isMergingConsensusEnabled: boolean;
     pluginActions: ReturnType<typeof usePlugins>;
-    onMergeConsensusJobs: (() => void) | null;
+    onMergeConsensusJobs: () => void;
     onOpenBugTracker: (() => void) | null;
     onUploadAnnotations: () => void;
     onExportDataset: () => void;
@@ -41,7 +40,6 @@ export default function TaskActionsItems(menuItemsData: MenuItemsData, taskMenuP
         projectId,
         pluginActions,
         isAutomaticAnnotationEnabled,
-        isConsensusEnabled,
         isMergingConsensusEnabled,
         onMergeConsensusJobs,
         onUploadAnnotations,
@@ -117,13 +115,11 @@ export default function TaskActionsItems(menuItemsData: MenuItemsData, taskMenuP
     //     disabled: isDisabled('quality_control'),
     // }, 70]);
 
-    if (isConsensusEnabled) {
-        menuItems.push([{
-            key: 'consensus_management',
-            label: withCount('共识管理', 'consensus_management', `/tasks/${taskId}/consensus`),
-            disabled: isDisabled('consensus_management'),
-        }, 75]);
-    }
+    menuItems.push([{
+        key: 'consensus_management',
+        label: withCount('共识管理', 'consensus_management', `/tasks/${taskId}/consensus`),
+        disabled: isDisabled('consensus_management'),
+    }, 75]);
 
     if (onMergeConsensusJobs) {
         menuItems.push([{

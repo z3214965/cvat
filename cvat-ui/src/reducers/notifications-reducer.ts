@@ -328,7 +328,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
                         ...state.messages,
                         auth: {
                             ...state.messages.auth,
-                            message: `如需使用账号，请先验证邮箱地址。我们已向 ${action.payload.userEmail} 发送一封包含验证链接的邮件。`,
+                            registerDone: {
+                                message: `要使用您的账号，请先验证邮箱地址。我们已向 ${action.payload.userEmail} 发送了一封包含验证链接的邮件。`,
+                            },
                         },
                     },
                 };
@@ -677,8 +679,7 @@ export default function (state = defaultState, action: AnyAction): Notifications
         }
         case ImportActionTypes.IMPORT_DATASET_FAILED: {
             const { instance, resource } = action.payload;
-            const message =
-                resource === 'annotation' ?
+            const message = resource === 'annotation' ?
                     `无法上传标注 [任务 #${instance?.taskId || instance.id}](/tasks/${instance?.taskId || instance.id})` :
                     `无法将数据集导入到 [项目 #${instance.id}](/projects/${instance.id})`;
             return {

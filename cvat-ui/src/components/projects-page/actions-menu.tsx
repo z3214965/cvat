@@ -226,6 +226,7 @@ function ProjectActionsComponent(props: Readonly<Props>): JSX.Element {
             onDeleteProject,
             selectedIds,
             isExportDatasetDisabled,
+            isQualityControlDisabled: projectInstance.dimension === DimensionType.DIMENSION_1D,
             t,
         }, props);
     }

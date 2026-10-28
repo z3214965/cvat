@@ -49,7 +49,7 @@ export interface AdvancedConfiguration {
     sortingMethod?: SortingMethod;
     useProjectSourceStorage?: boolean;
     useProjectTargetStorage?: boolean;
-    consensusReplicas?: number;
+    initialReplicas?: number;
     sourceStorage: StorageData;
     targetStorage: StorageData;
 }
@@ -61,7 +61,7 @@ export enum AdvancedConfigurationSection {
     IMAGE_QUALITY = 'imageQuality',
     FRAME_RANGE = 'frameRange',
     CHUNK_SIZE = 'chunkSize',
-    CONSENSUS = 'consensus',
+    REPLICAS = 'replicas',
     BUG_TRACKER = 'bugTracker',
     STORAGE = 'storage',
 }
@@ -73,13 +73,13 @@ export const CV_ADVANCED_CONFIGURATION_SECTIONS = [
     AdvancedConfigurationSection.IMAGE_QUALITY,
     AdvancedConfigurationSection.FRAME_RANGE,
     AdvancedConfigurationSection.CHUNK_SIZE,
-    AdvancedConfigurationSection.CONSENSUS,
+    AdvancedConfigurationSection.REPLICAS,
     AdvancedConfigurationSection.BUG_TRACKER,
     AdvancedConfigurationSection.STORAGE,
 ] as const;
 
 export const AUDIO_ADVANCED_CONFIGURATION_SECTIONS = [
-    AdvancedConfigurationSection.CONSENSUS,
+    AdvancedConfigurationSection.REPLICAS,
     AdvancedConfigurationSection.BUG_TRACKER,
     AdvancedConfigurationSection.STORAGE,
 ] as const;
@@ -92,7 +92,7 @@ const initialValues: AdvancedConfiguration = {
     sortingMethod: SortingMethod.LEXICOGRAPHICAL,
     useProjectSourceStorage: true,
     useProjectTargetStorage: true,
-    consensusReplicas: 0,
+    initialReplicas: 0,
 
     sourceStorage: {
         location: StorageLocation.LOCAL,
@@ -111,7 +111,7 @@ const defaultFieldsBySection = {
     [AdvancedConfigurationSection.IMAGE_QUALITY]: ['imageQuality'],
     [AdvancedConfigurationSection.FRAME_RANGE]: [],
     [AdvancedConfigurationSection.CHUNK_SIZE]: [],
-    [AdvancedConfigurationSection.CONSENSUS]: ['consensusReplicas'],
+    [AdvancedConfigurationSection.REPLICAS]: ['initialReplicas'],
     [AdvancedConfigurationSection.BUG_TRACKER]: [],
     [AdvancedConfigurationSection.STORAGE]: [
         'useProjectSourceStorage',
@@ -410,7 +410,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                 >
                     <Switch />
                 </Form.Item>
-                <Text className='cvat-text-color'>优先使用 zip 分块</Text>
+                <Text className='cvat-text-color'>优先使用zip分块</Text>
                 <Tooltip title='ZIP分块具有更好的质量，但它们需要更多的磁盘空间和下载时间。仅适用于视频'>
                     <QuestionCircleOutlined style={{ opacity: 0.5 }} />
                 </Tooltip>
@@ -462,26 +462,17 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         );
     }
 
-    private renderConsensusReplicas(): JSX.Element {
+    private renderInitialReplicas(): JSX.Element {
         return (
             <Form.Item
                 label='共识副本'
-                name='consensusReplicas'
-                rules={[
-                    {
-                        validator: isInteger({
-                            min: 0,
-                            max: 10,
-                            filter: (intValue: number): boolean => intValue !== 1,
-                        }),
-                    },
-                ]}
+                name='initialReplicas'
+                rules={[{ validator: isInteger({ min: 0 }) }]}
             >
                 <Input
                     size='large'
                     type='number'
                     min={0}
-                    max={10}
                     step={1}
                 />
             </Form.Item>
@@ -538,7 +529,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
         const hasImageQuality = this.hasSection(AdvancedConfigurationSection.IMAGE_QUALITY);
         const hasFrameRange = this.hasSection(AdvancedConfigurationSection.FRAME_RANGE);
         const hasChunkSize = this.hasSection(AdvancedConfigurationSection.CHUNK_SIZE);
-        const hasConsensus = this.hasSection(AdvancedConfigurationSection.CONSENSUS);
+        const hasReplicas = this.hasSection(AdvancedConfigurationSection.REPLICAS);
         const hasBugTracker = this.hasSection(AdvancedConfigurationSection.BUG_TRACKER);
         const hasStorage = this.hasSection(AdvancedConfigurationSection.STORAGE);
 
@@ -587,10 +578,10 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
                         <Col span={7}>{this.renderChunkSize()}</Col>
                     </Row>
                 )}
-                {hasConsensus && (
+                {hasReplicas && (
                     <Row justify='start'>
                         <Col span={7}>
-                            {this.renderConsensusReplicas()}
+                            {this.renderInitialReplicas()}
                         </Col>
                     </Row>
                 )}

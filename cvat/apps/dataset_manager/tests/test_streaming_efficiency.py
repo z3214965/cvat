@@ -10,7 +10,6 @@ from datumaro.components import media
 from datumaro.components.dataset import StreamDataset
 from datumaro.components.dataset_base import CategoriesInfo, DatasetBase, DatasetItem
 from django.contrib.auth.models import Group
-import numpy as np
 from rest_framework import status
 from rq.job import Job as RQJob
 

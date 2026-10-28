@@ -74,7 +74,7 @@ function ChangeColorItem({
             onClick={onChangeColorClick}
             className='cvat-audio-region-menu-change-color'
         >
-            {`Change ${colorBy.toLowerCase()} color`}
+            {`更改${colorBy.toLowerCase()}颜色`}
         </Button>
     );
 }
@@ -95,7 +95,7 @@ export default function AudioRegionItemMenu(props: Props): MenuProps {
     items.push(
         {
             key: MenuKeys.FIT_INTERVAL,
-            label: <Button type='link' icon={<ArrowsAltOutlined />} onClick={props.onFitInterval}>Fit interval</Button>,
+            label: <Button type='link' icon={<ArrowsAltOutlined />} onClick={props.onFitInterval}>适配区间</Button>,
         },
         { type: 'divider' },
         {

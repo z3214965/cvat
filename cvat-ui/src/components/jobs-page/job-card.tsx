@@ -10,7 +10,7 @@ import Card from 'antd/lib/card';
 import Descriptions from 'antd/lib/descriptions';
 import { MoreOutlined } from '@ant-design/icons';
 
-import { Job, JobType, JobStage, JobStageCH, JobState, JobStateCH } from 'cvat-core-wrapper';
+import { Job, JobType } from 'cvat-core-wrapper';
 import { useCardHeightHOC, useContextMenuClick } from 'utils/hooks';
 import Preview from 'components/common/preview';
 import { CombinedState } from 'reducers';

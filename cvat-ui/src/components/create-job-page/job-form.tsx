@@ -141,8 +141,8 @@ function JobForm(props: Props): JSX.Element {
         <Col key={JobFormSection.JOB_TYPE}>
             <Form.Item
                 name='type'
-                label='任务类型'
-                rules={[{ required: true, message: '请指定任务类型' }]}
+                label='作业类型'
+                rules={[{ required: true, message: '请指定作业类型' }]}
             >
                 <Select
                     virtual={false}
@@ -172,7 +172,7 @@ function JobForm(props: Props): JSX.Element {
                         随机
                     </Select.Option>
                     <Select.Option value={FrameSelectionMethod.RANDOM_PER_JOB}>
-                        每个任务随机
+                        每个作业随机
                     </Select.Option>
                 </Select>
             </Form.Item>
@@ -188,7 +188,7 @@ function JobForm(props: Props): JSX.Element {
                         label={(
                             <Space>
                                 {frameSelectionMethod === FrameSelectionMethod.RANDOM ?
-                                    '数量' : '单任务数量'}
+                                    '数量' : '单作业数量'}
                                 <CVATTooltip title={description}>
                                     <QuestionCircleOutlined
                                         style={{ opacity: 0.5 }}

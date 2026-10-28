@@ -18,7 +18,7 @@ import { CombinedState } from 'reducers';
 import { exportActions } from 'actions/export-actions';
 import { importActions } from 'actions/import-actions';
 import { mergeConsensusJobsAsync } from 'actions/consensus-actions';
-import { deleteJobAsync, updateJobAsync } from 'actions/jobs-actions';
+import { deleteJobAsync, jobsActions, updateJobAsync } from 'actions/jobs-actions';
 import { makeBulkOperationAsync } from 'actions/bulk-actions';
 import { selectionActions } from 'actions/selection-actions';
 
@@ -52,10 +52,12 @@ function JobActionsComponent(
         mergingConsensus,
         selectedIds,
         allJobs,
+        currentOrganization,
     } = useSelector((state: CombinedState) => ({
         mergingConsensus: state.consensus.actions.merging,
         selectedIds: state.jobs.selected,
         allJobs: state.jobs.current,
+        currentOrganization: state.organizations.current,
     }), shallowEqual);
     const isBulkMode = selectedIds.length > 1;
 
@@ -89,22 +91,28 @@ function JobActionsComponent(
         dispatch(exportActions.openExportDatasetModal(jobInstance));
     }, [jobInstance]);
 
+    const onAddReplicas = useCallback(() => {
+        dispatch(jobsActions.openAddReplicasModal(jobsToAct));
+    }, [jobsToAct]);
+
+    const onDistributeJobs = useCallback(() => {
+        dispatch(jobsActions.openDistributeJobsModal(jobsToAct));
+    }, [jobsToAct]);
+
     const onMergeConsensusJob = useCallback(() => {
-        if (jobInstance.replicasCount > 0) {
-            Modal.confirm({
-                title: '该共识作业将被合并',
-                content: '父作业中已有的标注将被更新。是否继续？',
-                className: 'cvat-modal-confirm-consensus-merge-job',
-                onOk: () => {
-                    dispatch(mergeConsensusJobsAsync(jobInstance));
-                },
-                okButtonProps: {
-                    type: 'primary',
-                    danger: true,
-                },
-                okText: '合并',
-            });
-        }
+        Modal.confirm({
+            title: '该共识作业将被合并',
+            content: '父作业中已有的标注将被更新。是否继续？',
+            className: 'cvat-modal-confirm-consensus-merge-job',
+            onOk: () => {
+                dispatch(mergeConsensusJobsAsync(jobInstance));
+            },
+            okButtonProps: {
+                type: 'primary',
+                danger: true,
+            },
+            okText: '合并',
+        });
     }, [jobInstance]);
 
     const onDeleteJob = useCallback(() => {
@@ -117,7 +125,7 @@ function JobActionsComponent(
                     dispatch(makeBulkOperationAsync(
                         jobsToAct,
                         async (job) => {
-                            if (job.type === JobType.GROUND_TRUTH) {
+                            if (job.type === JobType.GROUND_TRUTH || job.type === JobType.REPLICA) {
                                 await dispatch(deleteJobAsync(job));
                             }
                         },
@@ -227,7 +235,12 @@ function JobActionsComponent(
             onImportAnnotations,
             onExportAnnotations,
             onMergeConsensusJob: jobInstance.replicasCount > 0 ? onMergeConsensusJob : null,
-            onDeleteJob: jobInstance.type === JobType.GROUND_TRUTH ? onDeleteJob : null,
+            onAddReplicas: jobsToAct.every((job) => job.type === JobType.ANNOTATION) ?
+                onAddReplicas : null,
+            onDistributeJobs: jobsToAct.length > 1 && currentOrganization ? onDistributeJobs : null,
+            onDeleteJob: (
+                jobInstance.type === JobType.GROUND_TRUTH || jobInstance.type === JobType.REPLICA
+            ) ? onDeleteJob : null,
             onGoToParent: jobInstance.parentJobId ? onGoToParent : null,
             onGoToReplicas: jobInstance.replicasCount > 0 ? onGoToReplicas : null,
             jobsToAct,

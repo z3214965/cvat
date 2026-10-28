@@ -22,8 +22,6 @@ function CVATTag(props: TagProps): JSX.Element | null {
     switch (type) {
         case TagType.GROUND_TRUTH:
             return <Tag className='cvat-tag-ground-truth' color='#ED9C00'>真值</Tag>;
-        case TagType.CONSENSUS:
-            return <Tag className='cvat-tag-consensus' color='#1890FF'>共识</Tag>;
         case TagType.PARENT:
             return <Tag className='cvat-tag-parent' color='#1890FF'>主任务</Tag>;
         case TagType.REPLICA:

@@ -144,9 +144,9 @@ export class AudioIntervalState {
                     set: (label) => {
                         data.updateFlags.label = true;
                         if (!(label instanceof Label)) {
-                            throw new ArgumentError(
-                                `Label must be an instance of Label class, got ${typeof label}`,
-                            );
+                                throw new ArgumentError(
+                                    `标签必须是 Label 类的实例，当前类型为 ${typeof label}`,
+                                );
                         }
 
                         if (label.id! === data.label.id) {
@@ -160,7 +160,7 @@ export class AudioIntervalState {
                     get: () => data.start,
                     set: (start) => {
                         if (typeof start !== 'number') {
-                            throw new ArgumentError('Start is expected to be a number.');
+                            throw new ArgumentError('start应为数字类型。');
                         }
 
                         if (start === data.start) {
@@ -175,7 +175,7 @@ export class AudioIntervalState {
                     get: () => data.stop,
                     set: (stop) => {
                         if (stop !== null && typeof stop !== 'number') {
-                            throw new ArgumentError('Stop is expected to be a number or null.');
+                            throw new ArgumentError('Stop应为数字类型或null。');
                         }
 
                         if (stop === data.stop) {
@@ -197,7 +197,7 @@ export class AudioIntervalState {
                     get: () => data.hidden,
                     set: (hidden) => {
                         if (typeof hidden !== 'boolean') {
-                            throw new ArgumentError('Hidden is expected to be a boolean.');
+                            throw new ArgumentError('Hidden 应为布尔类型。');
                         }
 
                         if (hidden === data.hidden) {
@@ -212,7 +212,7 @@ export class AudioIntervalState {
                     get: () => data.lock,
                     set: (lock) => {
                         if (typeof lock !== 'boolean') {
-                            throw new ArgumentError('Lock is expected to be a boolean.');
+                            throw new ArgumentError('Lock 应为布尔类型。');
                         }
 
                         if (lock === data.lock) {
@@ -331,7 +331,7 @@ Object.defineProperty(AudioIntervalState.prototype.save, 'implementation', {
             return this.__internal.save(this);
         }
 
-        throw new Error('Could not save audio interval state. Context is not provided.');
+        throw new Error('无法保存音频区间状态，未提供上下文。');
     },
     writable: false,
 });
@@ -342,7 +342,7 @@ Object.defineProperty(AudioIntervalState.prototype.export, 'implementation', {
             return this.__internal.export();
         }
 
-        throw new Error('Could not export audio interval state. Context is not provided.');
+        throw new Error('无法导出音频区间状态，未提供上下文。');
     },
     writable: false,
 });
@@ -353,7 +353,7 @@ Object.defineProperty(AudioIntervalState.prototype.delete, 'implementation', {
             return this.__internal.delete(null, force);
         }
 
-        throw new Error('Could not delete audio interval state. Context is not provided.');
+        throw new Error('无法删除音频区间状态，未提供上下文。');
     },
     writable: false,
 });

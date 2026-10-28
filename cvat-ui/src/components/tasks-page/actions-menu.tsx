@@ -266,10 +266,9 @@ function TaskActionsComponent(props: Readonly<Props>): JSX.Element {
                 activeInference &&
                 ![RQStatus.FAILED, RQStatus.FINISHED].includes(activeInference.status)
             ),
-            isConsensusEnabled: taskInstance.consensusEnabled,
             isMergingConsensusEnabled: mergingConsensus[`task_${taskInstance.id}`],
             pluginActions,
-            onMergeConsensusJobs: taskInstance.consensusEnabled ? onMergeConsensusJobs : null,
+            onMergeConsensusJobs,
             onOpenBugTracker: taskInstance.bugTracker ? onOpenBugTracker : null,
             onUploadAnnotations,
             onExportDataset,

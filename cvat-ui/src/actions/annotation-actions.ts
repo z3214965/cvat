@@ -33,7 +33,6 @@ import {
     Workspace,
     isMultiSelectionSupported,
 } from 'reducers';
-import { switchToolsBlockerState } from './settings-actions';
 import { updateJobAsync } from './jobs-actions';
 import { loadAudioDataAsync } from './audio-actions';
 
@@ -1404,7 +1403,7 @@ export function getJobAsync({
             getCore().config.globalObjectsCounter = 0;
             const [job] = await cvat.jobs.get({ jobID });
             let gtJob: Job | null = null;
-            if (job.type === JobType.ANNOTATION || job.type === JobType.CONSENSUS_REPLICA) {
+            if (job.type === JobType.ANNOTATION || job.type === JobType.REPLICA) {
                 try {
                     [gtJob] = await cvat.jobs.get({ taskID, type: JobType.GROUND_TRUTH });
                 } catch (_e) {
@@ -2110,14 +2109,8 @@ export function repeatDrawShapeAsync(): ThunkAction {
 
         let activeControl = ActiveControl.CURSOR;
         if (activeInteractor && activeInteractorParameters && activeLabelID && canvasInstance instanceof Canvas) {
-            if (activeInteractor.kind.includes('tracker')) {
-                canvasInstance.interact({ enabled: true, ...activeInteractorParameters });
-                dispatch(interactWithCanvas(activeInteractor, activeLabelID, activeInteractorParameters));
-                dispatch(switchToolsBlockerState({ buttonVisible: false }));
-            } else {
-                canvasInstance.interact({ enabled: true, ...activeInteractorParameters });
-                dispatch(interactWithCanvas(activeInteractor, activeLabelID, activeInteractorParameters));
-            }
+            canvasInstance.interact({ enabled: true, ...activeInteractorParameters });
+            dispatch(interactWithCanvas(activeInteractor, activeLabelID, activeInteractorParameters));
 
             return;
         }

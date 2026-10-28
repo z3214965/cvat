@@ -323,7 +323,7 @@ function SingleShapeSidebar(): JSX.Element {
                 await openCVWrapper.initialize(() => {});
             } catch (error: unknown) {
                 notification.error({
-                    message: 'OpenCV 初始化失败',
+                    message: 'OpenCV初始化失败',
                     description: error instanceof Error ? error.message : String(error),
                 });
                 return;
@@ -652,7 +652,7 @@ function SingleShapeSidebar(): JSX.Element {
                                 await setRotatedShapeDrawing(event.target.checked);
                             }}
                         >
-                            Draw a rotated shape
+                            绘制旋转形状
                         </Checkbox>
                     </Col>
                 </Row>

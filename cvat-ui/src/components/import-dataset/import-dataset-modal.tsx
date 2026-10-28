@@ -640,8 +640,8 @@ function ImportDatasetModal(props: StateToProps): JSX.Element {
                                 }}
                             />
                         </Form.Item>
-                        <Text strong>将 masks 转换为多边形</Text>
-                        <CVATTooltip title='此配置项仅适用于 masks 类标注格式'>
+                        <Text strong>将masks转换为多边形</Text>
+                        <CVATTooltip title='此配置项仅适用于masks类标注格式'>
                             <QuestionCircleOutlined />
                         </CVATTooltip>
                     </Space>

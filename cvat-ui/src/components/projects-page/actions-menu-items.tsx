@@ -19,6 +19,7 @@ interface MenuItemsData {
     onDeleteProject: () => void;
     selectedIds: number[];
     isExportDatasetDisabled: boolean;
+    isQualityControlDisabled: boolean;
     t: (key: string) => string;
 }
 
@@ -85,7 +86,7 @@ export default function ProjectActionsItems(
     menuItems.push([{
         key: 'quality-control',
         label: <Link to={`/projects/${projectId}/quality-control`}>{t('common.quality_control')}</Link>,
-        disabled: isDisabled('quality-control'),
+        disabled: isDisabled('quality-control') || isQualityControlDisabled,
     }, 50]);
 
     menuItems.push([{

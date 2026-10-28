@@ -9,7 +9,7 @@ import {
     toReversed,
 } from './shared';
 import {
-    Geometry, SliceData, Configuration, CanvasHint,
+    Geometry, SliceData, Configuration,
 } from './canvasModel';
 import consts from './consts';
 import { ObjectSelector } from './objectSelector';
@@ -99,7 +99,7 @@ export class SliceHandlerImpl implements SliceHandler {
     private hideObject: (clientID: number) => void;
     private showObject: (clientID: number) => void;
     private onSliceDone: (state?: any, results?: number[][], duration?: number) => void;
-    private onMessage: (messages: CanvasHint[] | null, topic: string) => void;
+    private onMessage: (message: string | null, topic?: string) => void;
     private onError: (exception: unknown) => void;
     private getObjects: () => any[];
     private geometry: Geometry;
@@ -137,18 +137,14 @@ export class SliceHandlerImpl implements SliceHandler {
     }
 
     private showInitialMessage(): void {
-        this.onMessage([{
-            type: 'text',
-            icon: 'info',
-            content: '在图形轮廓上设置起始点',
-        }, {
-            type: 'list',
-            content: [
-                '切割线不能自相交',
-                '切割线与轮廓的交点不能超过两处',
-            ],
-            className: 'cvat-canvas-notification-list-warning',
-        }], 'slice');
+        this.onMessage([
+            '### 分割形状',
+            '',
+            '切割线不能自相交，且与轮廓相交次数不能超过两次。',
+            '',
+            '**操作**',
+            '- 点击形状轮廓开始切割。',
+        ].join('\n'), 'slice-start-cut-v1');
     }
 
     private initialize(sliceData: EnhancedSliceData): void {
@@ -219,18 +215,16 @@ export class SliceHandlerImpl implements SliceHandler {
                 circle.attr('stroke-width', consts.BASE_STROKE_WIDTH / this.geometry.scale);
                 this.slicingPoints.push(circle);
 
-                this.onMessage([{
-                    type: 'text',
-                    icon: 'info',
-                    content: '必要时在图形轮廓内部添加更多点。在轮廓另一处相交以完成切割',
-                }, {
-                    type: 'list',
-                    content: [
-                        '按住 <Shift> 启用滑动模式',
-                        '右键单击撤销上一个点',
-                    ],
-                    className: 'cvat-canvas-notification-list-shortcuts',
-                }], 'slice');
+                this.onMessage([
+                    '### 绘制切割线',
+                    '',
+                    '在轮廓上另一点结束，即可分割形状。',
+                    '',
+                    '**操作**',
+                    '- 在形状内部点击，添加切割点。',
+                    '- 按住 Shift 开启滑移模式。',
+                    '- 右键点击 删除上一个点。',
+                ].join('\n'), 'slice-draw-cut-v1');
             }
         };
 
@@ -512,7 +506,7 @@ export class SliceHandlerImpl implements SliceHandler {
         this.canvas.off('mousemove.slice');
         this.enabled = false;
         this.onSliceDone();
-        this.onMessage(null, 'slice');
+        this.onMessage(null);
     }
 
     public slice(sliceData: SliceData): void {
@@ -530,11 +524,11 @@ export class SliceHandlerImpl implements SliceHandler {
                 this.startTimestamp = Date.now();
                 const { startTimestamp } = this;
 
-                this.onMessage([{
-                    type: 'text',
-                    content: '正在获取图形轮廓',
-                    icon: 'loading',
-                }], 'force');
+                this.onMessage([
+                    '### 准备分割',
+                    '',
+                    '正在获取形状轮廓…',
+                ].join('\n'), 'force');
 
                 sliceData.getContour(state).then((contour) => {
                     if (this.startTimestamp === startTimestamp && this.enabled) {
@@ -564,11 +558,14 @@ export class SliceHandlerImpl implements SliceHandler {
                 }
             }
 
-            this.onMessage([{
-                type: 'text',
-                content: '点击需要切割的mask或多边形图形',
-                icon: 'info',
-            }], 'slice');
+            this.onMessage([
+                '### 分割形状',
+                '',
+                '将mask或多边形拆分为多个独立形状。',
+                '',
+                '**操作**',
+                '- 点击你想要分割的形状。',
+            ].join('\n'), 'slice-select-shape-v1');
 
             this.objectSelector.enable(([state]) => {
                 if (state) {

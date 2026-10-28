@@ -84,11 +84,11 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
     );
 
     const generalTooltip = makeTooltip(
-        makeTooltipFragment('Job selection filter', settings.descriptions.jobFilter),
+        makeTooltipFragment('作业筛选器', settings.descriptions.jobFilter),
     );
 
     const jobValidationTooltip = makeTooltip(
-        makeTooltipFragment('Max validations per job', settings.descriptions.maxValidationsPerJob),
+        makeTooltipFragment('单个作业最大核验次数', settings.descriptions.maxValidationsPerJob),
     );
 
     if (requirementFormMode.type !== 'list') {
@@ -121,7 +121,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
         >
             <Row className='cvat-quality-settings-title'>
                 <Text strong>
-                    General
+                    通用
                 </Text>
                 <CVATTooltip title={generalTooltip} className='cvat-settings-tooltip'>
                     <QuestionCircleOutlined
@@ -133,7 +133,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='jobFilter'
-                        label='Job selection filter'
+                        label='作业筛选器'
                         trigger='onApplyFilter'
                     >
                         {/* value and onApplyFilter will be automatically provided by Form.Item */}
@@ -157,7 +157,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
             <Divider />
             <Row className='cvat-quality-settings-title'>
                 <Text strong>
-                    Job validation
+                    作业验证
                 </Text>
                 <CVATTooltip title={jobValidationTooltip} className='cvat-settings-tooltip'>
                     <QuestionCircleOutlined
@@ -169,7 +169,7 @@ export default function QualitySettingsForm(props: Readonly<Props>): JSX.Element
                 <Col span={12}>
                     <Form.Item
                         name='maxValidationsPerJob'
-                        label='Max validations per job'
+                        label='单个作业最大核验次数'
                         rules={[{ required: true, message: 'This field is required' }]}
                     >
                         <InputNumber

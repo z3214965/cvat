@@ -37,7 +37,7 @@ export class OpenCVWrapper {
 
     private getCVInterface(): OpenCVInterface {
         if (!this.cvInterface) {
-            throw new Error('OpenCV 尚未初始化，请先调用 initialize() 方法。');
+            throw new Error('OpenCV尚未初始化，请先调用 initialize() 方法。');
         }
         return this.cvInterface;
     }
@@ -209,7 +209,7 @@ export class OpenCVWrapper {
             }
         }
 
-        throw new Error(`未为 ${state.shapeType} 实现 getContour 方法`);
+        throw new Error(`未为 ${state.shapeType} 实现getContour方法`);
     };
 
     public getContoursFromState = async (

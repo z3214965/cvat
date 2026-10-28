@@ -48,7 +48,7 @@ export const JobStateCH: Record<JobState, string> = {
 export enum JobType {
     ANNOTATION = 'annotation',
     GROUND_TRUTH = 'ground_truth',
-    CONSENSUS_REPLICA = 'consensus_replica',
+    REPLICA = 'replica',
 }
 
 export enum DimensionType {

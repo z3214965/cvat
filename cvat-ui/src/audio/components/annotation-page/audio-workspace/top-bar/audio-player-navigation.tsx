@@ -65,7 +65,6 @@ const componentShortcuts = {
     },
 };
 
-
 registerComponentShortcuts(componentShortcuts);
 
 const AUDIO_SHORT_JUMP_FRACTION = 0.005;

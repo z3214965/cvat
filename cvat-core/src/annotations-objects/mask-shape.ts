@@ -59,7 +59,9 @@ export class MaskShape extends Shape {
         emptyMaskOccurred: boolean,
     } {
         if (frame !== this.frame) {
-            throw new ArgumentError(`"frame" 属性错误：与图形帧号不一致（${frame} 和 ${this.frame}）`);
+            throw new ArgumentError(
+                `"frame" 属性错误：与形状帧不一致（${frame} 对比 ${this.frame}）`,
+            );
         }
 
         const others = this.getMasksOnFrame(frame)

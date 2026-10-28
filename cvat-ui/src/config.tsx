@@ -23,8 +23,8 @@ const DATASET_MANIFEST_GUIDE_URL = 'https://docs.cvat.ai/docs/manual/advanced/da
 const CANVAS_BACKGROUND_COLORS = ['#ffffff', '#f1f1f1', '#e5e5e5', '#d8d8d8', '#CCCCCC', '#B3B3B3', '#999999'];
 const NEW_LABEL_COLOR = '#b3b3b3';
 const LATEST_COMMENTS_SHOWN_QUICK_ISSUE = 3;
-const QUICK_ISSUE_INCORRECT_POSITION_TEXT = 'Wrong position';
-const QUICK_ISSUE_INCORRECT_ATTRIBUTE_TEXT = 'Wrong attribute';
+const QUICK_ISSUE_INCORRECT_POSITION_TEXT = '位置错误';
+const QUICK_ISSUE_INCORRECT_ATTRIBUTE_TEXT = '属性错误';
 const DEFAULT_PROJECT_SUBSETS = ['Train', 'Test', 'Validation'];
 const CANVAS_WORKSPACE_ROWS = 12;
 const CANVAS_WORKSPACE_COLS = 12;
@@ -33,63 +33,64 @@ const CANVAS_WORKSPACE_DEFAULT_CONTEXT_HEIGHT = 4;
 const CANVAS_WORKSPACE_PADDING = CANVAS_WORKSPACE_MARGIN / 2;
 const OUTSIDE_PIC_URL = 'https://docs.cvat.ai/images/image019.jpg';
 const DEFAULT_AWS_REGIONS: string[][] = [
-    ['us-east-1', 'US East (N. Virginia)'],
-    ['us-east-2', 'US East (Ohio)'],
-    ['us-west-1', 'US West (N. California)'],
-    ['us-west-2', 'US West (Oregon)'],
-    ['ap-south-1', 'Asia Pacific (Mumbai)'],
-    ['ap-northeast-1', 'Asia Pacific (Tokyo)'],
-    ['ap-northeast-2', 'Asia Pacific (Seoul)'],
-    ['ap-northeast-3', 'Asia Pacific (Osaka)'],
-    ['ap-southeast-1', 'Asia Pacific (Singapore)'],
-    ['ap-southeast-2', 'Asia Pacific (Sydney)'],
-    ['ca-central-1', 'Canada (Central)'],
-    ['eu-central-1', 'EU (Frankfurt)'],
-    ['eu-west-1', 'Europe (Ireland)'],
-    ['eu-west-2', 'Europe (London)'],
-    ['eu-west-3', 'Europe (Paris)'],
-    ['eu-north-1', 'Europe (Stockholm)'],
-    ['sa-east-1', 'South America (São Paulo)'],
+    ['us-east-1', '美国东部（弗吉尼亚北部）'],
+    ['us-east-2', '美国东部（俄亥俄）'],
+    ['us-west-1', '美国西部（加利福尼亚北部）'],
+    ['us-west-2', '美国西部（俄勒冈）'],
+    ['ap-south-1', '亚太（孟买）'],
+    ['ap-northeast-1', '亚太（东京）'],
+    ['ap-northeast-2', '亚太（首尔）'],
+    ['ap-northeast-3', '亚太（大阪）'],
+    ['ap-southeast-1', '亚太（新加坡）'],
+    ['ap-southeast-2', '亚太（悉尼）'],
+    ['ca-central-1', '加拿大（中部）'],
+    ['eu-central-1', '欧洲（法兰克福）'],
+    ['eu-west-1', '欧洲（爱尔兰）'],
+    ['eu-west-2', '欧洲（伦敦）'],
+    ['eu-west-3', '欧洲（巴黎）'],
+    ['eu-north-1', '欧洲（斯德哥尔摩）'],
+    ['sa-east-1', '南美（圣保罗）'],
 ];
 
 const DEFAULT_GOOGLE_CLOUD_STORAGE_LOCATIONS: string[][] = [
-    ['NORTHAMERICA-NORTHEAST1', 'Montréal'],
-    ['NORTHAMERICA-NORTHEAST2', 'Toronto'],
-    ['US-CENTRAL1', 'Iowa'],
-    ['US-EAST1', 'South Carolina'],
-    ['US-EAST4', 'Northern Virginia'],
-    ['US-WEST1', 'Oregon'],
-    ['US-WEST2', 'Los Angeles'],
-    ['US-WEST3', 'Salt Lake City'],
-    ['US-WEST4', 'Las Vegas'],
-    ['SOUTHAMERICA-EAST1', 'São Paulo'],
-    ['EUROPE-CENTRAL2', 'Warsaw'],
-    ['EUROPE-NORTH1', 'Finland'],
-    ['EUROPE-WEST1', 'Belgium'],
-    ['EUROPE-WEST2', 'London'],
-    ['EUROPE-WEST3', 'Frankfurt'],
-    ['EUROPE-WEST4', 'Netherlands'],
-    ['EUROPE-WEST6', 'Zürich'],
-    ['ASIA-EAST1', 'Taiwan'],
-    ['ASIA-EAST2', 'Hong Kong'],
-    ['ASIA-NORTHEAST1', 'Tokyo'],
-    ['ASIA-NORTHEAST2', 'Osaka'],
-    ['ASIA-NORTHEAST3', 'Seoul'],
-    ['ASIA-SOUTH1', 'Mumbai'],
-    ['ASIA-SOUTH2', 'Delhi'],
-    ['ASIA-SOUTHEAST1', 'Singapore'],
-    ['ASIA-SOUTHEAST2', 'Jakarta'],
-    ['AUSTRALIA-SOUTHEAST1', 'Sydney'],
-    ['AUSTRALIA-SOUTHEAST2', 'Melbourne'],
-    // Multi-regions
-    ['ASIA', 'Data centers in Asia'],
-    ['EU', 'Data centers within member states of the European Union'],
-    ['US', 'Data centers in the United States'],
-    // Dual-regions
-    ['ASIA1', 'ASIA-NORTHEAST1 and ASIA-NORTHEAST2'],
-    ['EUR4', 'EUROPE-NORTH1 and EUROPE-WEST4'],
-    ['NAM4', 'US-CENTRAL1 and US-EAST1'],
+    ['NORTHAMERICA-NORTHEAST1', '蒙特利尔'],
+    ['NORTHAMERICA-NORTHEAST2', '多伦多'],
+    ['US-CENTRAL1', '艾奥瓦'],
+    ['US-EAST1', '南卡罗来纳'],
+    ['US-EAST4', '弗吉尼亚北部'],
+    ['US-WEST1', '俄勒冈'],
+    ['US-WEST2', '洛杉矶'],
+    ['US-WEST3', '盐湖城'],
+    ['US-WEST4', '拉斯维加斯'],
+    ['SOUTHAMERICA-EAST1', '圣保罗'],
+    ['EUROPE-CENTRAL2', '华沙'],
+    ['EUROPE-NORTH1', '芬兰'],
+    ['EUROPE-WEST1', '比利时'],
+    ['EUROPE-WEST2', '伦敦'],
+    ['EUROPE-WEST3', '法兰克福'],
+    ['EUROPE-WEST4', '荷兰'],
+    ['EUROPE-WEST6', '苏黎世'],
+    ['ASIA-EAST1', '中国台湾'],
+    ['ASIA-EAST2', '中国香港'],
+    ['ASIA-NORTHEAST1', '东京'],
+    ['ASIA-NORTHEAST2', '大阪'],
+    ['ASIA-NORTHEAST3', '首尔'],
+    ['ASIA-SOUTH1', '孟买'],
+    ['ASIA-SOUTH2', '德里'],
+    ['ASIA-SOUTHEAST1', '新加坡'],
+    ['ASIA-SOUTHEAST2', '雅加达'],
+    ['AUSTRALIA-SOUTHEAST1', '悉尼'],
+    ['AUSTRALIA-SOUTHEAST2', '墨尔本'],
+    // 多区域
+    ['ASIA', '亚洲的数据中心'],
+    ['EU', '欧盟成员国境内的数据中心'],
+    ['US', '美国的数据中心'],
+    // 双区域
+    ['ASIA1', '亚太东北1区 和 亚太东北2区'],
+    ['EUR4', '欧洲北部1区 和 欧洲西部4区'],
+    ['NAM4', '美国中部1区 和 美国东部1区'],
 ];
+
 
 const MAXIMUM_NOTIFICATION_MESSAGE_LENGTH = 600; // all above will be sent to console
 const HEALTH_CHECK_RETRIES = 10;
@@ -112,6 +113,7 @@ const RESET_NOTIFICATIONS_PATHS = {
 const BUCKET_CONTENT_KEY = 'All files';
 
 const NUMERIC_VALUE_CLAMP_THRESHOLD = 5000;
+const MAX_REPLICAS_TO_ADD = 100; // per job and action, UI only. The server limit is MAX_JOBS_PER_TASK
 const OPENCV_PATH = '/assets/opencv_4.8.0.js';
 
 const LOCAL_STORAGE_SEEN_GUIDES_MEMORY_LIMIT = 10;
@@ -187,6 +189,7 @@ export default {
     RESET_NOTIFICATIONS_PATHS,
     BUCKET_CONTENT_KEY,
     NUMERIC_VALUE_CLAMP_THRESHOLD,
+    MAX_REPLICAS_TO_ADD,
     OPENCV_PATH,
     LOCAL_STORAGE_SEEN_GUIDES_MEMORY_LIMIT,
     LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT,

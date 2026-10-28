@@ -185,7 +185,6 @@ function ImportBackupModal(): JSX.Element {
                             location: value,
                         });
                     }}
-
                 />
                 {selectedSourceStorage?.location === StorageLocation.CLOUD_STORAGE && renderCustomName()}
                 {selectedSourceStorage?.location === StorageLocation.LOCAL && uploadLocalFile()}

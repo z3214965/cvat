@@ -97,7 +97,7 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                     </Checkbox>
                 </Col>
                 <Col className='cvat-workspace-settings-auto-save-interval'>
-                    <Text type='secondary'> 自动保存间隔 </Text>
+                    <Text type='secondary'>自动保存间隔</Text>
                     <InputNumber
                         size='small'
                         min={minAutoSaveInterval}
@@ -112,7 +112,7 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
                             }
                         }}
                     />
-                    <Text type='secondary'> 分钟 </Text>
+                    <Text type='secondary'>分钟</Text>
                 </Col>
             </Row>
             <Row className='cvat-player-setting'>
@@ -251,7 +251,7 @@ function WorkspaceSettingsComponent(props: Props): JSX.Element {
             </Row>
             <Row className='cvat-workspace-settings-focused-object-padding cvat-player-setting'>
                 <Col>
-                    <Text className='cvat-text-color'> 聚焦对象填充 </Text>
+                    <Text className='cvat-text-color'>聚焦对象填充</Text>
                     <InputNumber
                         min={minFocusedObjectPadding}
                         max={maxFocusedObjectPadding}

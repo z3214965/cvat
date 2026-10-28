@@ -747,8 +747,7 @@ export default class SkeletonConfigurator extends React.PureComponent<Props, Sta
                             beforeUpload={(file: RcFile) => {
                                 if (!['image/jpeg', 'image/png'].includes(file.type)) {
                                     notification.error({
-                                        message:
-                                            `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`,
+                                        message: `文件必须是JPEG或PNG格式的图片。检测到的mime类型为 "${file.type}"`,
                                     });
                                 }
                                 this.setState({ image: file }, () => {

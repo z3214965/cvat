@@ -65,7 +65,7 @@ export default function DetailsComponent(props: DetailsComponentProps): JSX.Elem
                         {project.owner ? ` 由 ${project.owner.username} 创建` : null}
                         {`于 ${dayjs(project.createdDate).format('YYYY-MM-DDTHH:mm:ss')}`}
                     </Text>
-                    <MdGuideControl instanceType='project' id={project.id} />
+                    <MdGuideControl instanceType='项目' id={project.id} />
                     <BugTrackerEditor
                         instance={project}
                         onChange={(bugTracker): void => {

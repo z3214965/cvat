@@ -17,7 +17,6 @@ interface Props {
     selectedRegion: undefined | string;
     onSelectRegion: any;
     internalCommonProps: any;
-
     label: '区域' | '地域';
     name: 'location' | 'region';
     values: string[][];

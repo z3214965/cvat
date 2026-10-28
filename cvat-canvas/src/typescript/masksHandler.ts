@@ -288,7 +288,7 @@ export class MasksHandlerImpl implements MasksHandler {
             'polygon-plus': '向遮罩添加多边形',
             'polygon-minus': '从遮罩减去多边形',
         };
-        return this.tool ? descriptions[this.tool.type] : 'Edit mask';
+        return this.tool ? descriptions[this.tool.type] : '编辑mask';
     }
 
     private notifyHistoryChanged(): void {

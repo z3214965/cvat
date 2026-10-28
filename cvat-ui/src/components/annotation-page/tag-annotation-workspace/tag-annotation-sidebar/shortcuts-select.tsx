@@ -30,7 +30,7 @@ const componentShortcuts: Record<string, KeyMapItem> = {};
 
 for (const idx of [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]) {
     componentShortcuts[`SETUP_${idx}_TAG`] = {
-        name: 'Create a new tag',
+        name: '创建一个新标签',
         description: '创建对应类别的新属性标签。该类别可在标签标注侧边栏中进行配置',
         sequences: [`${idx}`],
         nonActive: true,

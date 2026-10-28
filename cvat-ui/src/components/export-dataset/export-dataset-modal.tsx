@@ -344,18 +344,21 @@ function ExportDatasetModal(props: Readonly<StateToProps>): JSX.Element {
                             )}
                     </Select>
                 </Form.Item>
-                <Space>
-                    <Form.Item
-                        className='cvat-modal-export-switch-use-default-storage'
-                        name='saveImages'
-                        valuePropName='checked'
-                    >
-                        <Switch className='cvat-modal-export-save-images' />
-                    </Form.Item>
-                    <Text strong>保存图片</Text>
-                </Space>
+                {
+                    canSaveImages &&
+                    <Space>
+                        <Form.Item
+                            className='cvat-modal-export-switch-use-default-storage'
+                            name='saveImages'
+                            valuePropName='checked'
+                        >
+                            <Switch className='cvat-modal-export-save-images' />
+                        </Form.Item>
+                        <Text strong>保存图片</Text>
+                    </Space>
+                }
                 {isBulkMode ? (
-                    <Form.Item label={<Text strong>名称模板</Text>} required>
+                    <Form.Item label={<Text strong>模板名称</Text>} required>
                         <Input
                             value={nameTemplate}
                             onChange={(e) => setNameTemplate(e.target.value)}

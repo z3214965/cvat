@@ -92,12 +92,11 @@ module.exports = (env, argv = {}) => {
                 secure: false,
                 changeOrigin: true,
                 onProxyReq: (proxyReq) => {
-                    proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
                     // 👇 关键：把 Origin 伪装成远程服务器地址，解决跨域问题
-                    // const targetUrl = new URL(env.API_URL);
-                    // proxyReq.setHeader('Origin', targetUrl.origin);
-                    // proxyReq.setHeader('Referer', targetUrl.origin);
-                    // proxyReq.setHeader('X-FORWARDED-HOST', targetUrl.host);
+                    const targetUrl = new URL(env.API_URL);
+                    proxyReq.setHeader('Origin', targetUrl.origin);
+                    proxyReq.setHeader('Referer', targetUrl.origin);
+                    proxyReq.setHeader('X-FORWARDED-HOST', targetUrl.host);
                 },
             }],
         },

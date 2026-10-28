@@ -111,8 +111,10 @@ export function implementJob(Job: typeof JobClass): typeof JobClass {
     });
 
     Object.defineProperty(Job.prototype.delete, 'implementation', {
-        value: async function deleteImplementation(this: JobClass): ReturnType<typeof JobClass.prototype.delete> {
-            if (this.type !== JobType.GROUND_TRUTH) {
+        value: async function deleteImplementation(
+            this: JobClass,
+        ): ReturnType<typeof JobClass.prototype.delete> {
+            if (this.type !== JobType.GROUND_TRUTH && this.type !== JobType.REPLICA) {
                 throw new Error('只有真值作业可以被删除');
             }
 
@@ -868,8 +870,8 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
                 taskSpec.source_storage = this.sourceStorage.toJSON();
             }
 
-            if (fields?.consensus_replicas) {
-                taskSpec.consensus_replicas = fields.consensus_replicas;
+            if (fields?.initial_replicas) {
+                taskSpec.initial_replicas = fields.initial_replicas;
             }
 
             const taskDataSpec = {
@@ -1140,19 +1142,15 @@ export function implementTask(Task: typeof TaskClass): typeof TaskClass {
                 throw new ArgumentError('结束帧超出了任务范围');
             }
 
-            const jobs = this.jobs.filter(
-                (_job) =>
-                    (frameFrom >= _job.startFrame && frameFrom <= _job.stopFrame) ||
-                    (frameTo >= _job.startFrame && frameTo <= _job.stopFrame) ||
-                    (frameFrom < _job.startFrame && frameTo > _job.stopFrame),
-            );
+            const jobs = this.jobs.filter((_job) => (
+                (frameFrom >= _job.startFrame && frameFrom <= _job.stopFrame) ||
+                (frameTo >= _job.startFrame && frameTo <= _job.stopFrame) ||
+                (frameFrom < _job.startFrame && frameTo > _job.stopFrame)
+            ));
 
             for (const job of jobs) {
                 const result = await findFrame(
-                    job.id,
-                    Math.max(frameFrom, job.startFrame),
-                    Math.min(frameTo, job.stopFrame),
-                    filters,
+                    job.id, Math.max(frameFrom, job.startFrame), Math.min(frameTo, job.stopFrame), filters,
                 );
 
                 if (result !== null) return result;

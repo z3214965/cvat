@@ -11,7 +11,7 @@ import Text from 'antd/lib/typography/Text';
 import Button from 'antd/lib/button';
 
 interface Props {
-    instanceType: 'task' | 'project';
+    instanceType: '任务' | '项目';
     id: number;
 }
 
@@ -22,7 +22,7 @@ function MdGuideControl(props: Props): JSX.Element {
     return (
         <Row justify='start' className='cvat-md-guide-control-wrapper'>
             <Col span={24}>
-                <Text strong className='cvat-text-color'>{`${instanceType[0].toUpperCase()}${instanceType.slice(1)} description`}</Text>
+                <Text strong className='cvat-text-color'>{`${instanceType[0].toUpperCase()}${instanceType.slice(1)}描述`}</Text>
                 <br />
                 <Button
                     onClick={() => {

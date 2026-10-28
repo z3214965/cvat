@@ -36,7 +36,7 @@ git checkout dev
 # 执行 squash 合并，允许无关历史
 git merge --squash develop --allow-unrelated-histories
 修改代码差异差异
-git commit -m "同步2.74.0最新代码快照"
+git commit -m "同步2.80.0最新代码快照"
 # 推送到你自己的远程 dev
 git push origin dev
 
@@ -136,7 +136,7 @@ pip3 download -d ./whl \
   --trusted-host download.pytorch.org \
   --default-timeout=3600 --retries 5 \
   torch torchvision torchaudio pycocotools matplotlib onnxruntime onnx opencv-python
-  
+
 http://47.96.137.124:4200/diludata/3dtiles/sam_vit_h_4b8939.pth
 
 http://47.96.137.124:4200/diludata/3dtiles/segment-anything-main.zip
@@ -184,11 +184,11 @@ nuctl delete function onnx-ultralytics-yolo11 --force
 set HTTP_PROXY=http://192.168.1.5:10810
 set HTTPS_PROXY=http://192.168.1.5:10810
 set ALL_PROXY=socks5://192.168.1.5:10810
-1、拉取官方已发布的服务端，docker pull cvat/server:v2.78.0
+1、拉取官方已发布的服务端，docker pull cvat/server:v2.80.0
 2、拉取代码，合并代码
 3、重新安装前端依赖：yarn install
 4、跳到9步骤，执行测试
-5、打包前端项目：yarn build:cvat-ui  
+5、打包前端项目：yarn build:cvat-ui
 6、修改docker-compose.yml中cvat_ui中image节点，日期为当前时间
 7、拷贝打包文件
 cvat-ui/react_nginx.conf、
@@ -201,7 +201,7 @@ docker-compose.dev.yml
 components/*
 上传到有docker编译环境的机器上
 8、运行以下命令，创建出对应前端镜像
-docker build -f Dockerfile.ui -t cvat/ui:v20260826 .
+docker build -f Dockerfile.ui -t cvat/ui:v20261028 .
 可选：
 docker save cvat/ui:v20260810 > cvat_ui_v20260810.tar
 docker load --input cvat_ui_v20260810.tar
@@ -211,7 +211,7 @@ docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker
 10、启动服务
 export CVAT_HOST=39.105.209.194
 export CVAT_POSTGRES_PASSWORD=diorszhang1987.
-export CVAT_VERSION=v2.78.0
+export CVAT_VERSION=v2.80.0
 docker-compose -f docker-compose.yml -f docker-compose.external_db.yml -f docker-compose.dev.yml -f components/serverless/docker-compose.serverless.yml up -d
 11、访问地址
 http://192.168.1.17:8080  /  http://39.105.209.194:4414

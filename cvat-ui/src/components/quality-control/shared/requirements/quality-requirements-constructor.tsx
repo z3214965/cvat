@@ -41,12 +41,12 @@ const metricFilterValues = Object.values(METRIC_LABELS)
 const requirementsFilterConfig: Partial<Config> = {
     fields: {
         name: {
-            label: 'Name',
+            label: '名称',
             type: 'text',
             valueSources: ['value'],
         },
         annotationType: {
-            label: 'Annotation type',
+            label: '标注类型',
             type: 'select',
             valueSources: ['value'],
             operators: ['select_any_in', 'select_equals'],
@@ -55,7 +55,7 @@ const requirementsFilterConfig: Partial<Config> = {
             },
         },
         metric: {
-            label: 'Metric',
+            label: '指标',
             type: 'select',
             valueSources: ['value'],
             operators: ['select_any_in', 'select_equals'],
@@ -64,7 +64,7 @@ const requirementsFilterConfig: Partial<Config> = {
             },
         },
         enabled: {
-            label: 'Enabled',
+            label: '已启用',
             type: 'boolean',
             valueSources: ['value'],
         },
@@ -270,15 +270,15 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
 
     const onDeleteRequirement = (requirement: QualityRequirement): void => {
         Modal.confirm({
-            title: `Delete "${requirement.name}" requirement?`,
-            content: 'This action cannot be undone.',
-            okText: 'Delete',
+            title: `确定要删除"${requirement.name}"这项要求吗？`,
+            content: '该操作无法撤销。',
+            okText: '删除',
             okButtonProps: { danger: true },
             onOk: async () => {
                 await updateRequirement(
                     requirement,
                     () => requirement.delete(),
-                    'Could not delete requirement',
+                    '删除要求失败',
                 );
             },
         });
@@ -292,7 +292,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
 
     return (
         <CVATTable
-            tableTitle='Requirements configuration'
+            tableTitle='需求配置'
             className='cvat-quality-requirements-configuration-table'
             searchDataIndex={['searchValue']}
             queryBuilder={{
@@ -305,14 +305,14 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                 isRequirementEnabled(record.requirement) ? '' : 'cvat-quality-requirements-disabled-row'
             )}
             columns={[{
-                title: 'Name',
+                title: '名称',
                 dataIndex: 'name',
                 sorter: (first: RequirementRow, second: RequirementRow) => first.name.localeCompare(second.name),
                 render: (_: string, record: RequirementRow): JSX.Element => (
                     <Text>{record.name}</Text>
                 ),
             }, {
-                title: 'Annotation type',
+                title: '标注类型',
                 dataIndex: 'annotationType',
                 sorter: (first: RequirementRow, second: RequirementRow) => (
                     first.annotationType.localeCompare(second.annotationType)
@@ -321,14 +321,14 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                     <Text>{record.annotationType}</Text>
                 ),
             }, {
-                title: 'Metric',
+                title: '指标',
                 dataIndex: 'metric',
                 sorter: (first: RequirementRow, second: RequirementRow) => first.metric.localeCompare(second.metric),
                 render: (_: string, record: RequirementRow): JSX.Element => (
                     <Text>{record.metric}</Text>
                 ),
             }, {
-                title: 'Threshold',
+                title: '阈值',
                 dataIndex: 'threshold',
                 sorter: (first: RequirementRow, second: RequirementRow) => (
                     first.threshold.localeCompare(second.threshold)
@@ -337,7 +337,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                     <Text>{record.threshold}</Text>
                 ),
             }, {
-                title: 'Enabled',
+                title: '已启用',
                 dataIndex: 'enabled',
                 sorter: (first: RequirementRow, second: RequirementRow) => (
                     Number(first.enabled) - Number(second.enabled)
@@ -350,14 +350,14 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                     />
                 ),
             }, {
-                title: 'Actions',
+                title: '操作',
                 dataIndex: 'actions',
                 render: (_: unknown, record: RequirementRow): JSX.Element => {
                     const actionsDisabled = disabled || pendingRequirementId !== null;
 
                     return (
                         <Space size='small'>
-                            <CVATTooltip title='Create child requirement'>
+                            <CVATTooltip title='创建子要求'>
                                 <Button
                                     type='text'
                                     className='cvat-quality-requirements-action-button'
@@ -367,7 +367,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                                     onClick={() => onCreateRequirement(record.requirement)}
                                 />
                             </CVATTooltip>
-                            <CVATTooltip title='Edit requirement'>
+                            <CVATTooltip title='编辑要求'>
                                 <Button
                                     type='text'
                                     className='cvat-quality-requirements-action-button'
@@ -381,7 +381,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                                 />
                             </CVATTooltip>
                             {!record.requirement.isBase && (
-                                <CVATTooltip title='Copy requirement'>
+                                <CVATTooltip title='复制要求'>
                                     <Button
                                         type='text'
                                         className='cvat-quality-requirements-action-button'
@@ -393,7 +393,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                                 </CVATTooltip>
                             )}
                             {!record.requirement.isBase && (
-                                <CVATTooltip title='Delete requirement'>
+                                <CVATTooltip title='删除要求'>
                                     <Button
                                         type='text'
                                         className='cvat-quality-requirements-action-button'
@@ -437,7 +437,7 @@ export default function QualityRequirementsConstructor(props: Readonly<Props>): 
                 emptyText: (
                     <Space>
                         <QuestionCircleOutlined />
-                        <Text type='secondary'>No requirements configured</Text>
+                        <Text type='secondary'>暂无质检要求</Text>
                     </Space>
                 ),
             }}

@@ -206,7 +206,7 @@ function getTopDown(edgeIndex: EdgeIndex): number[] {
     }
 }
 
-(SVG as any).Cube = SVG.invent({
+const Cube = SVG.invent({
     create: 'g',
     inherit: SVG.G,
     extend: {
@@ -1126,7 +1126,7 @@ function getTopDown(edgeIndex: EdgeIndex): number[] {
     },
     construct: {
         cube(points: string) {
-            return this.put(new (SVG as any).Cube()).constructorMethod(points);
+            return this.put(new Cube()).constructorMethod(points);
         },
     },
 });

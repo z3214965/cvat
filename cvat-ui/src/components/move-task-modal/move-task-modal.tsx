@@ -81,7 +81,9 @@ function MoveTaskModal({
         }
 
         if (Object.values(labelMap).some((map) => map.newLabelName === null)) {
-            notification.error({ message: '请为所有标签指定映射' });
+            notification.error({
+                message: '请为所有标签指定映射',
+            });
             return;
         }
 

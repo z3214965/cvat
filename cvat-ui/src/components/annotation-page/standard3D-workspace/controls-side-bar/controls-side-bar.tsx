@@ -51,7 +51,7 @@ const componentShortcuts: Record<string, KeyMapItem> = {
     PASTE_SHAPE: {
         name: '粘贴形状',
         description: '从内部剪贴板粘贴标注形状',
-        sequences: ['ctrl+v'],
+        sequences: ['ctrl+v', 'command+v'],
         scope: ShortcutScope.OBJECTS_SIDEBAR,
     },
     SWITCH_DRAW_MODE_STANDARD_3D_CONTROLS: {

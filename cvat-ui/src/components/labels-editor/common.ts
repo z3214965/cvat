@@ -194,13 +194,13 @@ export function toSVGCoord(svg: SVGSVGElement, coord: number[], raiseError = fal
     const ctm = svg.getScreenCTM();
 
     if (!ctm) {
-        if (raiseError) throw new Error('屏幕 CTM 为空');
+        if (raiseError) throw new Error('屏幕CTM为空');
         return coord;
     }
 
     const inversed = ctm.inverse();
     if (!inversed) {
-        if (raiseError) throw new Error('逆屏幕 CTM 为空');
+        if (raiseError) throw new Error('逆屏幕CTM为空');
         return coord;
     }
 
@@ -219,7 +219,7 @@ export function fromSVGCoord(svg: SVGSVGElement, coord: number[], raiseError = f
     const result = [];
     const ctm = svg.getScreenCTM();
     if (!ctm) {
-        if (raiseError) throw new Error('逆屏幕 CTM 为空');
+        if (raiseError) throw new Error('逆屏幕CTM为空');
         return coord;
     }
 

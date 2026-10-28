@@ -122,7 +122,18 @@ function RegionOfInterestInputComponent(props: Props): JSX.Element {
             command: 'draw_box',
             settings: {
                 crosshair: true,
-                hint: 'Draw a region of interest',
+                hint: {
+                    markdown: [
+                        '### 感兴趣区域',
+                        '',
+                        '框选出模型的运行区域。',
+                        '',
+                        '**操作**',
+                        '- 点击对角两点绘制矩形框。',
+                        '- 按住鼠标滚轮并拖动来平移画面。',
+                    ].join('\n'),
+                    topic: 'region-of-interest-v1',
+                },
             },
         });
     }, [canvasInstance]);
