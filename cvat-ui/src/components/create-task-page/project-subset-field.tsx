@@ -5,6 +5,8 @@
 import React, { useEffect, useState } from 'react';
 import Autocomplete from 'antd/lib/auto-complete';
 
+import { subsetLabelCH } from 'cvat-core/src/enums';
+
 import config from 'config';
 import { getCore } from 'cvat-core-wrapper';
 
@@ -21,12 +23,6 @@ interface ProjectPartialWithSubsets {
     id: number;
     subsets: string[];
 }
-
-const subsetLabels: Record<string, string> = {
-    Train: '训练集',
-    Test: '测试集',
-    Validation: '验证集',
-};
 
 export default function ProjectSubsetField(props: Props): JSX.Element {
     const {
@@ -81,7 +77,7 @@ export default function ProjectSubsetField(props: Props): JSX.Element {
             options={Array.from(new Set([...(internalValue ? [internalValue] : []), ...internalSubsets])).map(
                 (subset) => ({
                     value: subset,
-                    label: subsetLabels[subset] || subset,
+                    label: subsetLabelCH[subset as keyof typeof subsetLabelCH] || subset,
                 }),
             )}
         />

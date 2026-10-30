@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Config } from '@react-awesome-query-builder/antd';
+import { JobState, JobStateCH, JobStage, JobStageCH } from 'cvat-core/src/enums';
 import asyncFetchUsers from 'components/resource-sorting-filtering/request-users';
 
 export const config: Partial<Config> = {
@@ -15,10 +16,10 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
             fieldSettings: {
                 listValues: [
-                    { value: 'new', title: '待处理' },
-                    { value: 'in progress', title: '进行中' },
-                    { value: 'rejected', title: '已驳回' },
-                    { value: 'completed', title: '完成' },
+                    { value: 'new', title: JobStateCH[JobState.NEW] },
+                    { value: 'in progress', title: JobStateCH[JobState.IN_PROGRESS] },
+                    { value: 'rejected', title: JobStateCH[JobState.REJECTED] },
+                    { value: 'completed', title: JobStateCH[JobState.COMPLETED] },
                 ],
             },
         },
@@ -29,9 +30,9 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
             fieldSettings: {
                 listValues: [
-                    { value: 'annotation', title: '标注' },
-                    { value: 'validation', title: '验证' },
-                    { value: 'acceptance', title: '验收' },
+                    { value: 'annotation', title: JobStageCH[JobStage.ANNOTATION] },
+                    { value: 'validation', title: JobStageCH[JobStage.VALIDATION] },
+                    { value: 'acceptance', title: JobStageCH[JobStage.ACCEPTANCE] },
                 ],
             },
         },

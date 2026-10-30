@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Config } from '@react-awesome-query-builder/antd';
+import { TaskStatus, TaskStatusCH } from 'cvat-core/src/enums';
 import asyncFetchUsers from 'components/resource-sorting-filtering/request-users';
 
 export const config: Partial<Config> = {
@@ -55,9 +56,9 @@ export const config: Partial<Config> = {
             operators: ['select_equals', 'select_any_in', 'select_not_any_in'],
             fieldSettings: {
                 listValues: [
-                    { value: 'annotation', title: '标注' },
-                    { value: 'validation', title: '验证' },
-                    { value: 'completed', title: '完成' },
+                    { value: 'annotation', title: TaskStatusCH[TaskStatus.ANNOTATION] },
+                    { value: 'validation', title: TaskStatusCH[TaskStatus.VALIDATION] },
+                    { value: 'completed', title: TaskStatusCH[TaskStatus.COMPLETED] },
                 ],
             },
         },

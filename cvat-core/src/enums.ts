@@ -18,8 +18,19 @@ export enum TaskStatus {
     VALIDATION = 'validation',
     COMPLETED = 'completed',
 }
+export const TaskStatusCH: Record<TaskStatus, string> = {
+    [TaskStatus.ANNOTATION]: '标注',
+    [TaskStatus.VALIDATION]: '验证',
+    [TaskStatus.COMPLETED]: '完成',
+};
 
 export type ProjectStatus = TaskStatus;
+
+export enum subsetLabelCH {
+    Train = '训练集',
+    Test = '测试集',
+    Validation = '验证集',
+};
 
 export enum JobStage {
     ANNOTATION = 'annotation',

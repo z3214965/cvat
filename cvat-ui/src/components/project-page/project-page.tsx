@@ -24,6 +24,7 @@ import notification from 'antd/lib/notification';
 
 import { useTranslation } from 'react-i18next';
 
+import { subsetLabelCH } from 'cvat-core/src/enums';
 import {
     DimensionType, getCore, Project, Task,
 } from 'cvat-core-wrapper';
@@ -213,7 +214,7 @@ export default function ProjectPageComponent(): JSX.Element {
                 <>
                     {subsets.map((subset: string) => (
                         <React.Fragment key={subset}>
-                            {subset && <Title level={4}>{subset}</Title>}
+                            {subset && <Title level={4}>{subsetLabelCH[subset as keyof typeof subsetLabelCH] || subset}</Title>}
                             {renderTasksForSubset(subset, selectProps)}
                         </React.Fragment>
                     ))}
