@@ -227,7 +227,7 @@ function DetectorRunner(props: Props): JSX.Element {
                             setConvertMasksToPolygons(checked);
                         }}
                     />
-                    <Text>将masks转换为多边形</Text>
+                    <Text>将掩码转换为多边形</Text>
                 </div>
             )}
             {isDetector && withCleanup && (

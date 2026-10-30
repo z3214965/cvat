@@ -377,7 +377,7 @@ function BrushTools(): React.ReactPortal | null {
                 icon={<VerticalAlignBottomOutlined />}
                 onClick={() => setRemoveUnderlyingPixels(!removeUnderlyingPixels)}
             />
-            <CVATTooltip title={`隐藏 mask ${normalizedKeyMap.SWITCH_HIDDEN}`}>
+            <CVATTooltip title={`隐藏掩码 ${normalizedKeyMap.SWITCH_HIDDEN}`}>
                 <Button
                     type='text'
                     className={['cvat-brush-tools-hide', ...(activeObjectHidden ? ['cvat-brush-tools-active-tool'] : [])].join(' ')}

@@ -24,9 +24,8 @@ import notification from 'antd/lib/notification';
 
 import { useTranslation } from 'react-i18next';
 
-import { subsetLabelCH } from 'cvat-core/src/enums';
 import {
-    DimensionType, getCore, Project, Task,
+    DimensionType, getCore, Project, Task, subsetLabelCH
 } from 'cvat-core-wrapper';
 import { CombinedState, TasksQuery, SelectedResourceType } from 'reducers';
 import { getProjectTasksAsync, updateProjectAsync } from 'actions/projects-actions';

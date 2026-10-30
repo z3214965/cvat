@@ -12,7 +12,7 @@ import Switch from 'antd/lib/switch';
 import Text from 'antd/lib/typography/Text';
 import { RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 
-import { ShapeType, Label, DimensionType } from 'cvat-core-wrapper';
+import { ShapeType, ShapeTypeCH, Label, DimensionType } from 'cvat-core-wrapper';
 import { clamp } from 'utils/math';
 import LabelSelector from 'components/label-selector/label-selector';
 import CVATTooltip from 'components/common/cvat-tooltip';
@@ -68,7 +68,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
         <div className='cvat-draw-shape-popover-content'>
             <Row justify='start'>
                 <Col>
-                    <Text className='cvat-text-color' strong>{`绘制新的 ${shapeType} 图形`}</Text>
+                    <Text className='cvat-text-color' strong>{`绘制新的${ShapeTypeCH[shapeType]}图形`}</Text>
                 </Col>
             </Row>
             <Row justify='start'>
@@ -90,7 +90,7 @@ function DrawShapePopoverComponent(props: Props): JSX.Element {
                 <>
                     <Row>
                         <Col>
-                            <Text className='cvat-text-color'> Drawing method </Text>
+                            <Text className='cvat-text-color'>绘制方法</Text>
                         </Col>
                     </Row>
                     <Row className='cvat-draw-shape-popover-drawing-method'>

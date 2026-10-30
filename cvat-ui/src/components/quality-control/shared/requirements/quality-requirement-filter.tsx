@@ -40,25 +40,26 @@ interface StoredFilter {
 }
 
 const ANNOTATION_TYPE_VALUES = [
-    { value: 'tag', title: 'Tag' },
-    { value: 'rectangle', title: 'Rectangle' },
-    { value: 'points', title: 'Points' },
-    { value: 'polyline', title: 'Polyline' },
-    { value: 'polygon', title: 'Polygon' },
-    { value: 'cuboid', title: 'Cuboid' },
-    { value: 'ellipse', title: 'Ellipse' },
-    { value: 'skeleton', title: 'Skeleton' },
-    { value: 'skeleton_keypoint', title: 'Skeleton keypoint' },
-    { value: 'mask', title: 'Mask' },
+    { value: 'tag', title: '标签' },
+    { value: 'rectangle', title: '矩形框' },
+    { value: 'points', title: '点标注' },
+    { value: 'polyline', title: '折线' },
+    { value: 'polygon', title: '多边形' },
+    { value: 'cuboid', title: '3D长方体' },
+    { value: 'ellipse', title: '椭圆' },
+    { value: 'skeleton', title: '骨架' },
+    { value: 'skeleton_keypoint', title: '骨架关键点' },
+    { value: 'mask', title: '掩码' },
 ];
 
 const SOURCE_VALUES = [
-    { value: 'manual', title: 'Manual' },
-    { value: 'ground_truth', title: 'Ground truth' },
-    { value: 'semi-auto', title: 'Semi-auto' },
-    { value: 'auto', title: 'Auto' },
-    { value: 'file', title: 'File' },
+    { value: 'manual', title: '人工标注' },
+    { value: 'ground_truth', title: '真值' },
+    { value: 'semi-auto', title: '半自动' },
+    { value: 'auto', title: '自动' },
+    { value: 'file', title: '文件导入' },
 ];
+
 
 const getLabelOptions = (labels: Label[]): { value: string; title: string }[] => labels.map((label) => ({
     value: label.name,
@@ -137,47 +138,47 @@ const getAttributesSubfields = (labels: Label[], includeSublabels = true): Recor
 
 const getShapeSubfields = (labels: Label[]): Record<string, unknown> => ({
     label: {
-        label: 'Label',
+        label: '标签',
         type: 'text',
     },
     type: {
-        label: 'Type',
+        label: '类型',
         type: 'select',
         fieldSettings: {
             listValues: ANNOTATION_TYPE_VALUES,
         },
     },
     area: {
-        label: 'Area',
+        label: '面积',
         type: 'number',
         fieldSettings: { min: 0 },
     },
     source: {
-        label: 'Source',
+        label: '来源',
         type: 'select',
         fieldSettings: {
             listValues: SOURCE_VALUES,
         },
     },
     occluded: {
-        label: 'Occluded',
+        label: '是否遮挡',
         type: 'boolean',
     },
     track_id: {
-        label: 'Track Id',
+        label: '追踪ID',
         type: 'number',
         fieldSettings: { min: 0 },
     },
     outside: {
-        label: 'Outside',
+        label: '出界',
         type: 'boolean',
     },
     keyframe: {
-        label: 'Keyframe',
+        label: '关键帧',
         type: 'boolean',
     },
     attribute: {
-        label: 'Attributes',
+        label: '属性',
         type: '!struct',
         subfields: getAttributesSubfields(labels),
         fieldSettings: {
@@ -456,7 +457,7 @@ export default function QualityRequirementFilter(props: Readonly<Props>): JSX.El
             ...AntdConfig,
             fields: {
                 'shape.label': {
-                    label: 'Label',
+                    label: '标签',
                     type: 'select',
                     valueSources: ['value'] as 'value'[],
                     fieldSettings: {
@@ -464,26 +465,26 @@ export default function QualityRequirementFilter(props: Readonly<Props>): JSX.El
                     },
                 },
                 'shape.type': {
-                    label: 'Type',
+                    label: '标注类型',
                     type: 'select',
                     fieldSettings: {
                         listValues: ANNOTATION_TYPE_VALUES,
                     },
                 },
                 'shape.area': {
-                    label: 'Area',
+                    label: '面积',
                     type: 'number',
                     fieldSettings: { min: 0 },
                 },
                 'shape.source': {
-                    label: 'Source',
+                    label: '来源',
                     type: 'select',
                     fieldSettings: {
                         listValues: SOURCE_VALUES,
                     },
                 },
                 'shape.skeleton': {
-                    label: 'Skeleton',
+                    label: '骨架',
                     type: '!struct',
                     subfields: shapeSubfields,
                     fieldSettings: {
@@ -493,7 +494,7 @@ export default function QualityRequirementFilter(props: Readonly<Props>): JSX.El
                     },
                 },
                 'shape.track': {
-                    label: 'Track',
+                    label: '追踪',
                     type: '!struct',
                     subfields: shapeSubfields,
                     fieldSettings: {
@@ -503,7 +504,7 @@ export default function QualityRequirementFilter(props: Readonly<Props>): JSX.El
                     },
                 },
                 'shape.attribute': {
-                    label: 'Attributes',
+                    label: '属性',
                     type: '!struct',
                     subfields: attributeSubfields,
                     fieldSettings: {
@@ -513,50 +514,50 @@ export default function QualityRequirementFilter(props: Readonly<Props>): JSX.El
                     },
                 },
                 'shape.attribute.name': {
-                    label: 'Attribute name',
+                    label: '属性名称',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.attribute.value': {
-                    label: 'Attribute value',
+                    label: '属性值',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.track.attribute.name': {
-                    label: 'Track attribute name',
+                    label: '追踪属性名称',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.track.attribute.value': {
-                    label: 'Track attribute value',
+                    label: '追踪属性值',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.skeleton.attribute.name': {
-                    label: 'Skeleton attribute name',
+                    label: '骨架属性名称',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.skeleton.attribute.value': {
-                    label: 'Skeleton attribute value',
+                    label: '骨架属性值',
                     type: 'text',
                     hideForSelect: true,
                 },
                 'shape.occluded': {
-                    label: 'Occluded',
+                    label: '是否遮挡',
                     type: 'boolean',
                 },
                 'shape.track_id': {
-                    label: 'Track Id',
+                    label: '追踪ID',
                     type: 'number',
                     fieldSettings: { min: 0 },
                 },
                 'shape.outside': {
-                    label: 'Outside',
+                    label: '出界',
                     type: 'boolean',
                 },
                 'shape.keyframe': {
-                    label: 'Keyframe',
+                    label: '关键帧',
                     type: 'boolean',
                 },
             },

@@ -37,8 +37,8 @@ import ApiToken from 'cvat-core/src/api-token';
 import { FramesMetaData, FrameData } from 'cvat-core/src/frames';
 import { ServerError, RequestError } from 'cvat-core/src/exceptions';
 import {
-    ShapeType, ObjectType, LabelType, ModelKind, ModelProviders, HistoryActions,
-    DimensionType, JobType, Source, MembershipRole,
+    ShapeType, ShapeTypeCH, ObjectType, LabelType, ModelKind, ModelProviders, HistoryActions,
+    DimensionType, JobType, Source, MembershipRole, subsetLabelCH, TaskStatus, TaskStatusCH,
     JobStage, JobStageCH, JobState, JobStateCH, RQStatus, StorageLocation, MediaType,
 } from 'cvat-core/src/enums';
 import { Storage, StorageData } from 'cvat-core/src/storage';
@@ -92,6 +92,7 @@ export {
     AnnotationGuide,
     Attribute,
     ShapeType,
+    ShapeTypeCH,
     HistoryActions,
     Source,
     ObjectType,
@@ -144,6 +145,9 @@ export {
     TaskValidationLayout,
     StorageLocation,
     MembershipRole,
+    subsetLabelCH,
+    TaskStatus,
+    TaskStatusCH,
     AboutData,
     BaseImageFilter,
     fetchAndAssembleAudio,

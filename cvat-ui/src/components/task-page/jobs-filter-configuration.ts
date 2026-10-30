@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Config } from '@react-awesome-query-builder/antd';
-import { JobState, JobStateCH, JobStage, JobStageCH } from 'cvat-core/src/enums';
+import { JobState, JobStateCH, JobStage, JobStageCH } from 'cvat-core-wrapper';
 import asyncFetchUsers from 'components/resource-sorting-filtering/request-users';
 
 export const config: Partial<Config> = {

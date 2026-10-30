@@ -16,8 +16,7 @@ import Space from 'antd/lib/space';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import CVATTooltip from 'components/common/cvat-tooltip';
 
-import { JobType, MediaType } from 'cvat-core/src/enums';
-import { Task } from 'cvat-core-wrapper';
+import { JobType, MediaType, Task } from 'cvat-core-wrapper';
 import { createJobAsync } from 'actions/jobs-actions';
 
 export enum FrameSelectionMethod {

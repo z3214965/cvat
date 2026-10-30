@@ -697,7 +697,7 @@ export default class Collection {
             }
 
             if (state.shapeType === ShapeType.MASK) {
-                throw new ArgumentError('暂不支持对掩码(mask)进行合并');
+                throw new ArgumentError('暂不支持对掩码进行合并');
             }
             return object;
         });
@@ -918,7 +918,7 @@ export default class Collection {
         }
 
         if (isMaskJoin && objectsToJoin.some((obj) => !(obj instanceof MaskShape))) {
-            throw new ArgumentError('无法将masks与其他图形类型合并');
+            throw new ArgumentError('无法将掩码与其他图形类型合并');
         }
 
         if (objectsToJoin.length > 1) {

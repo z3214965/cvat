@@ -113,6 +113,16 @@ export enum ShapeType {
     SKELETON = 'skeleton',
     MASK = 'mask',
 }
+export const ShapeTypeCH: Record<ShapeType, string> = {
+    [ShapeType.RECTANGLE]: '矩形',
+    [ShapeType.POLYGON]: '多边形',
+    [ShapeType.POLYLINE]: '线',
+    [ShapeType.POINTS]: '点',
+    [ShapeType.ELLIPSE]: '长方体',
+    [ShapeType.CUBOID]: '椭圆',
+    [ShapeType.SKELETON]: '骨架',
+    [ShapeType.MASK]: '掩码',
+};
 
 export enum Source {
     MANUAL = 'manual',

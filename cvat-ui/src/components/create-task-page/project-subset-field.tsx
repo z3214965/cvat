@@ -5,10 +5,8 @@
 import React, { useEffect, useState } from 'react';
 import Autocomplete from 'antd/lib/auto-complete';
 
-import { subsetLabelCH } from 'cvat-core/src/enums';
-
 import config from 'config';
-import { getCore } from 'cvat-core-wrapper';
+import { getCore, subsetLabelCH } from 'cvat-core-wrapper';
 
 const core = getCore();
 

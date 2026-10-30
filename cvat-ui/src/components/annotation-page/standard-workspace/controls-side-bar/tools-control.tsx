@@ -1370,7 +1370,7 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                                 this.setState({ convertMasksToPolygons: checked });
                             }}
                         />
-                        <Text>将masks转换为多边形</Text>
+                        <Text>将掩码转换为多边形</Text>
                     </div>
                     {renderStartWithBox && (
                         <div>

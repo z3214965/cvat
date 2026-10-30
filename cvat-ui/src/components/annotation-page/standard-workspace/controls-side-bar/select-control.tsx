@@ -37,7 +37,7 @@ function SelectControl(props: Props): JSX.Element {
     return disabled ? (
         <Icon component={SelectIcon} className='cvat-select-control cvat-disabled-canvas-control' />
     ) : (
-        <CVATTooltip title='Select objects' placement='right'>
+        <CVATTooltip title='选择对象' placement='right'>
             <Icon
                 component={SelectIcon}
                 className={selecting ?

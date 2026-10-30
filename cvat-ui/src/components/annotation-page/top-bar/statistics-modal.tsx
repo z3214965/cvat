@@ -14,7 +14,7 @@ import Text from 'antd/lib/typography/Text';
 
 import CVATTooltip from 'components/common/cvat-tooltip';
 import { CombinedState } from 'reducers';
-import { DimensionType } from 'cvat-core-wrapper';
+import { DimensionType, ShapeType, ShapeTypeCH } from 'cvat-core-wrapper';
 import { showStatistics } from 'actions/annotation-actions';
 
 interface StateToProps {
@@ -135,7 +135,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
 
     const makeShapesTracksTitle = (title: string): JSX.Element => (
         <CVATTooltip title='图形/追踪'>
-            <Text strong>{title}</Text>
+            <Text strong>{ShapeTypeCH[title.toLowerCase() as ShapeType]}</Text>
             <QuestionCircleOutlined className='cvat-info-circle-icon' />
         </CVATTooltip>
     );
@@ -212,7 +212,7 @@ function StatisticsModalComponent(props: StateToProps & DispatchToProps): JSX.El
             width: 100,
         },
         {
-            title: <Text strong> Tag </Text>,
+            title: <Text strong> 标签 </Text>,
             dataIndex: 'tag',
             key: 'tag',
             width: 100,

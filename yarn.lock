@@ -6243,7 +6243,7 @@ __metadata:
 
 "cvat-core@file:./../cvat-core::locator=cvat-canvas3d%40file%3A.%2F..%2Fcvat-canvas3d%23.%2F..%2Fcvat-canvas3d%3A%3Ahash%3D964f80%26locator%3Dcvat-ui%2540workspace%253Acvat-ui":
   version: 15.3.1
-  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=a35d2a&locator=cvat-canvas3d%40file%3A.%2F..%2Fcvat-canvas3d%23.%2F..%2Fcvat-canvas3d%3A%3Ahash%3D964f80%26locator%3Dcvat-ui%2540workspace%253Acvat-ui"
+  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=34e8d3&locator=cvat-canvas3d%40file%3A.%2F..%2Fcvat-canvas3d%23.%2F..%2Fcvat-canvas3d%3A%3Ahash%3D964f80%26locator%3Dcvat-ui%2540workspace%253Acvat-ui"
   dependencies:
     axios: "npm:^1.20.0"
     axios-retry: "npm:^4.0.0"
@@ -6257,13 +6257,13 @@ __metadata:
     platform: "npm:^1.3.5"
     quickhull: "npm:^1.0.3"
     tus-js-client: "npm:^3.0.1"
-  checksum: 10c0/b49f7309fbf872c5300afc30b5399c30a53f7a7ed28661edcd83ebc61e56d7124b4589b38247e7b29ce263213b264dec925bd3f04d35f449401f2200be7506a8
+  checksum: 10c0/c9bf097b1cc5ef6b3611fe05aea0ae0f7fd0b16586b9fa1fff0a226d7e643d1812929501c37c33a928b6bc1da5cb916eb73d404f0ac12a73269beca708edebe1
   languageName: node
   linkType: hard
 
 "cvat-core@file:./../cvat-core::locator=cvat-canvas3d%40workspace%3Acvat-canvas3d":
   version: 15.3.1
-  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=a35d2a&locator=cvat-canvas3d%40workspace%3Acvat-canvas3d"
+  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=34e8d3&locator=cvat-canvas3d%40workspace%3Acvat-canvas3d"
   dependencies:
     axios: "npm:^1.20.0"
     axios-retry: "npm:^4.0.0"
@@ -6277,13 +6277,13 @@ __metadata:
     platform: "npm:^1.3.5"
     quickhull: "npm:^1.0.3"
     tus-js-client: "npm:^3.0.1"
-  checksum: 10c0/b49f7309fbf872c5300afc30b5399c30a53f7a7ed28661edcd83ebc61e56d7124b4589b38247e7b29ce263213b264dec925bd3f04d35f449401f2200be7506a8
+  checksum: 10c0/c9bf097b1cc5ef6b3611fe05aea0ae0f7fd0b16586b9fa1fff0a226d7e643d1812929501c37c33a928b6bc1da5cb916eb73d404f0ac12a73269beca708edebe1
   languageName: node
   linkType: hard
 
 "cvat-core@file:./../cvat-core::locator=cvat-ui%40workspace%3Acvat-ui":
   version: 15.3.1
-  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=a35d2a&locator=cvat-ui%40workspace%3Acvat-ui"
+  resolution: "cvat-core@file:./../cvat-core#./../cvat-core::hash=34e8d3&locator=cvat-ui%40workspace%3Acvat-ui"
   dependencies:
     axios: "npm:^1.20.0"
     axios-retry: "npm:^4.0.0"
@@ -6297,7 +6297,7 @@ __metadata:
     platform: "npm:^1.3.5"
     quickhull: "npm:^1.0.3"
     tus-js-client: "npm:^3.0.1"
-  checksum: 10c0/b49f7309fbf872c5300afc30b5399c30a53f7a7ed28661edcd83ebc61e56d7124b4589b38247e7b29ce263213b264dec925bd3f04d35f449401f2200be7506a8
+  checksum: 10c0/c9bf097b1cc5ef6b3611fe05aea0ae0f7fd0b16586b9fa1fff0a226d7e643d1812929501c37c33a928b6bc1da5cb916eb73d404f0ac12a73269beca708edebe1
   languageName: node
   linkType: hard
 
@@ -6322,9 +6322,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-canvas3d%2540file%253A.%252F..%252Fcvat-canvas3d%2523.%252F..%252Fcvat-canvas3d%253A%253Ahash%253D964f80%2526locator%253Dcvat-ui%252540workspace%25253Acvat-ui":
+"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-canvas3d%2540file%253A.%252F..%252Fcvat-canvas3d%2523.%252F..%252Fcvat-canvas3d%253A%253Ahash%253D964f80%2526locator%253Dcvat-ui%252540workspace%25253Acvat-ui":
   version: 2.1.0
-  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-canvas3d%2540file%253A.%252F..%252Fcvat-canvas3d%2523.%252F..%252Fcvat-canvas3d%253A%253Ahash%253D964f80%2526locator%253Dcvat-ui%252540workspace%25253Acvat-ui"
+  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-canvas3d%2540file%253A.%252F..%252Fcvat-canvas3d%2523.%252F..%252Fcvat-canvas3d%253A%253Ahash%253D964f80%2526locator%253Dcvat-ui%252540workspace%25253Acvat-ui"
   dependencies:
     async-mutex: "npm:^0.4.0"
     jszip: "npm:3.10.1"
@@ -6332,9 +6332,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-canvas3d%2540workspace%253Acvat-canvas3d":
+"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-canvas3d%2540workspace%253Acvat-canvas3d":
   version: 2.1.0
-  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-canvas3d%2540workspace%253Acvat-canvas3d"
+  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-canvas3d%2540workspace%253Acvat-canvas3d"
   dependencies:
     async-mutex: "npm:^0.4.0"
     jszip: "npm:3.10.1"
@@ -6342,9 +6342,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-ui%2540workspace%253Acvat-ui":
+"cvat-data@file:./../cvat-data::locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-ui%2540workspace%253Acvat-ui":
   version: 2.1.0
-  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3Da35d2a%26locator%3Dcvat-ui%2540workspace%253Acvat-ui"
+  resolution: "cvat-data@file:./../cvat-data#./../cvat-data::hash=079560&locator=cvat-core%40file%3A.%2F..%2Fcvat-core%23.%2F..%2Fcvat-core%3A%3Ahash%3D34e8d3%26locator%3Dcvat-ui%2540workspace%253Acvat-ui"
   dependencies:
     async-mutex: "npm:^0.4.0"
     jszip: "npm:3.10.1"
